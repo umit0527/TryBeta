@@ -35,6 +35,21 @@ namespace TryBeta.Controllers
         [ResponseType(typeof(CompanyRegisterDto))]
         public IHttpActionResult GetCompanyInfo(int id)
         {
+            // 先從 JwtAuthFilter 裡取得 UserId
+            if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
+            {
+                return Unauthorized();
+            }
+            int userId = (int)userIdObj;
+
+            // 權限判斷：確認該 userId 是否屬於 id 這個公司
+            bool hasAccess = db.Companyinfoes.Any(c => c.Id == id && c.UserId == userId);
+            if (!hasAccess)
+            {
+                var resp = Request.CreateResponse(HttpStatusCode.Unauthorized, new { message = "權限不足" });
+                return ResponseMessage(resp);
+            }
+
             // 1. 從資料庫抓
             var companyEntity = db.Companyinfoes.Include(c => c.CompanyContacts)
                                                 .Include(c => c.CompanyImages)

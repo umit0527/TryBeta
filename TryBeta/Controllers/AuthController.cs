@@ -75,14 +75,14 @@ namespace TryBeta.Controllers
         [HttpPost]
         [Route("company/login")]
         [ResponseType(typeof(Users))]
-        public IHttpActionResult PostUsers(CompanyLoginDto dto)
+        public IHttpActionResult PostCompanyLogin(CompanyLoginDto dto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest("登入資料有誤");
             }
                 
-            // 找出對應的帳號/email
+            // 找出對應的帳號/email，限定身分是企業
             var user = db.Users.FirstOrDefault(u =>(u.Account == dto.Identifier || u.Email == dto.Identifier) && u.Role == "Company");
 
             if (user == null)
@@ -124,17 +124,74 @@ namespace TryBeta.Controllers
                     user.Account,
                     user.Email,
                     user.Role,
-                },
-                company = new
+                }
+                //company = new
+                //{
+                //    company?.Id,
+                //    company?.Name,
+                //    company?.TaxIdNum,
+                //    company?.IndustryId,
+                //    company?.Address,
+                //    company?.Website,
+                //    company?.Intro,
+                //    company?.ScaleId
+                //}
+            });
+        }
+
+        // POST: api/Auth
+        [HttpPost]
+        [Route("users/login")]
+        [ResponseType(typeof(Users))]
+        public IHttpActionResult PostParticipantLogin(ParticipantLoginDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("登入資料有誤");
+            }
+
+            // 找出對應的帳號/email，限定身分是體驗者
+            var user = db.Users.FirstOrDefault(u => (u.Account == dto.Identifier || u.Email == dto.Identifier) && u.Role == "Participant");
+
+            if (user == null)
+            {
+                return Content(HttpStatusCode.Unauthorized, new
                 {
-                    company?.Id,
-                    company?.Name,
-                    company?.TaxIdNum,
-                    company?.IndustryId,
-                    company?.Address,
-                    company?.Website,
-                    company?.Intro,
-                    company?.ScaleId
+                    status = 401,
+                    message = "帳號或密碼錯誤"
+                });
+            }
+
+            // 驗證密碼
+            bool isPasswordValid = PasswordHasher.VerifyPassword(user.PasswordHash, dto.Password);
+
+            if (!isPasswordValid)
+            {
+                return Content(HttpStatusCode.Unauthorized, new
+                {
+                    status = 401,
+                    message = "帳號或密碼錯誤"
+                });
+            }
+
+            // 撈取公司資料
+            var participant = db.Companyinfoes.FirstOrDefault(c => c.UserId == user.Id);
+
+            // 產生 JWT Token
+            var jwtUtil = new JwtAuthUtil();
+            string token = jwtUtil.GenerateToken(user.Id, user.Account, participant?.Name ?? "");
+
+            return Ok(new
+            {
+                status = 200,
+                message = "登入成功",
+                token = token,
+                user = new
+                {
+                    user.Id,
+                    user.Account,
+                    user.Email,
+                    user.Role,
                 }
             });
         }

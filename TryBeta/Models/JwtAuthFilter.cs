@@ -52,6 +52,9 @@ namespace TryBeta.Models
                     var jwtAuthUtil = new JwtAuthUtil();
                     var jwtObject = jwtAuthUtil.GetPayload(request.Headers.Authorization.Parameter);
 
+                    // 將使用者ID放到 Request.Properties，讓 Controller 可用
+                    actionContext.Request.Properties["UserId"] = Convert.ToInt32(jwtObject["Id"]);
+
                     // 檢查有效期限是否過期，如 JwtToken 過期，需導引重新登入
                     if (IsTokenExpired(jwtObject["Exp"].ToString()))
                     {

@@ -188,7 +188,7 @@
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\CompanyController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\UsersController.cs" />
+    <Compile Include="Controllers\ParticipantController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -229,6 +229,14 @@
     <Compile Include="Migrations\202508130912025_addJwtModel.Designer.cs">
       <DependentUpon>202508130912025_addJwtModel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508131241099_addParticipantLoginApi.cs" />
+    <Compile Include="Migrations\202508131241099_addParticipantLoginApi.Designer.cs">
+      <DependentUpon>202508131241099_addParticipantLoginApi.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508131309588_adjustParticipatDtoName.cs" />
+    <Compile Include="Migrations\202508131309588_adjustParticipatDtoName.Designer.cs">
+      <DependentUpon>202508131309588_adjustParticipatDtoName.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
@@ -244,6 +252,7 @@
     <Compile Include="Models\Industry.cs" />
     <Compile Include="Models\JwtAuthFilter.cs" />
     <Compile Include="Models\JwtAuthUtil.cs" />
+    <Compile Include="Models\ParticipantDto.cs" />
     <Compile Include="Models\PasswordHash.cs" />
     <Compile Include="Models\PortfolioLinks.cs" />
     <Compile Include="Models\Position.cs" />
@@ -252,9 +261,10 @@
     <Compile Include="Models\PortfolioFiles.cs" />
     <Compile Include="Models\ResumeSkill.cs" />
     <Compile Include="Models\SimpleResume.cs" />
-    <Compile Include="Models\UserInfoes.cs" />
+    <Compile Include="Models\ParticipantInfoes.cs" />
     <Compile Include="Models\Users.cs" />
-    <Compile Include="Models\UsersDto.cs" />
+    <Compile Include="Models\ParticipantRegisterDto.cs" />
+    <Compile Include="Models\ParticipantLoginDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -425,6 +435,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508130912025_addJwtModel.resx">
       <DependentUpon>202508130912025_addJwtModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508131241099_addParticipantLoginApi.resx">
+      <DependentUpon>202508131241099_addParticipantLoginApi.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508131309588_adjustParticipatDtoName.resx">
+      <DependentUpon>202508131309588_adjustParticipatDtoName.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

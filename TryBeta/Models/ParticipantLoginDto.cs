@@ -6,7 +6,7 @@ using System.Web;
 
 namespace TryBeta.Models
 {
-    public class CompanyLoginDto
+    public class ParticipantLoginDto
     {
         [Required(ErrorMessage = "請輸入帳號或 Email")]
         [RegularExpression(@"^[\x21-\x7E]+$", ErrorMessage = "帳號或 Email 只能包含英文、數字與符號")]

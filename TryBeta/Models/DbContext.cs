@@ -29,7 +29,7 @@ namespace TryBeta.Models
         public DbSet<PortfolioLinks> PortfolioLinks { get; set; }  //作品連結表 (簡單履歷表)
         public DbSet<ResumeSkill> ResumeSkill { get; set; }  //技能表 (簡單履歷表)
         public DbSet<SimpleResume> SimpleResume { get; set; }  //簡單履歷表
-        public DbSet<UserInfoes> UserInfoes { get; set; }  //體驗者基本資料表
+        public DbSet<ParticipantInfoes> ParticipantInfoes { get; set; }  //體驗者基本資料表
         public DbSet<Industry> Industries { get; set; }  //產業表
         public DbSet<Position> Positions { get; set; }  //職務表
         public DbSet<City> City { get; set; }  //城市表
@@ -47,8 +47,8 @@ namespace TryBeta.Models
                     new IndexAnnotation(
                         new IndexAttribute("IX_Unique_Email") { IsUnique = true }));
 
-            // UserInfoes -> Users 外鍵，禁止 Cascade Delete
-            modelBuilder.Entity<UserInfoes>()
+            // ParticipantInfoes -> Users 外鍵，禁止 Cascade Delete
+            modelBuilder.Entity<ParticipantInfoes>()
                 .HasRequired(u => u.User)
                 .WithMany()
                 .HasForeignKey(u => u.UserId)
