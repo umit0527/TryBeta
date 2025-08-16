@@ -73,10 +73,8 @@ namespace TryBeta.Models
         public int ProgramDurationDays { get; set; }  //體驗持續期間
 
         [Required]
-        [StringLength(50)]
-        [JsonProperty("status")]
-        public string Status { get; set; } // 審核中:Under review, 系統通過:System Pass, 系統拒絕:System Rejection,
-                                           // 人工通過:Manual pass, 人工拒絕:Manual rejection
+        [JsonProperty("status_id")]
+        public int StatusId { get; set; } 
 
         [JsonProperty("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
@@ -86,5 +84,11 @@ namespace TryBeta.Models
 
         // 導航屬性
         public virtual CompanyInfoes Company { get; set; }
+        public virtual Industry Industry { get; set; }
+        public virtual Position JobTitle { get; set; }
+
+        [ForeignKey("StatusId")]
+        public virtual ProgramPlanStatus Status { get; set; }
+        public virtual ICollection<ProgramStep> Steps { get; set; } = new List<ProgramStep>();
     }
 }

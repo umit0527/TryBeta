@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -32,8 +33,9 @@ namespace TryBeta.Models
         public string PasswordHash { get; set; }
 
         [Required]
-        [JsonProperty("status")]
-        public string Status { get; set; }  // 停用, 啟用
+        [JsonProperty("status_id")]
+        [ForeignKey("UserStatus")]
+        public int StatusId { get; set; }  // 停用, 啟用
 
         [Required]
         [JsonProperty("created_at")]
@@ -42,5 +44,9 @@ namespace TryBeta.Models
         [Required]
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+        // EF 導航屬性
+        [ForeignKey("StatusId")]
+        public virtual UserStatus UserStatus { get; set; }
     }
 }

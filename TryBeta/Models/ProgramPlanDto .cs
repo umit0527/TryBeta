@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -81,6 +82,13 @@ namespace TryBeta.Models
 
         [JsonProperty("program_duration_days")]
         public int ProgramDurationDays { get; set; }  //體驗執行期間
+
+        [JsonProperty("status_id")]
+        [ForeignKey("StatusId")]
+        public int StatusId { get; set; }  //體驗計畫狀態
+
+        [JsonProperty("status_title")]
+        public string StatusTitle { get; set; } // 用來回傳 ProgramPlanStatus.Title
 
         public List<ProgramStepDto> Steps { get; set; } = new List<ProgramStepDto>();
 

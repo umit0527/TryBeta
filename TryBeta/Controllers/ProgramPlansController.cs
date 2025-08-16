@@ -25,68 +25,68 @@ namespace TryBeta.Controllers
         //}
 
         // GET: api/ProgramPlans/5 取得所有體驗計畫(未審核即通過)
-        [HttpGet]
-        [Route("programs")]
-        [JwtAuthFilter] // 必須登入
-        public IHttpActionResult GetProgramPlans(int page = 1, int pageSize = 21)
-        {
-            try
-            {
-                // 1. 取得登入企業 ID
-                if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
-                {
-                    return Unauthorized();
-                }
-                int companyId = (int)userIdObj;
+        //[HttpGet]
+        //[Route("programs")]
+        //[JwtAuthFilter] // 必須登入
+        //public IHttpActionResult GetProgramPlans(int page = 1, int pageSize = 21)
+        //{
+        //    try
+        //    {
+        //        // 1. 取得登入企業 ID
+        //        if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
+        //        {
+        //            return Unauthorized();
+        //        }
+        //        int companyId = (int)userIdObj;
 
 
-                // 2.保護 page/pageSize
-                if (page <= 0) page = 1;
-                if (pageSize <= 0 || pageSize > 100) pageSize = 21;
+        //        // 2.保護 page/pageSize
+        //        if (page <= 0) page = 1;
+        //        if (pageSize <= 0 || pageSize > 100) pageSize = 21;
 
-                // 3. 計算總筆數
-                var totalCount = db.ProgramPlan.Count(p => p.CompanyId == companyId);
+        //        // 3. 計算總筆數
+        //        var totalCount = db.ProgramPlan.Count(p => p.CompanyId == companyId);
 
-                // 4.分頁查詢
-                var programs = db.ProgramPlan
-                    .Where(p => p.CompanyId == companyId)
-                    .OrderByDescending(p => p.CreatedAt)
-                    .Skip((page - 1) * pageSize)   // 跳過前面頁數的資料
-                    .Take(pageSize)                // 只取一頁大小
-                    .Select(p => new
-                    {
-                        p.Id,
-                        p.Status,
-                        p.Name,
-                        p.Intro,
+        //        // 4.分頁查詢
+        //        var programs = db.ProgramPlan
+        //            .Where(p => p.CompanyId == companyId)
+        //            .OrderByDescending(p => p.CreatedAt)
+        //            .Skip((page - 1) * pageSize)   // 跳過前面頁數的資料
+        //            .Take(pageSize)                // 只取一頁大小
+        //            .Select(p => new
+        //            {
+        //                p.Id,
+        //                p.StatusId,
+        //                p.Name,
+        //                p.Intro,
                         
                         
-                        p.PublishStartDate,
-                        p.PublishDurationDays,
-                        p.ProgramStartDate,
-                        p.ProgramEndDate,
-                        p.CreatedAt,
-                        p.UpdatedAt,
-                    // 成團判斷，假設你有一個方法計算當前報名人數
-                IsConfirmed = db.ProgramRegistrations
-                                .Count(r => r.ProgramId == p.Id) >= p.MinPeople
-                    })
-            .ToList();
+        //                p.PublishStartDate,
+        //                p.PublishDurationDays,
+        //                p.ProgramStartDate,
+        //                p.ProgramEndDate,
+        //                p.CreatedAt,
+        //                p.UpdatedAt,
+        //            // 成團判斷，假設你有一個方法計算當前報名人數
+        //        IsConfirmed = db.ProgramRegistrations
+        //                        .Count(r => r.ProgramId == p.Id) >= p.MinPeople
+        //            })
+        //    .ToList();
 
-                // 回傳分頁資訊
-                return Ok(new
-                {
-                    total = totalCount,     // 總筆數
-                    page,
-                    pageSize,
-                    data = programs
-                });               
-            }
-            catch (Exception ex)
-            {
-                return InternalServerError(ex);
-            }
-        }
+        //        // 回傳分頁資訊
+        //        return Ok(new
+        //        {
+        //            total = totalCount,     // 總筆數
+        //            page,
+        //            pageSize,
+        //            data = programs
+        //        });               
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return InternalServerError(ex);
+        //    }
+        //}
 
         // GET: api/v1/company/{companyid}/programs/{programId} 取得單一體驗計畫
         [HttpGet]
@@ -132,13 +132,17 @@ namespace TryBeta.Controllers
                 var industry = db.Industries
                     .Where(i => i.Id == programPlan.IndustryId)
                     .Select(i => new { i.Id, i.Title })
-                    .FirstOrDefault();
-
+                    .FirstOrDefault(); 
                 var jobTitle = db.Positions
                     .Where(j => j.Id == programPlan.JobTitleId)
                     .Select(j => new { j.Id, j.Title })
                     .FirstOrDefault();
 
+                // 取得狀態名稱
+                var status = db.ProgramPlanStatuses
+                    .Where(s => s.Id == programPlan.StatusId)
+                    .Select(s => new { s.Id, s.Title })
+                    .FirstOrDefault();
 
                 var response = new
                 {
@@ -147,6 +151,7 @@ namespace TryBeta.Controllers
                     programPlan.Intro,
                     Industry = industry,
                     JobTitle = jobTitle,
+                    Status = status,
                     programPlan.Address,
                     programPlan.ContactName,
                     programPlan.ContactPhone,
@@ -158,11 +163,154 @@ namespace TryBeta.Controllers
                     programPlan.ProgramStartDate,
                     programPlan.ProgramEndDate,
                     programPlan.ProgramDurationDays,
-                    programPlan.Status,
                     Steps = steps
                 };
 
                 return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        /// <summary>
+        /// 企業的體驗計畫清單 (支援搜尋、篩選、排序、分頁)
+        /// </summary>
+        // GET: api/v1/company/{companyid}/programs 企業的體驗計畫篩選器
+        [HttpGet]
+        [Route("programs")]
+        [JwtAuthFilter]
+        public IHttpActionResult GetCompanyPrograms(
+        string search = null,
+        int? industry = null,
+        int? jobtitle = null,
+        int? status = null,   // 1=全部 2=已通過 3=已發布 4=待發布 5=已拒絕 6=審核中
+        string sort = "newest",
+        int page = 1,
+        int limit = 21)
+        {
+            try
+            {
+                // 驗證登入企業ID
+                if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
+                    return Unauthorized();
+                int companyId = (int)userIdObj;
+
+                // 基本查詢
+                var query = db.ProgramPlan
+                    .Include(p => p.Industry)
+                    .Include(p => p.JobTitle)
+                    .Include(p => p.Status)
+                    .Include(p => p.Steps)
+                    .Where(p => p.CompanyId == companyId)
+                    .AsQueryable();
+
+                // 關鍵字搜尋
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(p => p.Name.Contains(search) || 
+                                        p.Intro.Contains(search) || 
+                                        p.Steps.Any(s => s.Name.Contains(search) ||
+                                        s.Description.Contains(search)));
+                }
+
+                // 產業篩選
+                if (industry.HasValue)
+                {
+                    query = query.Where(p => p.IndustryId == industry.Value);
+                }
+
+                // 職務篩選
+                if (jobtitle.HasValue)
+                {
+                    query = query.Where(p => p.JobTitleId == jobtitle.Value);
+                }
+
+                if (status.HasValue)
+                {
+                    var s = (ProgramPlanStatusEnum)status.Value;
+                    switch (s)
+                    {
+                        case ProgramPlanStatusEnum.SystemPass:
+                        case ProgramPlanStatusEnum.ManualPass:
+                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.SystemPass
+                                                   || p.StatusId == (int)ProgramPlanStatusEnum.ManualPass);
+                            break;
+
+                        case ProgramPlanStatusEnum.Published:
+                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.Published
+                                                   && p.PublishStartDate <= DateTime.Now
+                                                   && p.PublishEndDate >= DateTime.Now);
+                            break;
+
+                        case ProgramPlanStatusEnum.Pending:
+                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.Pending
+                                                   && p.PublishStartDate > DateTime.Now);
+                            break;
+
+                        case ProgramPlanStatusEnum.SystemRejected:
+                        case ProgramPlanStatusEnum.ManualRejected:
+                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.SystemRejected
+                                                   || p.StatusId == (int)ProgramPlanStatusEnum.ManualRejected);
+                            break;
+
+                        case ProgramPlanStatusEnum.UnderReview:
+                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.UnderReview);
+                            break;
+                    }
+                }
+
+                // 排序
+                switch (sort)
+                {
+                    case "oldest":
+                        query = query.OrderBy(p => p.Id);
+                        break;
+                    case "newest":
+                    default:
+                        query = query.OrderByDescending(p => p.Id);
+                        break;
+                }
+
+                // 分頁
+                var total = query.Count();
+                var items = query
+                    .Skip((page - 1) * limit)
+                    .Take(limit)
+                    .Select(p => new
+                    {
+                        p.Id,
+                        p.Name,
+                        p.Intro,
+                        Industry = new { p.Industry.Id, p.Industry.Title },
+                        JobTitle = new { p.JobTitle.Id, p.JobTitle.Title },
+                        p.PublishStartDate,
+                        p.PublishEndDate,
+                        p.ProgramStartDate,
+                        p.ProgramEndDate,
+                        Steps = p.Steps.Select(s => new
+                        {
+                            s.Id,
+                            s.Name,
+                            s.Description,
+                            s.CreatedAt,
+                            s.UpdatedAt
+                        })
+                    })
+                    .ToList();
+
+                // 回傳訊息
+                string message = total == 0 ? "查無符合條件的體驗計畫" : null;
+
+                return Ok(new
+                {
+                    total,
+                    page,
+                    limit,
+                    items,
+                    message
+                });
             }
             catch (Exception ex)
             {
@@ -245,40 +393,40 @@ namespace TryBeta.Controllers
                 int companyId = (int)userIdObj;
 
                 // 3. 檢查方案是否過期並更新狀態
-                var planUsageToCheck = db.PlanUsage
-                    .Where(p => p.CompanyId == companyId && p.Status == "active")
-                    .ToList();
-
-                foreach (var plan in planUsageToCheck)
-                {
-                    if (plan.EndDate.HasValue && plan.EndDate.Value < DateTime.Now)
-                    {
-                        plan.Status = "expired";
-                    }
-                }
-                db.SaveChanges();
-
-                // 4. 查詢仍然有效的方案
                 var planUsage = db.PlanUsage
-                    .FirstOrDefault(p => p.CompanyId == companyId && p.Status == "active");
+            .Include("Plan")
+            .Include("PlanUsageStatus")
+            .Where(p => p.CompanyId == companyId)
+            .OrderByDescending(p => p.StartDate)
+            .FirstOrDefault();
+
                 if (planUsage == null)
+                    return BadRequest("尚未購買方案或方案已過期");
+                // 4. 驗證方案狀態（過期 / 額滿）
+                bool changed = false;
+
+                if (planUsage.EndDate.HasValue && planUsage.EndDate.Value.Date < DateTime.Now.Date)
                 {
-                    return BadRequest("尚未購買方案或方案已過期，無法新增體驗計畫");
+                    planUsage.StatusId = 2; // expired
+                    changed = true;
+                }
+                else if (planUsage.RemainingPeople <= 0)
+                {
+                    planUsage.StatusId = 4; // full
+                    changed = true;
                 }
 
-                // 5. 檢查剩餘人數
+                if (changed)
+                    db.SaveChanges();
+
+                if (planUsage.StatusId != 1) // 1 = active
+                    return BadRequest("方案不可用（已過期或已額滿）");
+
+                // 5. 驗證剩餘人數
                 if (planUsage.RemainingPeople < dto.MaxPeople)
-                {
-                    return BadRequest("體驗剩餘人數已達上限");
-                }
+                    return BadRequest("體驗剩餘人數不足");
 
-                // 6. 計算日期
-                // 計算刊登結束日期
-                var publishEndDate = dto.PublishStartDate.AddDays(dto.PublishDurationDays);
-                // 計算體驗期間
-                var programDurationDays = (dto.ProgramEndDate - dto.ProgramStartDate).Days+1;
-
-                // 7. 建立 ProgramPlan
+                // 6. 建立 ProgramPlan
                 var programPlan = new ProgramPlan
                 {
                     CompanyId = companyId,
@@ -291,41 +439,52 @@ namespace TryBeta.Controllers
                     ContactPhone = dto.ContactPhone,
                     MinPeople = dto.MinPeople,
                     MaxPeople = dto.MaxPeople,
-                    PublishStartDate = dto.PublishStartDate, //體驗刊登開始日期
-                    PublishEndDate = dto.PublishStartDate.AddDays(dto.PublishDurationDays-1), //體驗刊登結束日期
-                    PublishDurationDays = dto.PublishDurationDays,  //體驗刊登期間  
-                    ProgramStartDate = dto.ProgramStartDate,  //體驗計畫執行開始日期
-                    ProgramEndDate = dto.ProgramEndDate,  //體驗計畫執行結束日期
-                    ProgramDurationDays = programDurationDays, // 體驗計畫執行期間
-                    Status = "Under review", // 暫扣人數
+                    PublishStartDate = dto.PublishStartDate,
+                    PublishEndDate = dto.PublishStartDate.AddDays(dto.PublishDurationDays - 1),
+                    PublishDurationDays = dto.PublishDurationDays,
+                    ProgramStartDate = dto.ProgramStartDate,
+                    ProgramEndDate = dto.ProgramEndDate,
+                    ProgramDurationDays = (dto.ProgramEndDate - dto.ProgramStartDate).Days + 1,
+                    StatusId = 1, // 暫扣人數
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
-                db.ProgramPlan.Add(programPlan); // 先存 ProgramPlan 取得 Id
-                db.SaveChanges(); 
+                db.ProgramPlan.Add(programPlan);
+                db.SaveChanges();
 
-                // 7. 新增階段
+                // 7. 建立階段
                 foreach (var stepDto in dto.Steps)
                 {
                     var step = new ProgramStep
                     {
                         Name = stepDto.Name,
                         Description = stepDto.Description,
+                        ProgramPlanId = programPlan.Id,
                         CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
-                        ProgramPlanId = programPlan.Id // FK
+                        UpdatedAt = DateTime.Now
                     };
                     db.ProgramStep.Add(step);
                 }
 
-                // 8.扣掉剩餘人數，用 MaxPeople 扣額度，假設最多會來多少人
+                // 8. 扣掉剩餘人數
                 planUsage.RemainingPeople -= dto.MaxPeople;
-
+                if (planUsage.RemainingPeople <= 0)
+                {
+                    planUsage.StatusId = 4; // full
+                }
                 db.SaveChanges();
 
-                // 9. 建立 DTO 回傳前端
+                // 9. 取得狀態名稱
+                var statusTitle = db.ProgramPlanStatuses
+                    .Where(s => s.Id == programPlan.StatusId)
+                    .Select(s => s.Title)
+                    .FirstOrDefault();
+
+                // 10. 回傳 DTO
                 var responseDto = new ProgramPlanDto
                 {
+                    StatusId = programPlan.StatusId,
+                    StatusTitle = statusTitle,
                     Name = programPlan.Name,
                     Intro = programPlan.Intro,
                     IndustryId = programPlan.IndustryId,
@@ -333,14 +492,14 @@ namespace TryBeta.Controllers
                     Address = programPlan.Address,
                     ContactName = programPlan.ContactName,
                     ContactPhone = programPlan.ContactPhone,
-                    MinPeople= programPlan.MinPeople,
-                    MaxPeople= programPlan.MaxPeople,
-                    PublishStartDate = programPlan.PublishStartDate,  //體驗計畫刊登開始日期
-                    PublishDurationDays = programPlan.PublishDurationDays,  //體驗刊登期間
-                    PublishEndDate = programPlan.PublishEndDate,  //體驗計畫刊登結束日期
-                    ProgramStartDate = programPlan.ProgramStartDate,  //體驗計畫執行開始日期
+                    MinPeople = programPlan.MinPeople,
+                    MaxPeople = programPlan.MaxPeople,
+                    PublishStartDate = programPlan.PublishStartDate,
+                    PublishDurationDays = programPlan.PublishDurationDays,
+                    PublishEndDate = programPlan.PublishEndDate,
+                    ProgramStartDate = programPlan.ProgramStartDate,
                     ProgramDurationDays = programPlan.ProgramDurationDays,
-                    ProgramEndDate = programPlan.ProgramEndDate,  //體驗計畫執行結束日期
+                    ProgramEndDate = programPlan.ProgramEndDate,
                     Steps = dto.Steps
                 };
 
@@ -350,18 +509,10 @@ namespace TryBeta.Controllers
             {
                 var allErrors = ex.EntityValidationErrors
                     .SelectMany(eve => eve.ValidationErrors)
-                    .Select(ve => new
-                    {
-                        Property = ve.PropertyName,
-                        Error = ve.ErrorMessage
-                    })
+                    .Select(ve => new { Property = ve.PropertyName, Error = ve.ErrorMessage })
                     .ToList();
 
-                return Content(HttpStatusCode.BadRequest, new
-                {
-                    Message = "欄位驗證失敗",
-                    Errors = allErrors
-                });
+                return Content(HttpStatusCode.BadRequest, new { Message = "欄位驗證失敗", Errors = allErrors });
             }
             catch (Exception ex)
             {

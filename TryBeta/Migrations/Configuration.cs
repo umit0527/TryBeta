@@ -653,6 +653,35 @@
                     }
                 );
             }
+
+            //體驗計畫狀態表
+            context.ProgramPlanStatuses.AddOrUpdate(
+cs => cs.Title,
+new ProgramPlanStatus { Title = "UnderReview" },
+new ProgramPlanStatus { Title = "SystemPass" },
+new ProgramPlanStatus { Title = "SystemRejected" },
+new ProgramPlanStatus { Title = "ManualPass" },
+new ProgramPlanStatus { Title = "ManualRejected" },
+new ProgramPlanStatus { Title = "Pending" },
+new ProgramPlanStatus { Title = "Published" }
+);
+
+            //帳號密碼狀態表
+            context.UserStatuses.AddOrUpdate(
+cs => cs.Title,
+new UserStatus { Title = "Enabled" },
+new UserStatus { Title = "Disabled" }
+);
+
+            //目前方案狀態表
+            context.UserStatuses.AddOrUpdate(
+cs => cs.Title,
+new UserStatus { Title = "Active" },
+new UserStatus { Title = "Expired" },
+new UserStatus { Title = "Unused" },
+new UserStatus { Title = "Full" }
+);
+
         }
     }
 }

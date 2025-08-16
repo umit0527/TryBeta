@@ -38,9 +38,9 @@ namespace TryBeta.Models
         public int RemainingPeople { get; set; }
 
         [Required]
-        [JsonProperty("status")]
-        [StringLength(20)]
-        public string Status { get; set; } // active / expired / unused
+        [ForeignKey("PlanUsageStatus")]
+        [JsonProperty("status_id")]
+        public int StatusId { get; set; }
 
         [JsonProperty("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
@@ -51,5 +51,6 @@ namespace TryBeta.Models
         // 導航屬性
         public virtual CompanyInfoes Company { get; set; }
         public virtual Plan Plan { get; set; }
+        public virtual PlanUsageStatus PlanUsageStatus { get; set; }
     }
 }

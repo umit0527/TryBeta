@@ -294,6 +294,18 @@
     <Compile Include="Migrations\202508160936444_cancelProgramPlansFeild.Designer.cs">
       <DependentUpon>202508160936444_cancelProgramPlansFeild.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508161319439_addProgramPlanStatusModel.cs" />
+    <Compile Include="Migrations\202508161319439_addProgramPlanStatusModel.Designer.cs">
+      <DependentUpon>202508161319439_addProgramPlanStatusModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508161426372_adjustUserStats.cs" />
+    <Compile Include="Migrations\202508161426372_adjustUserStats.Designer.cs">
+      <DependentUpon>202508161426372_adjustUserStats.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508161507466_adjustPlanUsageStatusFeild.cs" />
+    <Compile Include="Migrations\202508161507466_adjustPlanUsageStatusFeild.Designer.cs">
+      <DependentUpon>202508161507466_adjustPlanUsageStatusFeild.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
@@ -314,10 +326,12 @@
     <Compile Include="Models\PasswordHash.cs" />
     <Compile Include="Models\Plan.cs" />
     <Compile Include="Models\PlanUsage.cs" />
+    <Compile Include="Models\PlanUsageStatus.cs" />
     <Compile Include="Models\PortfolioLinks.cs" />
     <Compile Include="Models\Position.cs" />
     <Compile Include="Models\ProgramPlanDto .cs" />
     <Compile Include="Models\ProgramPlans.cs" />
+    <Compile Include="Models\ProgramPlanStatus.cs" />
     <Compile Include="Models\ProgramRegistration.cs" />
     <Compile Include="Models\ProgramStep.cs" />
     <Compile Include="Models\ResumeEducation.cs" />
@@ -329,6 +343,7 @@
     <Compile Include="Models\Users.cs" />
     <Compile Include="Models\ParticipantRegisterDto.cs" />
     <Compile Include="Models\ParticipantLoginDto.cs" />
+    <Compile Include="Models\UserStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -544,6 +559,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508160936444_cancelProgramPlansFeild.resx">
       <DependentUpon>202508160936444_cancelProgramPlansFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508161319439_addProgramPlanStatusModel.resx">
+      <DependentUpon>202508161319439_addProgramPlanStatusModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508161426372_adjustUserStats.resx">
+      <DependentUpon>202508161426372_adjustUserStats.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508161507466_adjustPlanUsageStatusFeild.resx">
+      <DependentUpon>202508161507466_adjustPlanUsageStatusFeild.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

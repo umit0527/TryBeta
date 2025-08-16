@@ -193,7 +193,7 @@ namespace TryBeta.Controllers
                         Email = dto.Email,
                         PasswordHash = hashedPassword,
                         Role = "Company",
-                        Status = "Enable", // 預設啟用
+                        StatusId = 1, // 預設啟用
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now
                     };

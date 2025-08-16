@@ -26,69 +26,67 @@ namespace TryBeta.Controllers
             try
             {
                 // 1. 驗證並取得目前登入的企業 ID
-                var authHeader = Request.Headers.Authorization;
-                if (authHeader == null || authHeader.Scheme != "Bearer")
-                {
-                    return Unauthorized();
-                }
-
-                var token = authHeader.Parameter;
                 if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
-                {
-                    return Unauthorized(); // Token 無效或缺少
-                }
+                    return Unauthorized();
                 int companyId = (int)userIdObj;
 
-                // 2. 找出該企業（未過期）的最新方案訂單
+                // 2. 找出該企業最新的方案訂單
                 var order = db.CompanyPlanOrders
                     .Where(o => o.CompanyId == companyId)
                     .OrderByDescending(o => o.PurchaseDate)
                     .FirstOrDefault();
 
                 if (order == null)
-                {
-                    // 沒有購買方案
                     return Ok(new { status = "no_plan", message = "尚未購買方案" });
-                }
 
                 // 3. 查詢方案資料
                 var plan = db.Plan.FirstOrDefault(p => p.Id == order.PlanId);
                 if (plan == null)
-                {
-                    return NotFound(); // 找不到對應方案
-                }
+                    return NotFound();
 
-                // 4. 取得該企業的有效方案
+                // 4. 取得該企業的最新方案使用紀錄
                 var planUsage = db.PlanUsage
                     .Include("Plan")
-                    .FirstOrDefault(p => p.CompanyId == companyId && p.Status == "active");
+                    .Include("PlanUsageStatus")
+                    .Where(p => p.CompanyId == companyId)
+                    .OrderByDescending(p => p.StartDate)
+                    .FirstOrDefault();
 
                 if (planUsage == null)
-                {
-                    // 方案過期
                     return Ok(new { status = "expired", message = "方案已過期" });
+
+                // 5. 驗證過期與額滿
+                bool changed = false;
+
+                // 過期檢查
+                if (planUsage.EndDate.HasValue && planUsage.EndDate.Value.Date < DateTime.Now.Date)
+                {
+                    planUsage.StatusId = 2; // expired
+                    changed = true;
+                }
+                // 額滿檢查（只在未過期時檢查）
+                else if (planUsage.RemainingPeople <= 0)
+                {
+                    planUsage.StatusId = 4; // full
+                    changed = true;
                 }
 
-                // 計算已使用的體驗人數
-                int usedParticipants = planUsage.Plan.MaxParticipants - planUsage.RemainingPeople;
+                if (changed)
+                    db.SaveChanges();
 
-                // 判斷是否已達上限
-                string currentStatus = planUsage.RemainingPeople <= 0 ? "full" : "active";
-
-                // 計算剩餘天數
+                // 6. 計算已使用人數與剩餘天數
+                int usedParticipants = plan.MaxParticipants - planUsage.RemainingPeople;
                 int remainingDays = planUsage.EndDate.HasValue
                                     ? (planUsage.EndDate.Value - DateTime.Now).Days
                                     : 0;
-                if (remainingDays < 0)
-                {
-                    remainingDays = 0;
-                }
+                if (remainingDays < 0) remainingDays = 0;
 
-                // 5. 回傳資料
+                // 7. 回傳資料
                 var result = new
                 {
                     plan_id = plan.Id,
-                    status = currentStatus,
+                    status_id = planUsage.StatusId,
+                    status_name = planUsage.PlanUsageStatus.Title,
                     plan_name = plan.Name,
                     plan_price = plan.Price,
                     plan_duration_days = plan.DurationDays,
