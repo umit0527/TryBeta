@@ -7,6 +7,11 @@ using System.Web;
 
 namespace TryBeta.Models
 {
+    public class ProgramStepDto
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
     public class ProgramPlanDto : IValidatableObject
     {
         [Required(ErrorMessage = "請輸入名稱")]
@@ -44,33 +49,40 @@ namespace TryBeta.Models
         [JsonProperty("contact_phone")]
         public string ContactPhone { get; set; }
 
-        [Required(ErrorMessage = "Step ID為必填")]
-        [Range(1, int.MaxValue, ErrorMessage = "Step ID必須大於0")]
-        [JsonProperty("step_id")]
-        public int StepId { get; set; }
+        [Required(ErrorMessage = "請輸入最少體驗人數")]
+        [Range(1, int.MaxValue, ErrorMessage = "最少體驗人數必須大於0")]
+        [JsonProperty("min_people")]
+        public int MinPeople { get; set; }
 
-        [Required(ErrorMessage = "體驗人數為必填")]
-        [Range(1, int.MaxValue, ErrorMessage = "體驗人數必須大於0")]
-        [JsonProperty("program_count")]
-        public int ProgramCount { get; set; }
+        [Required(ErrorMessage = "請輸入體驗人數上限")]
+        [Range(1, int.MaxValue, ErrorMessage = "體驗人數上限必須大於0")]
+        [JsonProperty("max_people")]
+        public int MaxPeople { get; set; }
 
         [Required(ErrorMessage = "刊登開始日期為必填")]
         [JsonProperty("publish_start_date")]
-        public DateTime PublishStartDate { get; set; }
+        public DateTime PublishStartDate { get; set; }  //體驗刊登開始日期
 
         [Required(ErrorMessage = "刊登持續天數為必填")]
         [Range(1, 365, ErrorMessage = "刊登持續天數必須介於1到365")]
         [JsonProperty("publish_duration_days")]
-        public int PublishDurationDays { get; set; }
+        public int PublishDurationDays { get; set; }  //體驗刊登期間
 
-        [Required(ErrorMessage = "體驗開始日期為必填")]
+        [JsonProperty("publish_end_date")]
+        public DateTime PublishEndDate { get; set; }  //體驗刊登結束日期
+
+        [Required(ErrorMessage = "請選擇體驗開始日期")]
         [JsonProperty("program_start_date")]
-        public DateTime ProgramStartDate { get; set; }
+        public DateTime ProgramStartDate { get; set; }  //體驗執行開始日期
 
-        [Required(ErrorMessage = "體驗持續天數為必填")]
-        [Range(1, 365, ErrorMessage = "體驗持續天數必須介於1到365")]
+        [Required(ErrorMessage = "請選擇體驗結束日期")]
+        [JsonProperty("program_end_date")]
+        public DateTime ProgramEndDate { get; set; }  //體驗執行結束日期
+
         [JsonProperty("program_duration_days")]
-        public int ProgramDurationDays { get; set; }
+        public int ProgramDurationDays { get; set; }  //體驗執行期間
+
+        public List<ProgramStepDto> Steps { get; set; } = new List<ProgramStepDto>();
 
 
         /// <summary>
@@ -101,6 +113,13 @@ namespace TryBeta.Models
                 yield return new ValidationResult(
                     "體驗開始日期不能早於刊登開始日期",
                     new[] { "ProgramStartDate", "PublishStartDate" });
+            }
+
+            if (MaxPeople < MinPeople)
+            {
+                yield return new ValidationResult(
+                "體驗人數上限不得小於最少體驗人數",
+                new[] { nameof(MaxPeople), nameof(MinPeople) });
             }
         }
     }

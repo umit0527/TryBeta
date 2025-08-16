@@ -38,7 +38,12 @@ namespace TryBeta.Models
         public DbSet<Plan> Plan { get; set; } //方案表
         public DbSet<CompanyPlanOrder> CompanyPlanOrders { get; set; } //企業方案訂單表
         public DbSet<PlanUsage> PlanUsage { get; set; } //企業目前方案狀態表
-        public DbSet<ProgramPlans> ProgramPlans { get; set; } //體驗計畫表
+        public DbSet<ProgramRegistration> ProgramRegistrations { get; set; } //體驗計畫註冊表
+        public DbSet<ProgramPlan> ProgramPlan { get; set; } //體驗計畫表
+        public DbSet<ProgramStep> ProgramStep { get; set; } //體驗計畫表
+
+
+
 
 
 

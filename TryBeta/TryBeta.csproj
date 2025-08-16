@@ -193,6 +193,7 @@
     <Compile Include="Controllers\ParticipantController.cs" />
     <Compile Include="Controllers\PlansController.cs" />
     <Compile Include="Controllers\ProgramPlansController.cs" />
+    <Compile Include="Controllers\ProgramRegistrationsController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -277,6 +278,22 @@
     <Compile Include="Migrations\202508151426239_adjustProgramPlanFeildType.Designer.cs">
       <DependentUpon>202508151426239_adjustProgramPlanFeildType.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508160740389_addProgramRegistration.cs" />
+    <Compile Include="Migrations\202508160740389_addProgramRegistration.Designer.cs">
+      <DependentUpon>202508160740389_addProgramRegistration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508160830473_addProgramStep.cs" />
+    <Compile Include="Migrations\202508160830473_addProgramStep.Designer.cs">
+      <DependentUpon>202508160830473_addProgramStep.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508160918232_adjustProgramPlansFeild.cs" />
+    <Compile Include="Migrations\202508160918232_adjustProgramPlansFeild.Designer.cs">
+      <DependentUpon>202508160918232_adjustProgramPlansFeild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508160936444_cancelProgramPlansFeild.cs" />
+    <Compile Include="Migrations\202508160936444_cancelProgramPlansFeild.Designer.cs">
+      <DependentUpon>202508160936444_cancelProgramPlansFeild.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
@@ -301,6 +318,7 @@
     <Compile Include="Models\Position.cs" />
     <Compile Include="Models\ProgramPlanDto .cs" />
     <Compile Include="Models\ProgramPlans.cs" />
+    <Compile Include="Models\ProgramRegistration.cs" />
     <Compile Include="Models\ProgramStep.cs" />
     <Compile Include="Models\ResumeEducation.cs" />
     <Compile Include="Models\ResumeExperience.cs" />
@@ -514,6 +532,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508151426239_adjustProgramPlanFeildType.resx">
       <DependentUpon>202508151426239_adjustProgramPlanFeildType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508160740389_addProgramRegistration.resx">
+      <DependentUpon>202508160740389_addProgramRegistration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508160830473_addProgramStep.resx">
+      <DependentUpon>202508160830473_addProgramStep.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508160918232_adjustProgramPlansFeild.resx">
+      <DependentUpon>202508160918232_adjustProgramPlansFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508160936444_cancelProgramPlansFeild.resx">
+      <DependentUpon>202508160936444_cancelProgramPlansFeild.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

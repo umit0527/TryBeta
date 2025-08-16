@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -13,8 +14,12 @@ namespace TryBeta.Models
         [JsonProperty("id")]
         public int Id { get; set; }
 
+        [ForeignKey("ProgramPlan")]
+        [JsonProperty("program_plan_id")]
+        public int ProgramPlanId { get; set; }
+
         [Required(ErrorMessage = "階段名稱必填")]
-        [MaxLength(100, ErrorMessage = "階段名稱最多100字")]
+        [MaxLength(50, ErrorMessage = "階段名稱最多50字")]
         [JsonProperty("name")]
         public string Name { get; set; } // 階段名稱
 
@@ -27,5 +32,8 @@ namespace TryBeta.Models
 
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+        // 導航屬性
+        public virtual ProgramPlan ProgramPlan { get; set; }
     }
 }
