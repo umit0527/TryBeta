@@ -328,6 +328,30 @@
     <Compile Include="Migrations\202508170655160_addProgramPlanFeild.Designer.cs">
       <DependentUpon>202508170655160_addProgramPlanFeild.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508170731129_addProgramSubmit.cs" />
+    <Compile Include="Migrations\202508170731129_addProgramSubmit.Designer.cs">
+      <DependentUpon>202508170731129_addProgramSubmit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508170747410_adjustProgramSubmitDtoFeild.cs" />
+    <Compile Include="Migrations\202508170747410_adjustProgramSubmitDtoFeild.Designer.cs">
+      <DependentUpon>202508170747410_adjustProgramSubmitDtoFeild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508171259373_addPostApi Participant Submit.cs" />
+    <Compile Include="Migrations\202508171259373_addPostApi Participant Submit.Designer.cs">
+      <DependentUpon>202508171259373_addPostApi Participant Submit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508171309337_adjust ResumeEducatin Feild.cs" />
+    <Compile Include="Migrations\202508171309337_adjust ResumeEducatin Feild.Designer.cs">
+      <DependentUpon>202508171309337_adjust ResumeEducatin Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508171338105_adjust ProgramSubit Feild.cs" />
+    <Compile Include="Migrations\202508171338105_adjust ProgramSubit Feild.Designer.cs">
+      <DependentUpon>202508171338105_adjust ProgramSubit Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508171408376_adjust exisiting &amp; simpleresume isactive feild type.cs" />
+    <Compile Include="Migrations\202508171408376_adjust exisiting &amp; simpleresume isactive feild type.Designer.cs">
+      <DependentUpon>202508171408376_adjust exisiting &amp; simpleresume isactive feild type.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
@@ -357,6 +381,9 @@
     <Compile Include="Models\ProgramPlanStatus.cs" />
     <Compile Include="Models\ProgramRegistration.cs" />
     <Compile Include="Models\ProgramStep.cs" />
+    <Compile Include="Models\ProgramSubmit.cs" />
+    <Compile Include="Models\ProgramSubmitDto.cs" />
+    <Compile Include="Models\ProgramSubmitStatus.cs" />
     <Compile Include="Models\ResumeEducation.cs" />
     <Compile Include="Models\ResumeExperience.cs" />
     <Compile Include="Models\PortfolioFiles.cs" />
@@ -600,6 +627,24 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508170655160_addProgramPlanFeild.resx">
       <DependentUpon>202508170655160_addProgramPlanFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508170731129_addProgramSubmit.resx">
+      <DependentUpon>202508170731129_addProgramSubmit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508170747410_adjustProgramSubmitDtoFeild.resx">
+      <DependentUpon>202508170747410_adjustProgramSubmitDtoFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508171259373_addPostApi Participant Submit.resx">
+      <DependentUpon>202508171259373_addPostApi Participant Submit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508171309337_adjust ResumeEducatin Feild.resx">
+      <DependentUpon>202508171309337_adjust ResumeEducatin Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508171338105_adjust ProgramSubit Feild.resx">
+      <DependentUpon>202508171338105_adjust ProgramSubit Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508171408376_adjust exisiting &amp; simpleresume isactive feild type.resx">
+      <DependentUpon>202508171408376_adjust exisiting &amp; simpleresume isactive feild type.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -31,6 +31,7 @@ namespace TryBeta.Models
         public DbSet<PortfolioLinks> PortfolioLinks { get; set; }  //作品連結表 (簡單履歷表)
         public DbSet<ResumeSkill> ResumeSkill { get; set; }  //技能表 (簡單履歷表)
         public DbSet<SimpleResume> SimpleResume { get; set; }  //簡單履歷表
+        //public DbSet<ResumeEducation> ResumeEducationStatuses { get; set; } //簡單履歷的狀態表 (體驗者)
         public DbSet<ParticipantInfoes> ParticipantInfoes { get; set; }  //體驗者基本資料表
         public DbSet<Industry> Industries { get; set; }  //產業表
         public DbSet<Position> Positions { get; set; }  //職務表
@@ -45,6 +46,9 @@ namespace TryBeta.Models
         public DbSet<ProgramStep> ProgramStep { get; set; } //體驗計畫階段表
         public DbSet<ProgramPlanImage> ProgramPlanImages { get; set; } //體驗計畫照片表
         public DbSet<ProgramPlanStatus> ProgramPlanStatuses { get; set; } //體驗計畫狀態表
+        public DbSet<ProgramSubmit> ProgramSubmits { get; set; } //體驗計畫申請表 (體驗者)
+        public DbSet<ProgramSubmitStatus> ProgramSubmitStatuses { get; set; } //體驗計畫申請狀態表 (體驗者)
+
 
 
 

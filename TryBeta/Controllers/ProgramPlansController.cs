@@ -88,9 +88,9 @@ namespace TryBeta.Controllers
         //    }
         //}
 
-        // GET: api/v1/company/{companyid}/programs/{programId} 取得單一體驗計畫
+        // GET: api/v1/company/{companyid}/programs/{programId} 取得單一體驗計畫詳情
         [HttpGet]
-        [Route("programs/{programId:int}")]
+        [Route("programs/{programId:int}")]  
         [JwtAuthFilter]
         public IHttpActionResult GetProgramPlan(int companyid, int programId)
         {
@@ -117,6 +117,7 @@ namespace TryBeta.Controllers
                     return NotFound();
                 }
 
+                // 取得階段資料
                 var steps = db.ProgramStep
                     .Where(s => s.ProgramPlanId == programPlan.Id)
                     .OrderBy(s => s.Id)
@@ -128,7 +129,7 @@ namespace TryBeta.Controllers
                     })
                     .ToList();
 
-                // 取得產業與職務名稱
+                // 取得產業名稱與職務名稱
                 var industry = db.Industries
                     .Where(i => i.Id == programPlan.IndustryId)
                     .Select(i => new { i.Id, i.Title })
@@ -142,6 +143,12 @@ namespace TryBeta.Controllers
                 var status = db.ProgramPlanStatuses
                     .Where(s => s.Id == programPlan.StatusId)
                     .Select(s => new { s.Id, s.Title })
+                    .FirstOrDefault();
+
+                // 取得圖片資料
+                var images = db.ProgramPlanImages
+                    .Where(s => s.Id == programPlan.Id)
+                    .Select(s => new { s.Id, s.ImgPath })
                     .FirstOrDefault();
 
                 var response = new
@@ -163,7 +170,8 @@ namespace TryBeta.Controllers
                     programPlan.ProgramStartDate,
                     programPlan.ProgramEndDate,
                     programPlan.ProgramDurationDays,
-                    Steps = steps
+                    Steps = steps,
+                    Images = images
                 };
 
                 return Ok(response);
@@ -177,16 +185,16 @@ namespace TryBeta.Controllers
         /// <summary>
         /// 企業的體驗計畫清單 (支援搜尋、篩選、排序、分頁)
         /// </summary>
-        // GET: api/v1/company/{companyid}/programs 企業的體驗計畫篩選器
+        // GET: api/v1/company/{companyid}/programs 企業的體驗計畫篩選器，包含全部體驗計畫
         [HttpGet]
         [Route("programs")]
         [JwtAuthFilter]
         public IHttpActionResult GetCompanyPrograms(
         string search = null,
-        int? industry = null,
-        int? jobtitle = null,
+        int? industry_id = null,
+        int? job_title_id = null,
         int? status = null,   // 1=全部 2=已通過 3=已發布 4=待發布 5=已拒絕 6=審核中
-        string sort = "newest",
+        string sort = "publish_start_desc",
         int page = 1,
         int limit = 21)
         {
@@ -216,15 +224,15 @@ namespace TryBeta.Controllers
                 }
 
                 // 產業篩選
-                if (industry.HasValue)
+                if (industry_id.HasValue)
                 {
-                    query = query.Where(p => p.IndustryId == industry.Value);
+                    query = query.Where(p => p.IndustryId == industry_id.Value);
                 }
 
                 // 職務篩選
-                if (jobtitle.HasValue)
+                if (job_title_id.HasValue)
                 {
-                    query = query.Where(p => p.JobTitleId == jobtitle.Value);
+                    query = query.Where(p => p.JobTitleId == job_title_id.Value);
                 }
 
                 if (status.HasValue)
@@ -264,12 +272,26 @@ namespace TryBeta.Controllers
                 // 排序
                 switch (sort)
                 {
-                    case "oldest":
-                        query = query.OrderBy(p => p.Id);
+                    case "publish_start_asc":        // 刊登開始日期舊到新
+                        query = query.OrderBy(p => p.PublishStartDate);
                         break;
-                    case "newest":
-                    default:
-                        query = query.OrderByDescending(p => p.Id);
+                    case "publish_start_desc":       // 刊登開始日期新到舊
+                        query = query.OrderByDescending(p => p.PublishStartDate);
+                        break;
+                    case "publish_end_asc":          // 刊登截止日期舊到新
+                        query = query.OrderBy(p => p.PublishEndDate);
+                        break;
+                    case "publish_end_desc":         // 刊登截止日期新到舊
+                        query = query.OrderByDescending(p => p.PublishEndDate);
+                        break;
+                    case "program_start_asc":        // 體驗開始日期舊到新
+                        query = query.OrderBy(p => p.ProgramStartDate);
+                        break;
+                    case "program_start_desc":       // 體驗開始日期新到舊
+                        query = query.OrderByDescending(p => p.ProgramStartDate);
+                        break;
+                    default:                         // 預設刊登日期新到舊
+                        query = query.OrderByDescending(p => p.PublishStartDate);
                         break;
                 }
 

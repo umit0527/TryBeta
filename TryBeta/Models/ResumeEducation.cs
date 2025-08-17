@@ -8,6 +8,12 @@ using System.Web;
 
 namespace TryBeta.Models
 {
+    public enum EducationStatus  //用enum，不建狀態表
+    {
+        Studying = 1,   // 在學中
+        Graduated = 2,  // 已畢業
+        DroppedOut = 3  // 肄業
+    }
     public class ResumeEducation
     {
         [JsonProperty("id")]
@@ -28,7 +34,7 @@ namespace TryBeta.Models
 
         [JsonProperty("degree")]
         [MaxLength(50)]
-        public string Degree { get; set; }  //
+        public string Degree { get; set; }  //程度
 
         [Required]
         [JsonProperty("start_date")]
@@ -36,6 +42,10 @@ namespace TryBeta.Models
 
         [JsonProperty("end_date")]
         public DateTime? EndDate { get; set; } //在職或就學中可使用
+
+        [Required]
+        [JsonProperty("status")]
+        public EducationStatus Status { get; set; } = EducationStatus.Studying;  // 在學/畢業/肄業
 
         [JsonProperty("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
