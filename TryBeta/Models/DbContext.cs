@@ -43,6 +43,7 @@ namespace TryBeta.Models
         public DbSet<ProgramRegistration> ProgramRegistrations { get; set; } //體驗計畫註冊表
         public DbSet<ProgramPlan> ProgramPlan { get; set; } //體驗計畫表
         public DbSet<ProgramStep> ProgramStep { get; set; } //體驗計畫階段表
+        public DbSet<ProgramPlanImage> ProgramPlanImages { get; set; } //體驗計畫照片表
         public DbSet<ProgramPlanStatus> ProgramPlanStatuses { get; set; } //體驗計畫狀態表
 
 

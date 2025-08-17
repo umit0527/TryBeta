@@ -435,8 +435,10 @@ namespace TryBeta.Controllers
                     IndustryId = dto.IndustryId,
                     JobTitleId = dto.JobTitleId,
                     Address = dto.Address,
+                    AddressMap = dto.AddressMap,
                     ContactName = dto.ContactName,
                     ContactPhone = dto.ContactPhone,
+                    ContactEmail = dto.ContactEmail,
                     MinPeople = dto.MinPeople,
                     MaxPeople = dto.MaxPeople,
                     PublishStartDate = dto.PublishStartDate,
@@ -466,45 +468,67 @@ namespace TryBeta.Controllers
                     db.ProgramStep.Add(step);
                 }
 
-                // 8. 扣掉剩餘人數
-                planUsage.RemainingPeople -= dto.MaxPeople;
-                if (planUsage.RemainingPeople <= 0)
+                // 8. 建立圖片 (最多 4 張)
+                if (dto.Images != null && dto.Images.Any())
                 {
-                    planUsage.StatusId = 4; // full
+                    if (dto.Images.Count > 4)
+                        return BadRequest("最多只能上傳 4 張圖片");
+
+                    foreach (var imgUrl in dto.Images)
+                    {
+                        var image = new ProgramPlanImage
+                        {
+                            ProgramPlanId = programPlan.Id,
+                            ImgPath = imgUrl,
+                            CreatedAt = DateTime.Now
+                        };
+                        db.ProgramPlanImages.Add(image);
+                    }
                 }
-                db.SaveChanges();
 
-                // 9. 取得狀態名稱
-                var statusTitle = db.ProgramPlanStatuses
-                    .Where(s => s.Id == programPlan.StatusId)
-                    .Select(s => s.Title)
-                    .FirstOrDefault();
 
-                // 10. 回傳 DTO
-                var responseDto = new ProgramPlanDto
-                {
-                    StatusId = programPlan.StatusId,
-                    StatusTitle = statusTitle,
-                    Name = programPlan.Name,
-                    Intro = programPlan.Intro,
-                    IndustryId = programPlan.IndustryId,
-                    JobTitleId = programPlan.JobTitleId,
-                    Address = programPlan.Address,
-                    ContactName = programPlan.ContactName,
-                    ContactPhone = programPlan.ContactPhone,
-                    MinPeople = programPlan.MinPeople,
-                    MaxPeople = programPlan.MaxPeople,
-                    PublishStartDate = programPlan.PublishStartDate,
-                    PublishDurationDays = programPlan.PublishDurationDays,
-                    PublishEndDate = programPlan.PublishEndDate,
-                    ProgramStartDate = programPlan.ProgramStartDate,
-                    ProgramDurationDays = programPlan.ProgramDurationDays,
-                    ProgramEndDate = programPlan.ProgramEndDate,
-                    Steps = dto.Steps
-                };
+                // 9. 扣掉剩餘人數
+                planUsage.RemainingPeople -= dto.MaxPeople;
+                    if (planUsage.RemainingPeople <= 0)
+                    {
+                        planUsage.StatusId = 4; // full
+                    }
+                    db.SaveChanges();
 
-                return Ok(responseDto);
-            }
+                    // 10. 取得狀態名稱
+                    var statusTitle = db.ProgramPlanStatuses
+                        .Where(s => s.Id == programPlan.StatusId)
+                        .Select(s => s.Title)
+                        .FirstOrDefault();
+
+                    // 11. 回傳 DTO
+                    var responseDto = new ProgramPlanDto
+                    {
+                        StatusId = programPlan.StatusId,
+                        StatusTitle = statusTitle,
+                        Name = programPlan.Name,
+                        Intro = programPlan.Intro,
+                        IndustryId = programPlan.IndustryId,
+                        JobTitleId = programPlan.JobTitleId,
+                        Address = programPlan.Address,
+                        AddressMap = programPlan.AddressMap,
+                        ContactName = programPlan.ContactName,
+                        ContactPhone = programPlan.ContactPhone,
+                        ContactEmail = programPlan.ContactEmail,
+                        MinPeople = programPlan.MinPeople,
+                        MaxPeople = programPlan.MaxPeople,
+                        PublishStartDate = programPlan.PublishStartDate,
+                        PublishDurationDays = programPlan.PublishDurationDays,
+                        PublishEndDate = programPlan.PublishEndDate,
+                        ProgramStartDate = programPlan.ProgramStartDate,
+                        ProgramDurationDays = programPlan.ProgramDurationDays,
+                        ProgramEndDate = programPlan.ProgramEndDate,
+                        Steps = dto.Steps,
+                        Images = dto.Images,
+                    };
+
+                    return Ok(responseDto);
+                }
             catch (DbEntityValidationException ex)
             {
                 var allErrors = ex.EntityValidationErrors

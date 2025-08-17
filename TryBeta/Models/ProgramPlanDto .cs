@@ -40,15 +40,23 @@ namespace TryBeta.Models
         [JsonProperty("address")]
         public string Address { get; set; }
 
-        [Required(ErrorMessage = "請輸入聯絡人")]
+        [JsonProperty("address_map")]
+        public string AddressMap { get; set; }
+
+        [Required(ErrorMessage = "請輸入聯絡人名稱")]
         [MaxLength(100, ErrorMessage = "聯絡人最多100字")]
         [JsonProperty("contact_name")]
         public string ContactName { get; set; }
 
-        [Required(ErrorMessage = "請輸入電話號碼")]
+        [Required(ErrorMessage = "請輸入聯絡人電話號碼")]
         [Phone(ErrorMessage = "電話格式不正確")]
         [JsonProperty("contact_phone")]
         public string ContactPhone { get; set; }
+
+        [Required(ErrorMessage = "請輸入聯絡人Email")]
+        [EmailAddress(ErrorMessage = "Email格式不正確")]
+        [JsonProperty("contact_email")]
+        public string ContactEmail { get; set; }
 
         [Required(ErrorMessage = "請輸入最少體驗人數")]
         [Range(1, int.MaxValue, ErrorMessage = "最少體驗人數必須大於0")]
@@ -89,6 +97,18 @@ namespace TryBeta.Models
 
         [JsonProperty("status_title")]
         public string StatusTitle { get; set; } // 用來回傳 ProgramPlanStatus.Title
+
+        [JsonProperty("applied_count")]
+        public int AppliedCount { get; set; }   // 已申請人數 給體驗者端呈現用
+
+        [JsonProperty("days_left")]
+        public int? DaysLeft { get; set; }      // 申請截止日期還有幾天 (體驗還沒r進行時用，給體驗者端呈現用)
+
+        [JsonProperty("is_ongoing")]
+        public bool? IsOngoing { get; set; }    // 體驗是否進行中 (體驗進行後用，給體驗者端呈現用)
+
+        // 圖片清單
+        public List<string> Images { get; set; } = new List<string>();
 
         public List<ProgramStepDto> Steps { get; set; } = new List<ProgramStepDto>();
 

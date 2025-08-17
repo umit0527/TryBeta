@@ -24,6 +24,7 @@ namespace TryBeta.Models
         [JsonProperty("name")]
         public string Name { get; set; }
 
+        [Required]
         [StringLength(1000)]
         [JsonProperty("intro")]
         public string Intro { get; set; }
@@ -38,13 +39,23 @@ namespace TryBeta.Models
         [JsonProperty("address")]
         public string Address { get; set; }
 
+        [JsonProperty("address_map")]
+        public string AddressMap { get; set; }
+
+        [Required]
         [StringLength(50)]
         [JsonProperty("contact_name")]
         public string ContactName { get; set; }
 
+        [Required]
         [StringLength(50)]
         [JsonProperty("contact_phone")]
         public string ContactPhone { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        [JsonProperty("contact_email")]
+        public string ContactEmail { get; set; }
 
         [Required]
         [JsonProperty("min_people")]
