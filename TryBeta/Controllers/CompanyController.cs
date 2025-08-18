@@ -135,9 +135,14 @@ namespace TryBeta.Controllers
             // 先跑 ModelState 驗證
             if (!ModelState.IsValid)
             {
-                var modelErrors = ModelState.Values.SelectMany(v => v.Errors)
-                                  .Select(e => e.ErrorMessage)
-                                  .ToList();
+                var modelErrors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage)
+                                 ? e.Exception?.Message
+                                 : e.ErrorMessage)
+                    .Where(m => !string.IsNullOrWhiteSpace(m))
+                    .ToList();
+
                 allErrors.AddRange(modelErrors);
             }
 
@@ -161,10 +166,18 @@ namespace TryBeta.Controllers
                 allErrors.Add("該企業名稱已被使用");
             }
 
-            bool taxExists = db.Companyinfoes.Any(c => c.TaxIdNum == dto.TaxIdNum);
-            if (taxExists)
+            //  統編檢查
+            if (!string.IsNullOrWhiteSpace(dto.TaxIdNum))
             {
-                allErrors.Add("該統編已被使用");
+                if (!System.Text.RegularExpressions.Regex.IsMatch(dto.TaxIdNum, @"^\d{8}$"))
+                {
+                    allErrors.Add("統一編號必須是 8 碼的數字");
+                }
+                else
+                {
+                    if (db.Companyinfoes.Any(c => c.TaxIdNum == dto.TaxIdNum))
+                        allErrors.Add("該統編已被使用");
+                }
             }
 
             // 如果有任何錯誤就統一回傳
@@ -178,6 +191,7 @@ namespace TryBeta.Controllers
                 };
                 return Content(HttpStatusCode.BadRequest, content);
             }
+
 
             var hashedPassword = PasswordHasher.HashPassword(dto.Password); // 將密碼(明碼)加鹽雜湊
 
@@ -193,14 +207,14 @@ namespace TryBeta.Controllers
                         Email = dto.Email,
                         PasswordHash = hashedPassword,
                         Role = "Company",
-                        StatusId = 1, // 預設啟用
+                        StatusId = 1,
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now
                     };
                     db.Users.Add(user);
                     db.SaveChanges();
 
-                    // 建立企業基本資料
+                    // 建立公司基本資料
                     var company = new CompanyInfoes
                     {
                         Name = dto.Name,
@@ -212,12 +226,12 @@ namespace TryBeta.Controllers
                         ScaleId = dto.ScaleId,
                         UserId = user.Id,
                         CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
                     };
                     db.Companyinfoes.Add(company);
                     db.SaveChanges();
 
-                    // 建立聯絡人資料
+                    // 建立聯絡人
                     if (dto.CompanyContact != null)
                     {
                         var contact = new CompanyContacts
@@ -234,17 +248,15 @@ namespace TryBeta.Controllers
                         db.SaveChanges();
                     }
 
-                    //建立圖片
+                    // 建立圖片
                     if (dto.CompanyImg != null && dto.CompanyImg.Any())
                     {
-                        //檢查是否超過6張
                         var environmentCount = dto.CompanyImg.Count(i => i.Type == "environment");
                         if (environmentCount > 6)
                         {
                             return BadRequest("環境照片最多只能上傳 6 張");
                         }
 
-                        //加入圖片
                         foreach (var imgDto in dto.CompanyImg)
                         {
                             var image = new CompanyImages
@@ -259,23 +271,29 @@ namespace TryBeta.Controllers
                         }
                         db.SaveChanges();
                     }
+
                     transaction.Commit();
 
+                    // 回傳成功訊息
                     return Content(HttpStatusCode.Created, new
                     {
                         status = 201,
                         message = "註冊成功",
-                        Name = dto.Name,
-                        IndustryId = dto.IndustryId,
-                        TaxIdNum = dto.TaxIdNum,
-                        Address = dto.Address,
-                        Website = dto.Website,
-                        Intro = dto.Intro,
-                        ScaleId = dto.ScaleId,
-                        UserId = user.Id,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
-                    });  //201
+                        company = new
+                        {
+                            company.Id,
+                            company.Name,
+                            company.IndustryId,
+                            company.TaxIdNum,
+                            company.Address,
+                            company.Website,
+                            company.Intro,
+                            company.ScaleId,
+                            company.UserId,
+                            company.CreatedAt,
+                            company.UpdatedAt
+                        }
+                    });
                 }
                 catch (Exception ex)
                 {

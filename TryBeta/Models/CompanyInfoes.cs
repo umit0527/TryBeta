@@ -15,7 +15,7 @@ namespace TryBeta.Models
 
         [Required]
         [JsonProperty("name")]
-        [MaxLength(50)]
+        [MaxLength(100)]
         public string Name { get; set; }
 
         [Required]

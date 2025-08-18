@@ -75,6 +75,10 @@ namespace TryBeta.Models
         [JsonProperty("agree_terms")]
         public bool AgreeTerms { get; set; }
 
+        //導覽屬性
+        [ForeignKey("StatusId")]
+        public virtual ProgramPlanStatus Status { get; set; }
+
 
     }
 }
