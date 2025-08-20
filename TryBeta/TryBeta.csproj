@@ -453,7 +453,24 @@
     <Compile Include="Migrations\202508200920272_add ProgramView.Designer.cs">
       <DependentUpon>202508200920272_add ProgramView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508201354397_add EvaluationReview Table.cs" />
+    <Compile Include="Migrations\202508201354397_add EvaluationReview Table.Designer.cs">
+      <DependentUpon>202508201354397_add EvaluationReview Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201406176_adjust EvaluationReview Feild.cs" />
+    <Compile Include="Migrations\202508201406176_adjust EvaluationReview Feild.Designer.cs">
+      <DependentUpon>202508201406176_adjust EvaluationReview Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201451037_add AdminInfoes Table.cs" />
+    <Compile Include="Migrations\202508201451037_add AdminInfoes Table.Designer.cs">
+      <DependentUpon>202508201451037_add AdminInfoes Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201454254_add Feild in AdminInfoes Table.cs" />
+    <Compile Include="Migrations\202508201454254_add Feild in AdminInfoes Table.Designer.cs">
+      <DependentUpon>202508201454254_add Feild in AdminInfoes Table.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\AdminInfoes.cs" />
     <Compile Include="Models\AdminLoginDto.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
@@ -465,6 +482,7 @@
     <Compile Include="Models\CompanyScales.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\District.cs" />
+    <Compile Include="Models\EvaluationReview.cs" />
     <Compile Include="Models\ExistingResume.cs" />
     <Compile Include="Models\Identity.cs" />
     <Compile Include="Models\Industry.cs" />
@@ -830,6 +848,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508200920272_add ProgramView.resx">
       <DependentUpon>202508200920272_add ProgramView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201354397_add EvaluationReview Table.resx">
+      <DependentUpon>202508201354397_add EvaluationReview Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201406176_adjust EvaluationReview Feild.resx">
+      <DependentUpon>202508201406176_adjust EvaluationReview Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201451037_add AdminInfoes Table.resx">
+      <DependentUpon>202508201451037_add AdminInfoes Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201454254_add Feild in AdminInfoes Table.resx">
+      <DependentUpon>202508201454254_add Feild in AdminInfoes Table.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

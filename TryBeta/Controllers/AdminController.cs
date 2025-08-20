@@ -133,15 +133,74 @@ namespace TryBeta.Controllers
             var programSubmit = db.ProgramSubmits
                 .FirstOrDefault(ps => ps.ParticipantId == participant.Id && ps.ProgramPlanId == evaluation.ProgramPlanId);
 
+            //撈取目前的審核狀態
+            var currentReviewStatus = db.EvaluationReviews
+                .Where(r => r.EvaluationId == evaluation.Id)
+                .OrderByDescending(r => r.ReviewedAt)
+                .Select(r => new
+                {
+                    id = r.Id,
+                    status = r.Status.Title
+                })
+                .FirstOrDefault();
+
+            // 撈取該評價的審核歷史
+            var reviews = db.EvaluationReviews
+                .Where(r => r.EvaluationId == evaluation.Id)
+                .OrderByDescending(r => r.ReviewedAt)
+                .Select(r => new
+                {
+                    id = r.Id,
+                    reviewedAt = r.ReviewedAt,
+                    reviewer = new
+                    {
+                        id = r.ReviewerId,
+                        name = r.Reviewer.AdminInfo != null ? r.Reviewer.AdminInfo.Name : r.Reviewer.Account
+                    },
+                    reviewType = r.ReviewTypeId,
+                    comment = r.Comment,
+                    status = r.Status.Title
+                })
+                .ToList();
+
+            // 取得 ProgramPlanDto
+            var programPlanDto = new ProgramPlanDto
+            {
+                Name = evaluation.Program?.Name,
+                SerialNum = evaluation.Program?.SerialNum,
+                Industry = new ProgramPlanDto.SimpleEntityDto
+                {
+                    Id = evaluation.Program?.IndustryId ?? 0,
+                    Title = evaluation.Program?.Industry?.Title
+                },
+                JobTitle = new ProgramPlanDto.SimpleEntityDto
+                {
+                    Id = evaluation.Program?.JobTitleId ?? 0,
+                    Title = evaluation.Program?.JobTitle?.Title
+                },
+                Address = evaluation.Program?.Address,
+                ProgramStartDate = evaluation.Program?.ProgramStartDate ?? DateTime.MinValue,
+                ProgramEndDate = evaluation.Program?.ProgramEndDate ?? DateTime.MinValue,
+                ProgramDurationDays = evaluation.Program?.ProgramDurationDays ?? 0
+            };
+
             return Ok(new
             {
+                currentStatus = currentReviewStatus?.status,
                 id = evaluation.Id,
                 submitDate = programSubmit?.SubmitAt,
                 updateDate = programSubmit?.ReviewedAt,
                 program = new
                 {
-                    id = evaluation.ProgramPlanId,
-                    name = evaluation.Program?.Name
+                    // 區塊三：體驗資訊
+                    name = programPlanDto.Name,
+                    serialNum = programPlanDto.SerialNum,
+                    industry = programPlanDto.Industry?.Title,
+                    jobTitle = programPlanDto.JobTitle?.Title,
+                    address = programPlanDto.Address,
+                    startDate = programPlanDto.ProgramStartDate,
+                    endDate = programPlanDto.ProgramEndDate,
+                    durationDays = programPlanDto.ProgramDurationDays
                 },
                 participant = new
                 {
@@ -151,7 +210,8 @@ namespace TryBeta.Controllers
                     age = age
                 },
                 score = evaluation.Score,
-                comment = evaluation.Comment
+                comment = evaluation.Comment,
+                reviews = reviews
             });
         }
 
