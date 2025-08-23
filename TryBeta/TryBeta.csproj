@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.1.21.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.props" Condition="Exists('..\packages\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.1.21.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.props')" />
+  <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -25,6 +27,8 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
+    <DockerLaunchUrl>http://{ServiceIPAddress}</DockerLaunchUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,15 +49,119 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="jose-jwt, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\jose-jwt.5.2.0\lib\net472\jose-jwt.dll</HintPath>
+    </Reference>
+    <Reference Include="Konscious.Security.Cryptography.Argon2, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Konscious.Security.Cryptography.Argon2.1.3.1\lib\net46\Konscious.Security.Cryptography.Argon2.dll</HintPath>
+    </Reference>
+    <Reference Include="Konscious.Security.Cryptography.Blake2, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Konscious.Security.Cryptography.Blake2.1.1.1\lib\net46\Konscious.Security.Cryptography.Blake2.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.2, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.8.0.2\lib\net462\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=8.0.0.3, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.8.0.3\lib\net462\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json.Bson, Version=1.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.Bson.1.0.2\lib\net45\Newtonsoft.Json.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenAI, Version=2.3.0.0, Culture=neutral, PublicKeyToken=b4187f3e65366280, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenAI.2.3.0\lib\netstandard2.0\OpenAI.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ClientModel, Version=1.5.1.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ClientModel.1.5.1\lib\netstandard2.0\System.ClientModel.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=8.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.8.0.1\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory.Data, Version=8.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.Data.8.0.1\lib\net462\System.Memory.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.9\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Security.Cryptography.Encoding" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Text.Encodings.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Encodings.Web.8.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json, Version=8.0.0.5, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Json.8.0.5\lib\net462\System.Text.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Cors, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Cors.5.3.0\lib\net45\System.Web.Cors.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.9\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.Cors, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Cors.5.2.9\lib\net45\System.Web.Http.Cors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.9\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.9\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.9\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
@@ -70,43 +178,10 @@
     </Reference>
     <Reference Include="System.Net.Http">
     </Reference>
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.9\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net.Http.WebRequest">
-    </Reference>
-    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.Helpers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.9\lib\net45\System.Web.Http.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http.WebHost, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.9\lib\net45\System.Web.Http.WebHost.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.9\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Optimization">
       <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.9\lib\net45\System.Web.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="WebGrease">
       <Private>True</Private>
@@ -155,11 +230,368 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\AuthController.cs" />
+    <Compile Include="Controllers\CompanyController.cs" />
+    <Compile Include="Controllers\CompanyCurrentPlanController.cs" />
+    <Compile Include="Controllers\CompanyPlanOrdersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ParticipantController.cs" />
+    <Compile Include="Controllers\PlansController.cs" />
+    <Compile Include="Controllers\ProgramPlansController.cs" />
+    <Compile Include="Controllers\ProgramRegistrationsController.cs" />
+    <Compile Include="Controllers\PublicProgramPlansController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508111610357_feat database.cs" />
+    <Compile Include="Migrations\202508111610357_feat database.Designer.cs">
+      <DependentUpon>202508111610357_feat database.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508120711249_get company.cs" />
+    <Compile Include="Migrations\202508120711249_get company.Designer.cs">
+      <DependentUpon>202508120711249_get company.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508120903220_user register.cs" />
+    <Compile Include="Migrations\202508120903220_user register.Designer.cs">
+      <DependentUpon>202508120903220_user register.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508121353493_feat industry model.cs" />
+    <Compile Include="Migrations\202508121353493_feat industry model.Designer.cs">
+      <DependentUpon>202508121353493_feat industry model.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508121510342_feat position model.cs" />
+    <Compile Include="Migrations\202508121510342_feat position model.Designer.cs">
+      <DependentUpon>202508121510342_feat position model.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508121521179_AddDistrictAndCityModel.cs" />
+    <Compile Include="Migrations\202508121521179_AddDistrictAndCityModel.Designer.cs">
+      <DependentUpon>202508121521179_AddDistrictAndCityModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508121538353_adjustIdentiyFeild.cs" />
+    <Compile Include="Migrations\202508121538353_adjustIdentiyFeild.Designer.cs">
+      <DependentUpon>202508121538353_adjustIdentiyFeild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508130816582_addCityandDistrictSeed.cs" />
+    <Compile Include="Migrations\202508130816582_addCityandDistrictSeed.Designer.cs">
+      <DependentUpon>202508130816582_addCityandDistrictSeed.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508130912025_addJwtModel.cs" />
+    <Compile Include="Migrations\202508130912025_addJwtModel.Designer.cs">
+      <DependentUpon>202508130912025_addJwtModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508131241099_addParticipantLoginApi.cs" />
+    <Compile Include="Migrations\202508131241099_addParticipantLoginApi.Designer.cs">
+      <DependentUpon>202508131241099_addParticipantLoginApi.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508131309588_adjustParticipatDtoName.cs" />
+    <Compile Include="Migrations\202508131309588_adjustParticipatDtoName.Designer.cs">
+      <DependentUpon>202508131309588_adjustParticipatDtoName.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508140617190_test.cs" />
+    <Compile Include="Migrations\202508140617190_test.Designer.cs">
+      <DependentUpon>202508140617190_test.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508140719318_addPlanModel.cs" />
+    <Compile Include="Migrations\202508140719318_addPlanModel.Designer.cs">
+      <DependentUpon>202508140719318_addPlanModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508140733040_addPlanSeed.cs" />
+    <Compile Include="Migrations\202508140733040_addPlanSeed.Designer.cs">
+      <DependentUpon>202508140733040_addPlanSeed.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508140738284_adjustPlanSeed.cs" />
+    <Compile Include="Migrations\202508140738284_adjustPlanSeed.Designer.cs">
+      <DependentUpon>202508140738284_adjustPlanSeed.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508140950518_addCompanyPlanOrderDto.cs" />
+    <Compile Include="Migrations\202508140950518_addCompanyPlanOrderDto.Designer.cs">
+      <DependentUpon>202508140950518_addCompanyPlanOrderDto.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508141408518_addCurrentPlan.cs" />
+    <Compile Include="Migrations\202508141408518_addCurrentPlan.Designer.cs">
+      <DependentUpon>202508141408518_addCurrentPlan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508150827000_adjustCompanContactsModel.cs" />
+    <Compile Include="Migrations\202508150827000_adjustCompanContactsModel.Designer.cs">
+      <DependentUpon>202508150827000_adjustCompanContactsModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508151324359_addProgramPlansController.cs" />
+    <Compile Include="Migrations\202508151324359_addProgramPlansController.Designer.cs">
+      <DependentUpon>202508151324359_addProgramPlansController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508151426239_adjustProgramPlanFeildType.cs" />
+    <Compile Include="Migrations\202508151426239_adjustProgramPlanFeildType.Designer.cs">
+      <DependentUpon>202508151426239_adjustProgramPlanFeildType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508160740389_addProgramRegistration.cs" />
+    <Compile Include="Migrations\202508160740389_addProgramRegistration.Designer.cs">
+      <DependentUpon>202508160740389_addProgramRegistration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508160830473_addProgramStep.cs" />
+    <Compile Include="Migrations\202508160830473_addProgramStep.Designer.cs">
+      <DependentUpon>202508160830473_addProgramStep.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508160918232_adjustProgramPlansFeild.cs" />
+    <Compile Include="Migrations\202508160918232_adjustProgramPlansFeild.Designer.cs">
+      <DependentUpon>202508160918232_adjustProgramPlansFeild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508160936444_cancelProgramPlansFeild.cs" />
+    <Compile Include="Migrations\202508160936444_cancelProgramPlansFeild.Designer.cs">
+      <DependentUpon>202508160936444_cancelProgramPlansFeild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508161319439_addProgramPlanStatusModel.cs" />
+    <Compile Include="Migrations\202508161319439_addProgramPlanStatusModel.Designer.cs">
+      <DependentUpon>202508161319439_addProgramPlanStatusModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508161426372_adjustUserStats.cs" />
+    <Compile Include="Migrations\202508161426372_adjustUserStats.Designer.cs">
+      <DependentUpon>202508161426372_adjustUserStats.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508161507466_adjustPlanUsageStatusFeild.cs" />
+    <Compile Include="Migrations\202508161507466_adjustPlanUsageStatusFeild.Designer.cs">
+      <DependentUpon>202508161507466_adjustPlanUsageStatusFeild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508170638506_addProgramPlanImages.cs" />
+    <Compile Include="Migrations\202508170638506_addProgramPlanImages.Designer.cs">
+      <DependentUpon>202508170638506_addProgramPlanImages.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508170647370_adjustProgramPlanFeild.cs" />
+    <Compile Include="Migrations\202508170647370_adjustProgramPlanFeild.Designer.cs">
+      <DependentUpon>202508170647370_adjustProgramPlanFeild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508170655160_addProgramPlanFeild.cs" />
+    <Compile Include="Migrations\202508170655160_addProgramPlanFeild.Designer.cs">
+      <DependentUpon>202508170655160_addProgramPlanFeild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508170731129_addProgramSubmit.cs" />
+    <Compile Include="Migrations\202508170731129_addProgramSubmit.Designer.cs">
+      <DependentUpon>202508170731129_addProgramSubmit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508170747410_adjustProgramSubmitDtoFeild.cs" />
+    <Compile Include="Migrations\202508170747410_adjustProgramSubmitDtoFeild.Designer.cs">
+      <DependentUpon>202508170747410_adjustProgramSubmitDtoFeild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508171259373_addPostApi Participant Submit.cs" />
+    <Compile Include="Migrations\202508171259373_addPostApi Participant Submit.Designer.cs">
+      <DependentUpon>202508171259373_addPostApi Participant Submit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508171309337_adjust ResumeEducatin Feild.cs" />
+    <Compile Include="Migrations\202508171309337_adjust ResumeEducatin Feild.Designer.cs">
+      <DependentUpon>202508171309337_adjust ResumeEducatin Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508171338105_adjust ProgramSubit Feild.cs" />
+    <Compile Include="Migrations\202508171338105_adjust ProgramSubit Feild.Designer.cs">
+      <DependentUpon>202508171338105_adjust ProgramSubit Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508171408376_adjust exisiting &amp; simpleresume isactive feild type.cs" />
+    <Compile Include="Migrations\202508171408376_adjust exisiting &amp; simpleresume isactive feild type.Designer.cs">
+      <DependentUpon>202508171408376_adjust exisiting &amp; simpleresume isactive feild type.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508180643027_addScoreFeild&amp;PopularParams.cs" />
+    <Compile Include="Migrations\202508180643027_addScoreFeild&amp;PopularParams.Designer.cs">
+      <DependentUpon>202508180643027_addScoreFeild&amp;PopularParams.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508180717430_add API GET Users Program.cs" />
+    <Compile Include="Migrations\202508180717430_add API GET Users Program.Designer.cs">
+      <DependentUpon>202508180717430_add API GET Users Program.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508180721412_FixProgramSubmitStatus.cs" />
+    <Compile Include="Migrations\202508180721412_FixProgramSubmitStatus.Designer.cs">
+      <DependentUpon>202508180721412_FixProgramSubmitStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181003517_adjust ProramSubmitStatus Feild.cs" />
+    <Compile Include="Migrations\202508181003517_adjust ProramSubmitStatus Feild.Designer.cs">
+      <DependentUpon>202508181003517_adjust ProramSubmitStatus Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181007239_adjust ProgramPlanStatus Feild.cs" />
+    <Compile Include="Migrations\202508181007239_adjust ProgramPlanStatus Feild.Designer.cs">
+      <DependentUpon>202508181007239_adjust ProgramPlanStatus Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181437120_add Serial Number on ParogramPlan Table.cs" />
+    <Compile Include="Migrations\202508181437120_add Serial Number on ParogramPlan Table.Designer.cs">
+      <DependentUpon>202508181437120_add Serial Number on ParogramPlan Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181520090_add ParticipantSerialNumber on Table ProgramPlans.cs" />
+    <Compile Include="Migrations\202508181520090_add ParticipantSerialNumber on Table ProgramPlans.Designer.cs">
+      <DependentUpon>202508181520090_add ParticipantSerialNumber on Table ProgramPlans.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181544473_fix ProgramSubmit.cs" />
+    <Compile Include="Migrations\202508181544473_fix ProgramSubmit.Designer.cs">
+      <DependentUpon>202508181544473_fix ProgramSubmit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181556559_fixProgramSubmit2.cs" />
+    <Compile Include="Migrations\202508181556559_fixProgramSubmit2.Designer.cs">
+      <DependentUpon>202508181556559_fixProgramSubmit2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190531039_add ParticipantEducation &amp; ParticipantDetail.cs" />
+    <Compile Include="Migrations\202508190531039_add ParticipantEducation &amp; ParticipantDetail.Designer.cs">
+      <DependentUpon>202508190531039_add ParticipantEducation &amp; ParticipantDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190541133_fix user login 500.cs" />
+    <Compile Include="Migrations\202508190541133_fix user login 500.Designer.cs">
+      <DependentUpon>202508190541133_fix user login 500.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190551117_add ParticipantDetailDto StatusName.cs" />
+    <Compile Include="Migrations\202508190551117_add ParticipantDetailDto StatusName.Designer.cs">
+      <DependentUpon>202508190551117_add ParticipantDetailDto StatusName.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190607243_add ParticipantReview Model.cs" />
+    <Compile Include="Migrations\202508190607243_add ParticipantReview Model.Designer.cs">
+      <DependentUpon>202508190607243_add ParticipantReview Model.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190620238_adjust ProgramPlan Feild SerialNum.cs" />
+    <Compile Include="Migrations\202508190620238_adjust ProgramPlan Feild SerialNum.Designer.cs">
+      <DependentUpon>202508190620238_adjust ProgramPlan Feild SerialNum.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190623206_adjust SerialNum.cs" />
+    <Compile Include="Migrations\202508190623206_adjust SerialNum.Designer.cs">
+      <DependentUpon>202508190623206_adjust SerialNum.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190734534_add ProgramSubmiyStatues seed.cs" />
+    <Compile Include="Migrations\202508190734534_add ProgramSubmiyStatues seed.Designer.cs">
+      <DependentUpon>202508190734534_add ProgramSubmiyStatues seed.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190837371_add ParticipantReviewDto.cs" />
+    <Compile Include="Migrations\202508190837371_add ParticipantReviewDto.Designer.cs">
+      <DependentUpon>202508190837371_add ParticipantReviewDto.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508191002475_adjust ParticipantEvaluationDto.cs" />
+    <Compile Include="Migrations\202508191002475_adjust ParticipantEvaluationDto.Designer.cs">
+      <DependentUpon>202508191002475_adjust ParticipantEvaluationDto.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508191424108_add StatusId in ParticipantEvaluation Table.cs" />
+    <Compile Include="Migrations\202508191424108_add StatusId in ParticipantEvaluation Table.Designer.cs">
+      <DependentUpon>202508191424108_add StatusId in ParticipantEvaluation Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508191428096_fix Admin Get Evaluation StatusId.cs" />
+    <Compile Include="Migrations\202508191428096_fix Admin Get Evaluation StatusId.Designer.cs">
+      <DependentUpon>202508191428096_fix Admin Get Evaluation StatusId.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508191433106_fix ParticipantEvaluation StatusId2.cs" />
+    <Compile Include="Migrations\202508191433106_fix ParticipantEvaluation StatusId2.Designer.cs">
+      <DependentUpon>202508191433106_fix ParticipantEvaluation StatusId2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508200639049_add ProgramSubmitReview.cs" />
+    <Compile Include="Migrations\202508200639049_add ProgramSubmitReview.Designer.cs">
+      <DependentUpon>202508200639049_add ProgramSubmitReview.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508200643166_adjustProgramSubmitReview Feild.cs" />
+    <Compile Include="Migrations\202508200643166_adjustProgramSubmitReview Feild.Designer.cs">
+      <DependentUpon>202508200643166_adjustProgramSubmitReview Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508200824430_add PrgramView Table.cs" />
+    <Compile Include="Migrations\202508200824430_add PrgramView Table.Designer.cs">
+      <DependentUpon>202508200824430_add PrgramView Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508200920272_add ProgramView.cs" />
+    <Compile Include="Migrations\202508200920272_add ProgramView.Designer.cs">
+      <DependentUpon>202508200920272_add ProgramView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201354397_add EvaluationReview Table.cs" />
+    <Compile Include="Migrations\202508201354397_add EvaluationReview Table.Designer.cs">
+      <DependentUpon>202508201354397_add EvaluationReview Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201406176_adjust EvaluationReview Feild.cs" />
+    <Compile Include="Migrations\202508201406176_adjust EvaluationReview Feild.Designer.cs">
+      <DependentUpon>202508201406176_adjust EvaluationReview Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201451037_add AdminInfoes Table.cs" />
+    <Compile Include="Migrations\202508201451037_add AdminInfoes Table.Designer.cs">
+      <DependentUpon>202508201451037_add AdminInfoes Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201454254_add Feild in AdminInfoes Table.cs" />
+    <Compile Include="Migrations\202508201454254_add Feild in AdminInfoes Table.Designer.cs">
+      <DependentUpon>202508201454254_add Feild in AdminInfoes Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508210345363_add Feild SerialNum in ParticipantEvaluvtion.cs" />
+    <Compile Include="Migrations\202508210345363_add Feild SerialNum in ParticipantEvaluvtion.Designer.cs">
+      <DependentUpon>202508210345363_add Feild SerialNum in ParticipantEvaluvtion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508210625123_add OpenAIModeration Table.cs" />
+    <Compile Include="Migrations\202508210625123_add OpenAIModeration Table.Designer.cs">
+      <DependentUpon>202508210625123_add OpenAIModeration Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508210825553_add PrograPlanStatus Value.cs" />
+    <Compile Include="Migrations\202508210825553_add PrograPlanStatus Value.Designer.cs">
+      <DependentUpon>202508210825553_add PrograPlanStatus Value.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508221406294_required motivationcontent field.cs" />
+    <Compile Include="Migrations\202508221406294_required motivationcontent field.Designer.cs">
+      <DependentUpon>202508221406294_required motivationcontent field.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508221503287_add TopProgramPlan.cs" />
+    <Compile Include="Migrations\202508221503287_add TopProgramPlan.Designer.cs">
+      <DependentUpon>202508221503287_add TopProgramPlan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508221507370_add Feild Score in ProramPlan Table.cs" />
+    <Compile Include="Migrations\202508221507370_add Feild Score in ProramPlan Table.Designer.cs">
+      <DependentUpon>202508221507370_add Feild Score in ProramPlan Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508230815046_add Favorite Table.cs" />
+    <Compile Include="Migrations\202508230815046_add Favorite Table.Designer.cs">
+      <DependentUpon>202508230815046_add Favorite Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\AdminInfoes.cs" />
+    <Compile Include="Models\AdminLoginDto.cs" />
+    <Compile Include="Models\City.cs" />
+    <Compile Include="Models\CompanyContacts.cs" />
+    <Compile Include="Models\CompanyDto.cs" />
+    <Compile Include="Models\CompanyImages.cs" />
+    <Compile Include="Models\CompanyInfoes.cs" />
+    <Compile Include="Models\CompanyLoginDto.cs" />
+    <Compile Include="Models\CompanyPlanOrder.cs" />
+    <Compile Include="Models\CompanyScales.cs" />
+    <Compile Include="Models\DbContext.cs" />
+    <Compile Include="Models\District.cs" />
+    <Compile Include="Models\EvaluationReview.cs" />
+    <Compile Include="Models\ExistingResume.cs" />
+    <Compile Include="Models\Favorite.cs" />
+    <Compile Include="Models\FavoriteDto.cs" />
+    <Compile Include="Models\Identity.cs" />
+    <Compile Include="Models\Industry.cs" />
+    <Compile Include="Models\JwtAuthFilter.cs" />
+    <Compile Include="Models\JwtAuthUtil.cs" />
+    <Compile Include="Models\OpenAIModeration.cs" />
+    <Compile Include="Models\OpenAISettings.cs" />
+    <Compile Include="Models\ParticipantDetailDto.cs" />
+    <Compile Include="Models\ParticipantDto.cs" />
+    <Compile Include="Models\ParticipantEducation.cs" />
+    <Compile Include="Models\ParticipantEvaluation.cs" />
+    <Compile Include="Models\ParticipantEvaluationDto.cs" />
+    <Compile Include="Models\PasswordHash.cs" />
+    <Compile Include="Models\Plan.cs" />
+    <Compile Include="Models\PlanUsage.cs" />
+    <Compile Include="Models\PlanUsageStatus.cs" />
+    <Compile Include="Models\PortfolioLinks.cs" />
+    <Compile Include="Models\Position.cs" />
+    <Compile Include="Models\ProgramPlanDto .cs" />
+    <Compile Include="Models\ProgramPlanImages.cs" />
+    <Compile Include="Models\ProgramPlans.cs" />
+    <Compile Include="Models\ProgramPlanStatus.cs" />
+    <Compile Include="Models\ProgramRegistration.cs" />
+    <Compile Include="Models\ProgramStep.cs" />
+    <Compile Include="Models\ProgramSubmit.cs" />
+    <Compile Include="Models\ProgramSubmitDto.cs" />
+    <Compile Include="Models\ProgramSubmitStatus.cs" />
+    <Compile Include="Models\ProgramView.cs" />
+    <Compile Include="Models\ResumeEducation.cs" />
+    <Compile Include="Models\ResumeExperience.cs" />
+    <Compile Include="Models\PortfolioFiles.cs" />
+    <Compile Include="Models\ResumeSkill.cs" />
+    <Compile Include="Models\ProgramSubmitReview.cs" />
+    <Compile Include="Models\ProgramSubmitReviewDto.cs" />
+    <Compile Include="Models\SimpleResume.cs" />
+    <Compile Include="Models\ParticipantInfoes.cs" />
+    <Compile Include="Models\TopProgramPlan.cs" />
+    <Compile Include="Models\HomePageDto.cs" />
+    <Compile Include="Models\UpdateEvaluationDto.cs" />
+    <Compile Include="Models\Users.cs" />
+    <Compile Include="Models\ParticipantRegisterDto.cs" />
+    <Compile Include="Models\ParticipantLoginDto.cs" />
+    <Compile Include="Models\UserStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +620,10 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="OpenAISettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\HelpPage\Views\_ViewStart.cshtml" />
     <Content Include="Areas\HelpPage\Views\Web.config" />
     <Content Include="Areas\HelpPage\Views\Shared\_Layout.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\ResourceModel.cshtml" />
@@ -220,17 +656,16 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-    <Content Include="Areas\HelpPage\Views\_ViewStart.cshtml" />
     <Content Include="Content\Site.css" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="WebConnect.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\bootstrap.min.js.map" />
@@ -303,6 +738,225 @@
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202508111610357_feat database.resx">
+      <DependentUpon>202508111610357_feat database.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508120711249_get company.resx">
+      <DependentUpon>202508120711249_get company.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508120903220_user register.resx">
+      <DependentUpon>202508120903220_user register.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508121353493_feat industry model.resx">
+      <DependentUpon>202508121353493_feat industry model.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508121510342_feat position model.resx">
+      <DependentUpon>202508121510342_feat position model.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508121521179_AddDistrictAndCityModel.resx">
+      <DependentUpon>202508121521179_AddDistrictAndCityModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508121538353_adjustIdentiyFeild.resx">
+      <DependentUpon>202508121538353_adjustIdentiyFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508130816582_addCityandDistrictSeed.resx">
+      <DependentUpon>202508130816582_addCityandDistrictSeed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508130912025_addJwtModel.resx">
+      <DependentUpon>202508130912025_addJwtModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508131241099_addParticipantLoginApi.resx">
+      <DependentUpon>202508131241099_addParticipantLoginApi.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508131309588_adjustParticipatDtoName.resx">
+      <DependentUpon>202508131309588_adjustParticipatDtoName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140617190_test.resx">
+      <DependentUpon>202508140617190_test.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140719318_addPlanModel.resx">
+      <DependentUpon>202508140719318_addPlanModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140733040_addPlanSeed.resx">
+      <DependentUpon>202508140733040_addPlanSeed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140738284_adjustPlanSeed.resx">
+      <DependentUpon>202508140738284_adjustPlanSeed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140950518_addCompanyPlanOrderDto.resx">
+      <DependentUpon>202508140950518_addCompanyPlanOrderDto.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508141408518_addCurrentPlan.resx">
+      <DependentUpon>202508141408518_addCurrentPlan.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508150827000_adjustCompanContactsModel.resx">
+      <DependentUpon>202508150827000_adjustCompanContactsModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508151324359_addProgramPlansController.resx">
+      <DependentUpon>202508151324359_addProgramPlansController.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508151426239_adjustProgramPlanFeildType.resx">
+      <DependentUpon>202508151426239_adjustProgramPlanFeildType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508160740389_addProgramRegistration.resx">
+      <DependentUpon>202508160740389_addProgramRegistration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508160830473_addProgramStep.resx">
+      <DependentUpon>202508160830473_addProgramStep.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508160918232_adjustProgramPlansFeild.resx">
+      <DependentUpon>202508160918232_adjustProgramPlansFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508160936444_cancelProgramPlansFeild.resx">
+      <DependentUpon>202508160936444_cancelProgramPlansFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508161319439_addProgramPlanStatusModel.resx">
+      <DependentUpon>202508161319439_addProgramPlanStatusModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508161426372_adjustUserStats.resx">
+      <DependentUpon>202508161426372_adjustUserStats.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508161507466_adjustPlanUsageStatusFeild.resx">
+      <DependentUpon>202508161507466_adjustPlanUsageStatusFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508170638506_addProgramPlanImages.resx">
+      <DependentUpon>202508170638506_addProgramPlanImages.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508170647370_adjustProgramPlanFeild.resx">
+      <DependentUpon>202508170647370_adjustProgramPlanFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508170655160_addProgramPlanFeild.resx">
+      <DependentUpon>202508170655160_addProgramPlanFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508170731129_addProgramSubmit.resx">
+      <DependentUpon>202508170731129_addProgramSubmit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508170747410_adjustProgramSubmitDtoFeild.resx">
+      <DependentUpon>202508170747410_adjustProgramSubmitDtoFeild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508171259373_addPostApi Participant Submit.resx">
+      <DependentUpon>202508171259373_addPostApi Participant Submit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508171309337_adjust ResumeEducatin Feild.resx">
+      <DependentUpon>202508171309337_adjust ResumeEducatin Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508171338105_adjust ProgramSubit Feild.resx">
+      <DependentUpon>202508171338105_adjust ProgramSubit Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508171408376_adjust exisiting &amp; simpleresume isactive feild type.resx">
+      <DependentUpon>202508171408376_adjust exisiting &amp; simpleresume isactive feild type.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508180643027_addScoreFeild&amp;PopularParams.resx">
+      <DependentUpon>202508180643027_addScoreFeild&amp;PopularParams.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508180717430_add API GET Users Program.resx">
+      <DependentUpon>202508180717430_add API GET Users Program.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508180721412_FixProgramSubmitStatus.resx">
+      <DependentUpon>202508180721412_FixProgramSubmitStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181003517_adjust ProramSubmitStatus Feild.resx">
+      <DependentUpon>202508181003517_adjust ProramSubmitStatus Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181007239_adjust ProgramPlanStatus Feild.resx">
+      <DependentUpon>202508181007239_adjust ProgramPlanStatus Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181437120_add Serial Number on ParogramPlan Table.resx">
+      <DependentUpon>202508181437120_add Serial Number on ParogramPlan Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181520090_add ParticipantSerialNumber on Table ProgramPlans.resx">
+      <DependentUpon>202508181520090_add ParticipantSerialNumber on Table ProgramPlans.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181544473_fix ProgramSubmit.resx">
+      <DependentUpon>202508181544473_fix ProgramSubmit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181556559_fixProgramSubmit2.resx">
+      <DependentUpon>202508181556559_fixProgramSubmit2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190531039_add ParticipantEducation &amp; ParticipantDetail.resx">
+      <DependentUpon>202508190531039_add ParticipantEducation &amp; ParticipantDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190541133_fix user login 500.resx">
+      <DependentUpon>202508190541133_fix user login 500.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190551117_add ParticipantDetailDto StatusName.resx">
+      <DependentUpon>202508190551117_add ParticipantDetailDto StatusName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190607243_add ParticipantReview Model.resx">
+      <DependentUpon>202508190607243_add ParticipantReview Model.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190620238_adjust ProgramPlan Feild SerialNum.resx">
+      <DependentUpon>202508190620238_adjust ProgramPlan Feild SerialNum.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190623206_adjust SerialNum.resx">
+      <DependentUpon>202508190623206_adjust SerialNum.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190734534_add ProgramSubmiyStatues seed.resx">
+      <DependentUpon>202508190734534_add ProgramSubmiyStatues seed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190837371_add ParticipantReviewDto.resx">
+      <DependentUpon>202508190837371_add ParticipantReviewDto.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508191002475_adjust ParticipantEvaluationDto.resx">
+      <DependentUpon>202508191002475_adjust ParticipantEvaluationDto.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508191424108_add StatusId in ParticipantEvaluation Table.resx">
+      <DependentUpon>202508191424108_add StatusId in ParticipantEvaluation Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508191428096_fix Admin Get Evaluation StatusId.resx">
+      <DependentUpon>202508191428096_fix Admin Get Evaluation StatusId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508191433106_fix ParticipantEvaluation StatusId2.resx">
+      <DependentUpon>202508191433106_fix ParticipantEvaluation StatusId2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508200639049_add ProgramSubmitReview.resx">
+      <DependentUpon>202508200639049_add ProgramSubmitReview.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508200643166_adjustProgramSubmitReview Feild.resx">
+      <DependentUpon>202508200643166_adjustProgramSubmitReview Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508200824430_add PrgramView Table.resx">
+      <DependentUpon>202508200824430_add PrgramView Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508200920272_add ProgramView.resx">
+      <DependentUpon>202508200920272_add ProgramView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201354397_add EvaluationReview Table.resx">
+      <DependentUpon>202508201354397_add EvaluationReview Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201406176_adjust EvaluationReview Feild.resx">
+      <DependentUpon>202508201406176_adjust EvaluationReview Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201451037_add AdminInfoes Table.resx">
+      <DependentUpon>202508201451037_add AdminInfoes Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201454254_add Feild in AdminInfoes Table.resx">
+      <DependentUpon>202508201454254_add Feild in AdminInfoes Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508210345363_add Feild SerialNum in ParticipantEvaluvtion.resx">
+      <DependentUpon>202508210345363_add Feild SerialNum in ParticipantEvaluvtion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508210625123_add OpenAIModeration Table.resx">
+      <DependentUpon>202508210625123_add OpenAIModeration Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508210825553_add PrograPlanStatus Value.resx">
+      <DependentUpon>202508210825553_add PrograPlanStatus Value.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508221406294_required motivationcontent field.resx">
+      <DependentUpon>202508221406294_required motivationcontent field.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508221503287_add TopProgramPlan.resx">
+      <DependentUpon>202508221503287_add TopProgramPlan.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508221507370_add Feild Score in ProramPlan Table.resx">
+      <DependentUpon>202508221507370_add Feild Score in ProramPlan Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508230815046_add Favorite Table.resx">
+      <DependentUpon>202508230815046_add Favorite Table.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -336,7 +990,13 @@
       <ErrorText>此專案參考這部電腦上所缺少的 NuGet 套件。請啟用 NuGet 套件還原，以下載該套件。如需詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的檔案是 {0}。</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.1.21.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.1.21.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.1.21.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.1.21.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.targets'))" />
   </Target>
+  <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" />
+  <Import Project="..\packages\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.1.21.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.targets" Condition="Exists('..\packages\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.1.21.0\build\Microsoft.VisualStudio.Azure.Containers.Tools.Targets.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
