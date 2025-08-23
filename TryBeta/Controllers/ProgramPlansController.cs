@@ -250,10 +250,7 @@ namespace TryBeta.Controllers
                 // 關鍵字搜尋
                 if (!string.IsNullOrEmpty(search))
                 {
-                    query = query.Where(p => p.Name.Contains(search) ||
-                                        p.Intro.Contains(search) ||
-                                        p.Steps.Any(s => s.Name.Contains(search) ||
-                                        s.Description.Contains(search)));
+                    query = query.Where(p => p.Name.Contains(search));
                 }
 
                 // 產業篩選

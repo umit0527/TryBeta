@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
+using Jose;
 
 namespace TryBeta.Models
 {
@@ -109,16 +110,19 @@ namespace TryBeta.Models
         public int AppliedCount { get; set; } = 0;
 
         [JsonProperty("score")]
-        public int Score { get; set; } 
+        public int Score { get; set; }
         // ------------------------------------
 
         // 導航屬性
+        [ForeignKey("CompanyId")]
         public virtual CompanyInfoes Company { get; set; }
         public virtual Industry Industry { get; set; }
         public virtual Position JobTitle { get; set; }
 
         [ForeignKey("StatusId")]
         public virtual ProgramPlanStatus Status { get; set; }
+
+        
         public virtual ICollection<ProgramPlanImage> ProgramPlanImages { get; set; } = new List<ProgramPlanImage>();
         public virtual ICollection<ProgramStep> Steps { get; set; } = new List<ProgramStep>();
     }
