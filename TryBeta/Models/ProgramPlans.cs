@@ -1,0 +1,136 @@
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using Jose;
+
+namespace TryBeta.Models
+{
+    public class ProgramPlan
+    {
+        [Key]
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [Required]
+        [JsonProperty("company_id")]
+        [ForeignKey("Company")]
+        public int CompanyId { get; set; }
+
+        [JsonProperty("plan_id")]
+        public int? PlanId { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        [JsonProperty("serial_num")]
+        public string SerialNum { get; set; }
+
+        [Required]
+        [StringLength(255)]
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [Required]
+        [StringLength(1000)]
+        [JsonProperty("intro")]
+        public string Intro { get; set; }
+
+        [JsonProperty("industry_id")]
+        public int IndustryId { get; set; }
+
+        [JsonProperty("job_title_id")]
+        public int JobTitleId { get; set; }
+
+        [StringLength(255)]
+        [JsonProperty("address")]
+        public string Address { get; set; }
+
+        [JsonProperty("address_map")]
+        public string AddressMap { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        [JsonProperty("contact_name")]
+        public string ContactName { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        [JsonProperty("contact_phone")]
+        public string ContactPhone { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        [JsonProperty("contact_email")]
+        public string ContactEmail { get; set; }
+
+        [Required]
+        [JsonProperty("min_people")]
+        public int MinPeople { get; set; }   // 最少人數（成團標準）
+
+        [Required]
+        [JsonProperty("max_people")]
+        public int MaxPeople { get; set; }   // 最多人數（上限）
+
+        [JsonProperty("publish_start_date")]
+        public DateTime PublishStartDate { get; set; }  //刊登開始日期
+
+        [JsonProperty("publish_duration_days")]
+        public int PublishDurationDays { get; set; }  //刊登持續期間
+
+        [JsonProperty("publish_end_date")]
+        public DateTime PublishEndDate { get; set; }  //刊登結束日期
+
+        [JsonProperty("program_start_date")]
+        public DateTime ProgramStartDate { get; set; }  //體驗執行開始日期
+
+        [JsonProperty("program_end_date")]
+        public DateTime ProgramEndDate { get; set; }  //體驗執行結束日期
+
+        [JsonProperty("program_duration_days")]
+        public int ProgramDurationDays { get; set; }  //體驗持續期間
+
+        [Required]
+        [JsonProperty("status_id")]
+        public int StatusId { get; set; } 
+
+        [JsonProperty("created_at")]
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        [JsonProperty("updated_at")]
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+        // ------------ 熱門分數相關 ------------
+        [JsonProperty("views_count")]
+        public int ViewsCount { get; set; } = 0;
+
+        [JsonProperty("favorites_count")]
+        public int FavoritesCount { get; set; } = 0;
+
+        [JsonProperty("applied_count")]
+        public int AppliedCount { get; set; } = 0;
+
+        [JsonProperty("score")]
+        public int Score { get; set; }
+        // ------------------------------------
+
+        // 導航屬性
+        [ForeignKey("CompanyId")]
+        public virtual CompanyInfoes Company { get; set; }
+        public virtual Industry Industry { get; set; }
+        public virtual Position JobTitle { get; set; }
+
+        [ForeignKey("StatusId")]
+        public virtual ProgramPlanStatus Status { get; set; }
+
+        [ForeignKey("PlanId")]
+        public virtual Plan Plan { get; set; }
+
+        public virtual ICollection<ProgramPlanImage> ProgramPlanImages { get; set; } = new List<ProgramPlanImage>();
+        public virtual ICollection<ProgramStep> Steps { get; set; } = new List<ProgramStep>();
+        public virtual ICollection<ParticipantEvaluation> ParticipantEvaluations { get; set; } = new List<ParticipantEvaluation>();
+        public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+    }
+}
