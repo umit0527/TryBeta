@@ -61,9 +61,8 @@ namespace TryBeta.Models
         public int StatusId { get; set; } = 1; // 1=待審核, 2=通過, 3=拒絕
 
         //修改申請狀態日期(審核通過或拒絕)
-        [Required]
         [JsonProperty("reviewed_at")]
-        public DateTime? ReviewedAt { get; set; } = DateTime.Today;
+        public DateTime? ReviewedAt { get; set; }
 
         //----------------- 履歷 -----------------
         // 履歷類型: simple/existing
@@ -97,5 +96,7 @@ namespace TryBeta.Models
         //導覽屬性
         [ForeignKey("StatusId")]
         public virtual ProgramSubmitStatus Status { get; set; }
+
+        public ICollection<ParticipantEvaluation> Evaluations { get; set; }
     }
 }

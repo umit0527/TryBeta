@@ -32,7 +32,7 @@ namespace TryBeta.Models
 
         [JsonProperty("canceled_at")]
 
-        public DateTime CanceledAt { get; set; } = DateTime.Now;
+        public DateTime? CanceledAt { get; set; } = null;
 
 
         // 導覽屬性

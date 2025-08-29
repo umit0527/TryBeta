@@ -45,6 +45,15 @@ namespace TryBeta.Models
         public string StatusTitle { get; set; }
 
         // ------------ 熱門分數相關 ------------
+        [JsonProperty("views_count")]
+        public int ViewsCount { get; set; }
+        
+        [JsonProperty("favorites_count")]
+        public int FavoritesCount { get; set; }
+        
+        [JsonProperty("applied_count")]
+        public int AppliedCount { get; set; }
+
         [JsonProperty("score")]
         public int Score { get; set; }
 

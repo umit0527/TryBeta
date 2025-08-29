@@ -405,6 +405,12 @@ namespace TryBeta.Controllers
 
                     // 同步更新 ViewsCount 快取
                     plan.ViewsCount += 1;
+
+                    // 更新熱門分數
+                    plan.Score = plan.ViewsCount * 1
+                                 + plan.FavoritesCount * 3
+                                 + plan.AppliedCount * 5;
+
                     db.SaveChanges();
                 }
 
@@ -616,10 +622,10 @@ namespace TryBeta.Controllers
             switch (status_id)
             {
                 case 15: // 已通過
-                    query = query.Where(e => e.StatusId == 2 || e.StatusId == 4 || e.StatusId == 15);
+                    query = query.Where(e =>  e.StatusId == 4);
                     break;
                 case 16: // 已拒絕
-                    query = query.Where(e => e.StatusId == 3 || e.StatusId == 5 || e.StatusId == 16);
+                    query = query.Where(e => e.StatusId == 5 );
                     break;
                 case 17: // 未評價 
                     query = query.Where(e => e.StatusId == 17);
@@ -694,11 +700,15 @@ namespace TryBeta.Controllers
                     .Where(img => img.ProgramPlanId == plan.Id)
                     .OrderBy(img => img.Id)
                     .FirstOrDefault();
-
+ 
                 return new HomePageDto
                 {
                     Id = plan.Id,
                     Score = plan.Score,
+                    // 三個計數
+                    ViewsCount = plan.ViewsCount,
+                    FavoritesCount = plan.FavoritesCount,
+                    AppliedCount = plan.AppliedCount,
                     CompanyName = plan.Company.Name,
                     Name = plan.Name,
                     Intro = plan.Intro,
@@ -709,7 +719,7 @@ namespace TryBeta.Controllers
                     StatusId = plan.StatusId,
                     StatusTitle = plan.Status.Title,
                     CoverId = cover?.Id ?? 0,
-                    ImgPath = cover?.ImgPath,
+                    ImgPath = cover?.ImgPath
                 };
             }).ToList();
 
@@ -1237,8 +1247,25 @@ namespace TryBeta.Controllers
 
                 db.SaveChanges();
 
-                // 5. 回傳乾淨 JSON
-                return Ok(new
+                // 更新 ProgramPlan 的熱門分數
+                // ------------------------
+                var program = db.ProgramPlan.FirstOrDefault(p => p.Id == program_id);
+                if (program != null)
+                {
+                    // 更新申請通過數
+                    program.AppliedCount = db.ProgramSubmits
+                        .Where(a => a.ProgramPlanId == program_id && a.StatusId == (int)ReviewStatus.Approved)
+                        .Sum(a => (int?)a.ParticipantsCount) ?? 0;
+
+                    // 計算熱門分數
+                    program.Score = program.ViewsCount * 1
+                                  + program.FavoritesCount * 3
+                                  + program.AppliedCount * 5;
+
+                    db.SaveChanges();
+                }
+                    // 5. 回傳乾淨 JSON
+                    return Ok(new
                 {
                     success = true,
                     message = "申請已取消",
@@ -1415,8 +1442,8 @@ namespace TryBeta.Controllers
                     });
                 }
 
-                // 解析回傳結果
-                var moderationObj = JsonConvert.DeserializeObject<ModerationResponse>(moderationResultJson);
+                    // 解析回傳結果
+                    var moderationObj = JsonConvert.DeserializeObject<ModerationResponse>(moderationResultJson);
                 if (moderationObj?.Results != null && moderationObj.Results.Count > 0)
                 {
                     var first = moderationObj.Results[0];
@@ -1524,7 +1551,7 @@ namespace TryBeta.Controllers
                 int userId = (int)userIdObj;
 
 
-                var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == dto.UserId);
+                var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == userId);
                 if (participant == null)
                     return NotFound();
 
@@ -1545,6 +1572,7 @@ namespace TryBeta.Controllers
                 if (exists)
                     return BadRequest("已收藏此體驗計畫");
 
+                // 新增 Favorite
                 var favorite = new Favorite
                 {
                     ParticipantId = participant.Id,
@@ -1553,6 +1581,15 @@ namespace TryBeta.Controllers
                 };
 
                 db.Favorites.Add(favorite);
+                db.SaveChanges();
+
+                // 更新 ProgramPlan 的 FavoritesCount
+                program.FavoritesCount = db.Favorites.Count(f => f.ProgramPlanId == dto.ProgramPlanId);
+
+                // 更新熱門分數
+                program.Score = program.ViewsCount * 1
+                                + program.FavoritesCount * 3
+                                + program.AppliedCount * 5;
                 db.SaveChanges();
 
                 return Ok(new { Message = "成功收藏體驗計畫" });
@@ -1565,7 +1602,7 @@ namespace TryBeta.Controllers
 
         //DELETE: api/v1/favorites 體驗者取消收藏體驗計畫
         [HttpDelete]
-        [Route("~/api/v1/favorites/{programPlanId}")]
+        [Route("~/api/v1/favorites/{programPlanId:int}")]
         [JwtAuthFilter]
         public IHttpActionResult RemoveFavorite(int programPlanId)
         {
@@ -1590,6 +1627,29 @@ namespace TryBeta.Controllers
 
                 db.Favorites.Remove(favorite);
                 db.SaveChanges();
+
+                // 更新 ProgramPlan 的 FavoritesCount 與熱門分數
+                var program = db.ProgramPlan.FirstOrDefault(p => p.Id == programPlanId);
+                if (program != null)
+                {
+                    // 更新收藏數
+                    program.FavoritesCount = db.Favorites.Count(f => f.ProgramPlanId == programPlanId);
+
+                    // 更新申請通過數
+                    program.AppliedCount = db.ProgramSubmits
+                        .Where(a => a.ProgramPlanId == programPlanId && a.StatusId == 2)
+                        .Sum(a => (int?)a.ParticipantsCount) ?? 0;
+
+                    // 更新瀏覽次數（可選，如果你想保證最新）
+                    program.ViewsCount = db.ProgramViews.Count(v => v.ProgramPlanId == programPlanId);
+
+                    // 計算熱門分數，權重可調整
+                    program.Score = program.ViewsCount * 1
+                                  + program.FavoritesCount * 3
+                                  + program.AppliedCount * 5;
+
+                    db.SaveChanges();
+                }
 
                 return Ok(new { Message = "已取消收藏" });
             }

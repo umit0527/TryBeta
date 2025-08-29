@@ -37,7 +37,7 @@ namespace TryBeta.Models
                 { "Id", id },
                 { "Account", account },
                 { "NickName", name },
-                { "Exp", DateTime.Now.AddMinutes(30).ToString() } // JwtToken 時效設定 30 分
+                { "Exp", DateTime.Now.AddDays(365).ToString() } // JwtToken 時效設定 1 年
             };
 
             ////payload作法2
@@ -65,7 +65,7 @@ namespace TryBeta.Models
                 { "Id", (int)tokenData["Id"] },
                 { "Account", tokenData["Account"].ToString() },
                 { "NickName", tokenData["NickName"].ToString() },
-                { "Exp", DateTime.Now.AddDays(365).ToString() } // JwtToken 時效刷新設定 1年
+                { "Exp", DateTime.Now.AddDays(180).ToString() } // JwtToken 時效刷新設定 半年
             };
 
             //產生刷新時效的 JwtToken

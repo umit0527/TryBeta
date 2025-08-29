@@ -50,6 +50,8 @@ namespace TryBeta.Models
         [JsonProperty("evaluation_date")]
         public DateTime EvaluationDate { get; set; }  // 評價日期 (體驗者端的所有評價列表用)
 
+        //[JsonProperty("debug")]
+        //public string Debug { get; set; }
         //[Required]
         //[JsonProperty("reviewed_at")]
         //public DateTime ReviewedAt { get; set; } = DateTime.Today;

@@ -54,7 +54,7 @@ namespace TryBeta.Models
         public string MerchantId { get; set; }
 
         [JsonProperty("Amt")]
-        public int Amount { get; set; }
+        public decimal Amount { get; set; }
 
         [JsonProperty("TradeNo")]
         public string TradeNo { get; set; }
@@ -71,11 +71,8 @@ namespace TryBeta.Models
         [JsonProperty("AuthBank")]
         public string AuthBank { get; set; }
 
-        [JsonProperty("Card6No")]
-        public string Card6Digits { get; set; }
-
         [JsonProperty("Card4No")]
-        public string LastCard4Digits { get; set; }
+        public string Card4No { get; set; }
 
         [JsonProperty("PayTime")]
         public string PayTime { get; set; }

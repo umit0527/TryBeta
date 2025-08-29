@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -16,6 +18,7 @@ using TryBeta.Models;
 
 namespace TryBeta.Controllers
 {
+
     [RoutePrefix("api/v1/payments")]
     public class PaymentController : ApiController
     {
@@ -38,6 +41,171 @@ namespace TryBeta.Controllers
             }
 
             return Ok(companyPlanOrder);
+        }
+
+        // GET: api/v1/payments/callback 藍新金流：回傳結果給前端
+        // 用戶完成付款後，前端瀏覽器導向，方便展示付款結果或前端跳轉
+        // 僅用來查詢付款結果並展示，不直接更新訂單
+        [HttpGet]
+        [Route("callback")]
+        public IHttpActionResult PaymentCallbackGet()
+        {
+            try
+            {
+                // 1️ 讀取 query string
+                var query = HttpContext.Current.Request.QueryString;
+                string tradeInfo = query["TradeInfo"];
+                string tradeSha = query["TradeSha"];
+                string status = query["Status"];
+
+                if (string.IsNullOrEmpty(tradeInfo) || string.IsNullOrEmpty(tradeSha))
+                    return BadRequest("缺少必要的回傳參數");
+
+                if (string.IsNullOrEmpty(status) || !status.Equals("SUCCESS", StringComparison.OrdinalIgnoreCase))
+                    return Ok("1|OK"); // 付款失敗也回傳 1|OK，藍新不重送
+
+                // 2️ 設定 HashKey / HashIV
+                string hashKey = ConfigurationManager.AppSettings["Newebpay:HashKey"];
+                string hashIV = ConfigurationManager.AppSettings["Newebpay:HashIV"];
+
+                // 3️ 驗證 TradeSha
+                string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&TradeInfo={tradeInfo}&HashIV={hashIV}");
+                if (!string.Equals(calcSha, tradeSha, StringComparison.OrdinalIgnoreCase))
+                    return BadRequest("TradeSha 驗證失敗");
+
+                // 4️ 解密 TradeInfo
+                string decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
+                var tradeInfoObj = JsonConvert.DeserializeObject<PaymentTradeInfoDto>(decrypted);
+
+                if (tradeInfoObj == null || string.IsNullOrEmpty(tradeInfoObj.MerchantOrderNo))
+                    return BadRequest("TradeInfo 資料異常");
+
+                // 5️ 查訂單
+                var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == tradeInfoObj.MerchantOrderNo);
+                if (order == null)
+                    return BadRequest("訂單不存在");
+
+                // 6️ 查方案
+                var plan = db.Plan.Find(order.PlanId);
+                if (plan == null)
+                    return BadRequest($"方案不存在 (planId={order.PlanId})");
+
+                // 7 判斷付款結果
+                bool isPaid = status.Equals("SUCCESS", StringComparison.OrdinalIgnoreCase);
+
+                // 8 回傳訂單狀態給前端
+                var result = new
+                {
+                    OrderNum = order.OrderNum,
+                    CompanyId = order.CompanyId,
+                    PlanId = order.PlanId,
+                    PaymentStatus = "Paid",
+                    OrderStatus = "Active",
+                    PaymentMethod = tradeInfoObj.PaymentType ?? order.PaymentMethod,
+                    Card4No = tradeInfoObj.Card4No
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        // GET: api/v1/payments/callback 藍新金流：回傳結果給前端 測試
+        [HttpGet]
+        [Route("callback/test")]
+        public IHttpActionResult PaymentCallbackGetTest()
+        {
+            try
+            {
+                // ====== 測試用資料 ======
+                bool isTest = string.IsNullOrEmpty(HttpContext.Current.Request.QueryString["TradeInfo"]);
+                string tradeInfo, tradeSha, status;
+
+                string hashKey = ConfigurationManager.AppSettings["HashKey"];
+                string hashIV = ConfigurationManager.AppSettings["HashIV"];
+
+                if (isTest)
+                {
+                    // 模擬藍新回傳資料
+                    var tradeInfoObj1 = new PaymentTradeInfoDto
+                    {
+                        MerchantOrderNo = "ORD-20250826-002",
+                        PaymentType = "CREDIT",
+                        Card4No = "1234"
+                    };
+                    string json = JsonConvert.SerializeObject(tradeInfoObj1 ?? new PaymentTradeInfoDto());
+                    if (string.IsNullOrEmpty(json))
+                        throw new Exception("TradeInfo JSON 為空");
+
+                    tradeInfo = CryptoUtil.EncryptAESHex(json, hashKey, hashIV);
+                    tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&TradeInfo={tradeInfo}&HashIV={hashIV}").ToUpperInvariant();
+                    status = "SUCCESS";
+                }
+                else
+                {
+                    // 真正藍新回傳
+                    var query = HttpContext.Current.Request.QueryString;
+                    tradeInfo = query["TradeInfo"];
+                    tradeSha = query["TradeSha"];
+                    status = query["Status"];
+                }
+
+                if (string.IsNullOrEmpty(tradeInfo) || string.IsNullOrEmpty(tradeSha))
+                    return BadRequest("缺少必要的回傳參數");
+
+                if (string.IsNullOrEmpty(status) || !status.Equals("SUCCESS", StringComparison.OrdinalIgnoreCase))
+                    return Ok("1|OK"); // 付款失敗也回傳 1|OK，藍新不重送
+
+                //// 2️ 設定 HashKey / HashIV
+                //string hashKey = ConfigurationManager.AppSettings["Newebpay:HashKey"];
+                //string hashIV = ConfigurationManager.AppSettings["Newebpay:HashIV"];
+
+                // 3️ 驗證 TradeSha
+                string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&TradeInfo={tradeInfo}&HashIV={hashIV}");
+                if (!string.Equals(calcSha, tradeSha, StringComparison.OrdinalIgnoreCase))
+                    return BadRequest("TradeSha 驗證失敗");
+
+                // 4️ 解密 TradeInfo
+                string decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
+                var tradeInfoObj = JsonConvert.DeserializeObject<PaymentTradeInfoDto>(decrypted);
+
+                if (tradeInfoObj == null || string.IsNullOrEmpty(tradeInfoObj.MerchantOrderNo))
+                    return BadRequest("TradeInfo 資料異常");
+
+                // 5️ 查訂單
+                var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == tradeInfoObj.MerchantOrderNo);
+                if (order == null)
+                    return BadRequest("訂單不存在");
+
+                // 6️ 查方案
+                var plan = db.Plan.Find(order.PlanId);
+                if (plan == null)
+                    return BadRequest($"方案不存在 (planId={order.PlanId})");
+
+                // 7 判斷付款結果
+                bool isPaid = status.Equals("SUCCESS", StringComparison.OrdinalIgnoreCase);
+
+                // 8 回傳訂單狀態給前端
+                var result = new
+                {
+                    OrderNum = order.OrderNum,
+                    CompanyId = order.CompanyId,
+                    PlanId = order.PlanId,
+                    PaymentStatus = "Paid",
+                    OrderStatus = "Active",
+                    PaymentMethod = tradeInfoObj.PaymentType ?? order.PaymentMethod,
+                    Card4No = tradeInfoObj.Card4No
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // PUT: api/Payment/5
@@ -75,26 +243,44 @@ namespace TryBeta.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        //POST: api/v1/payments  藍星金流：付款建立訂單
+        // POST: api/v1/payments 藍新金流：建立訂單
         [HttpPost]
         [Route("")]
         [JwtAuthFilter]
-        public IHttpActionResult SetChargeData(ChargeRequestDto chargeData)
+        public IHttpActionResult SetChargeData([FromBody] ChargeRequestDto chargeData)
         {
-            // 1️ 驗證 DTO 與資料
+            if (chargeData == null)
+                return BadRequest("請傳送有效的 chargeData JSON");
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            if (chargeData.PlanId <= 0)
+                return BadRequest("plan_id 不可為 0");
+
             var plan = db.Plan.Find(chargeData.PlanId);
             if (plan == null)
-                return BadRequest("方案不存在");
+                return BadRequest($"方案不存在 (planId={chargeData.PlanId})");
 
             var company = db.Companyinfoes.Find(chargeData.CompanyId);
             if (company == null)
                 return BadRequest("企業不存在或無權限");
 
-            // 2️ 建立待付款訂單 (PaymentStatus = Pending)
-            string merchantOrderNo = $"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}_{chargeData.CompanyId}_{chargeData.PlanId}";
+            // 建立訂單
+            // 取得今天日期字串
+            string dateStr = DateTime.Now.ToString("yyyyMMdd");
+
+            // 計算今天已經有多少訂單，先抓今天的訂單到記憶體
+            var todayOrders = db.CompanyPlanOrders
+                .AsEnumerable() // <- 這會把資料拉到記憶體
+                .Where(o => o.OrderNum.StartsWith($"ORD-{dateStr}-"))
+                .Count();
+
+            // 流水號 +1
+            string sequence = (todayOrders + 1).ToString("D3"); // 3位數，不足補0
+
+            // 組成訂單編號
+            string merchantOrderNo = $"ORD-{dateStr}-{sequence}";
 
             var order = new CompanyPlanOrder
             {
@@ -104,48 +290,42 @@ namespace TryBeta.Controllers
                 Price = plan.Price,
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddDays(plan.DurationDays),
-                PaymentStatus = "Pending",    // 尚未付款
-                OrderStatus = "Created",      // 訂單已建立
-                PaymentMethod = string.IsNullOrEmpty(chargeData.PaymentMethod) ? "CreditCard" : chargeData.PaymentMethod, // 預設 CreditCard
-                Card4No = "",             // 付款完成後填入
+                PaymentStatus = "Pending",
+                OrderStatus = "Created",
+                PaymentMethod = string.IsNullOrEmpty(chargeData.PaymentMethod) ? "CreditCard" : chargeData.PaymentMethod,
+                Card4No = "",
             };
             db.CompanyPlanOrders.Add(order);
             db.SaveChanges();
 
-            // 3️ 生成藍新金流 TradeInfo / TradeSha
-            string hashKey = "1y2UG7Em4yNu1FJsCLOzzRCnvhpckhxd";  // 填入生成的 HashKey
-            string hashIV = "CBT9cVlEWmmktdzP";    // 填入生成的 HashIV
-            string merchantID = "MS156604019";
-            string tradeInfo = "";
-            string tradeSha = "";
-            string version = "2.0";          // 參考文件串接程式版本
+            // 生成藍新金流 TradeInfo / TradeSha (JSON 格式)
+            string hashKey = ConfigurationManager.AppSettings["HashKey"];
+            string hashIV = ConfigurationManager.AppSettings["HashIV"];
+            string merchantID = ConfigurationManager.AppSettings["MerchantID"];
+            string version = "2.0";
 
-            // tradeInfo 內容，導回的網址都需為 https 
-            var tradeData = new List<KeyValuePair<string, string>>()
-        {
-             new KeyValuePair<string, string>("MerchantID", merchantID),
-        new KeyValuePair<string, string>("RespondType", "JSON"),
-        new KeyValuePair<string, string>("TimeStamp", ((int)(DateTime.Now - new DateTime(1970,1,1)).TotalSeconds).ToString()),
-        new KeyValuePair<string, string>("Version", version),
-        new KeyValuePair<string, string>("MerchantOrderNo", merchantOrderNo),
-        new KeyValuePair<string, string>("Amt", plan.Price.ToString("0")),
-        new KeyValuePair<string, string>("ItemDesc", plan.Name),
-        new KeyValuePair<string, string>("TradeLimit", "600"),
-        new KeyValuePair<string, string>("NotifyURL", chargeData.NotifyUrl),
-        new KeyValuePair<string, string>("ReturnURL", chargeData.ReturnUrl),
-        new KeyValuePair<string, string>("Email", chargeData.Email),
-        new KeyValuePair<string, string>("LoginType", "0"),
-        new KeyValuePair<string, string>("CREDIT", order.PaymentMethod == "CreditCard" ? "1" : "0"), // 如果藍新文件需要這個參數，可以依方式帶值
-        };
+            // 將所有資料先轉成 JSON
+            var tradeDict = new
+            {
+                MerchantID = merchantID,
+                RespondType = "JSON",
+                TimeStamp = (int)(DateTime.Now - new DateTime(1970, 1, 1)).TotalSeconds,
+                Version = version,
+                MerchantOrderNo = merchantOrderNo,
+                Amt = plan.Price,
+                ItemDesc = plan.Name,
+                TradeLimit = 600,
+                NotifyURL = chargeData.NotifyUrl,
+                ReturnURL = chargeData.ReturnUrl,
+                Email = chargeData.Email,
+                LoginType = 0, // 0 表示不需要登入藍新金流會員
+                CREDIT = order.PaymentMethod == "CreditCard" ? "1" : "0"
+            };
 
-            // 將 List<KeyValuePair> 轉換成 key1=Value1&key2=Value2 格式
-            string tradeQueryPara = string.Join("&", tradeData.Select(x => $"{x.Key}={x.Value}"));
-            // AES 加密
-            tradeInfo = CryptoUtil.EncryptAESHex(tradeQueryPara, hashKey, hashIV);
-            // SHA256 加密
-            tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
+            string tradeJson = JsonConvert.SerializeObject(tradeDict);
+            string tradeInfo = CryptoUtil.EncryptAESHex(tradeJson, hashKey, hashIV);
+            string tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
 
-            // 4️ 回傳給前端，前端用這些資料導向藍新付款頁面
             return Ok(new
             {
                 Status = true,
@@ -156,74 +336,205 @@ namespace TryBeta.Controllers
                     TradeInfo = tradeInfo,
                     TradeSha = tradeSha,
                     Version = version
-                }
+                },
+                PayGetWay = "https://ccore.newebpay.com/MPG/mpg_getway"
             });
         }
 
-        // POST: api/v1/payments/callback 藍星金流：實際付款後更改付款狀態
+        // POST: api/v1/payments/callback 藍新金流：根據結果更改資料庫
+        // 後台自動回傳、server-to-server callback、可靠更新訂單
         [HttpPost]
         [Route("callback")]
-        public IHttpActionResult PaymentCallback()
+        public IHttpActionResult PaymentCallbackPost()
         {
-            // 1. 直接從表單中讀取藍新金流回傳的資料
+            try
+            {
+                string tradeInfo = null, tradeSha = null, status = null;
+
+                // 1️ 判斷 Content-Type
+                var contentType = HttpContext.Current.Request.ContentType?.ToLower();
+
+                if (!string.IsNullOrEmpty(contentType) && contentType.Contains("application/json"))
+                {
+                    // JSON 模式 (本地測試)
+                    using (var reader = new StreamReader(HttpContext.Current.Request.InputStream))
+                    {
+                        var body = reader.ReadToEnd();
+                        var json = JsonConvert.DeserializeObject<JObject>(body);
+                        tradeInfo = (string)json["TradeInfo"];
+                        tradeSha = (string)json["TradeSha"];
+                        status = (string)json["Status"];
+                    }
+                }
+                else
+                {
+                    // form-data 模式 (藍新正式回傳)
+                    var form = HttpContext.Current.Request.Form;
+                    tradeInfo = form["TradeInfo"];
+                    tradeSha = form["TradeSha"];
+                    status = form["Status"];
+                }
+
+                // 2️ 驗證必要參數
+                if (string.IsNullOrEmpty(tradeInfo) || string.IsNullOrEmpty(tradeSha))
+                    return BadRequest("缺少必要的回傳參數");
+
+                if (string.IsNullOrEmpty(status) || !status.Equals("SUCCESS", StringComparison.OrdinalIgnoreCase))
+                    return Ok("1|OK"); // 付款失敗也回傳固定字串
+
+                // 3️ 設定 HashKey / HashIV
+                string hashKey = ConfigurationManager.AppSettings["HashKey"];
+                string hashIV = ConfigurationManager.AppSettings["HashIV"];
+
+                // 4️ 驗證 TradeSha
+                string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
+                if (!string.Equals(calcSha, tradeSha, StringComparison.OrdinalIgnoreCase))
+                    return BadRequest("TradeSha 驗證失敗");
+
+                // 5️ 解密 TradeInfo
+                string decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
+                var tradeInfoObj = JsonConvert.DeserializeObject<PaymentTradeInfoDto>(decrypted);
+
+                if (tradeInfoObj == null || string.IsNullOrEmpty(tradeInfoObj.MerchantOrderNo))
+                    return BadRequest("TradeInfo 資料異常");
+
+                // 6️ 查訂單
+                var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == tradeInfoObj.MerchantOrderNo);
+                if (order == null)
+                    return BadRequest("訂單不存在");
+
+                // 7️ 查方案
+                var plan = db.Plan.Find(order.PlanId);
+                if (plan == null)
+                    return BadRequest($"方案不存在 (planId={order.PlanId})");
+
+                // 8️ 更新訂單狀態
+                order.PaymentStatus = "Paid";
+                order.OrderStatus = "Active";
+                order.PaymentMethod = tradeInfoObj.PaymentType ?? order.PaymentMethod;
+                order.Card4No = tradeInfoObj.Card4No;
+                order.UpdatedAt = DateTime.Now;
+                order.PaidAt = DateTime.Now;
+
+                // 9️ 更新方案使用額度
+                AddOrUpdatePlanUsage(order.CompanyId, order.PlanId, plan.MaxParticipants, plan.DurationDays);
+
+                db.SaveChanges();
+
+                // 10 回傳藍新固定字串
+                return Ok("1|OK");
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        // POST: api/v1/payments/result 藍新金流：根據結果導引前端頁面
+        [HttpPost]
+        [Route("result")]
+        public IHttpActionResult Result()
+        {
+            string hashKey = ConfigurationManager.AppSettings["Newebpay:HashKey"];
+            string hashIV = ConfigurationManager.AppSettings["Newebpay:HashIV"];
+
             var form = HttpContext.Current.Request.Form;
             string tradeInfo = form["TradeInfo"];
             string tradeSha = form["TradeSha"];
 
-            if (string.IsNullOrEmpty(tradeInfo) || string.IsNullOrEmpty(tradeSha))
+            // 驗證 TradeSha
+            string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
+            if (!string.Equals(calcSha, tradeSha, StringComparison.OrdinalIgnoreCase))
+                return BadRequest("TradeSha 驗證失敗");
+
+            // 解密 TradeInfo
+            var decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
+
+            // 解析
+            var result = JsonConvert.DeserializeObject<PaymentTradeInfoDto>(decrypted);
+
+            // 防呆檢查 RespondCode
+            if (result == null || string.IsNullOrEmpty(result.RespondCode) || string.IsNullOrEmpty(result.MerchantOrderNo))
             {
-                return BadRequest("缺少必要的回傳參數");
+                // 導向失敗頁面，或可先導向通用錯誤頁
+                return Redirect($"https://trybeta.rocekt.coding.com/payment/failed");
             }
 
-            // 1. 取得金流設定（藍新金流的 Key / IV）
-            string hashKey = ConfigurationManager.AppSettings["NewebPay_HashKey"];
-            string hashIV = ConfigurationManager.AppSettings["NewebPay_HashIV"];
-
-            // 2. 驗證 TradeSha 是否正確
-            string checkValue = $"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}";
-            string checkSha = CryptoUtil.EncryptSHA256(checkValue).ToUpper();
-
-            if (checkSha != tradeSha.ToUpper())
+            // 檢查訂單
+            var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == result.MerchantOrderNo);
+            if (order != null && result.RespondCode == "00")
             {
-                return BadRequest("TradeSha 驗證失敗，資料可能遭竄改");
+                var plan = db.Plan.Find(order.PlanId);
+                if (plan != null)
+                {
+                    AddOrUpdatePlanUsage(order.CompanyId, order.PlanId, plan.MaxParticipants, plan.DurationDays);
+                }
             }
 
-            // 3. 解密 TradeInfo
-            string decryptInfo = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
-            if (string.IsNullOrEmpty(decryptInfo))
-            {
-                return BadRequest("TradeInfo 解密失敗");
-            }
-
-            // 4. 轉成物件（依藍新回傳格式）
-            var tradeInfoDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(decryptInfo);
-
-            // 5. 依照交易狀態更新訂單 / 方案
-            string status = tradeInfoDict.ContainsKey("Status") ? tradeInfoDict["Status"].ToString() : "";
-            string merchantOrderNo = tradeInfoDict.ContainsKey("Result")
-                                   ? JsonConvert.DeserializeObject<Dictionary<string, string>>(tradeInfoDict["Result"].ToString())["MerchantOrderNo"]
-                                   : "";
-
-            // 6. 更新訂單狀態
-            var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == merchantOrderNo);
-            if (order == null)
-                return BadRequest("訂單不存在");
-
-            if (status == "SUCCESS")
-            {
-                order.PaymentStatus = "Paid";
-                order.OrderStatus = "Active";
-                db.SaveChanges();
-
-                return Ok(new { success = true, message = "付款成功", orderNo = merchantOrderNo });
-            }
+            // Redirect 到前端頁面
+            if (result.RespondCode == "00")
+                return Redirect($"https://pages/company/purchase/success?order={result.MerchantOrderNo}");
             else
-            {
-                order.PaymentStatus = "Failed";
-                order.OrderStatus = "Cancelled";
-                db.SaveChanges();
+                return Redirect($"https://pages/company/purchase/index");
+            //return Redirect($"https://trybeta.rocekt.coding.com/payment/failed?order={result.MerchantOrderNo}");
+        }
 
-                return Ok(new { success = false, message = "付款失敗", orderNo = merchantOrderNo });
+        // POST: api/v1/payments/result/test 藍新金流：根據結果導引前端頁面 測試
+        [HttpPost]
+        [Route("result/test")]
+        public IHttpActionResult ResultTest()
+        {
+            try
+            {
+                // ====== 測試用資料 ======
+                string hashKey = ConfigurationManager.AppSettings["HashKey"];
+                string hashIV = ConfigurationManager.AppSettings["HashIV"];
+
+                // 模擬藍新回傳資料
+                var tradeInfoObj = new PaymentTradeInfoDto
+                {
+                    MerchantOrderNo = "ORD-20250826-002", // 請確認資料庫已有這筆訂單
+                    RespondCode = "00",                     // 成功
+                    PaymentType = "CREDIT",
+                    Card4No = "1234"
+                };
+
+                string json = JsonConvert.SerializeObject(tradeInfoObj);
+                string tradeInfo = CryptoUtil.EncryptAESHex(json, hashKey, hashIV);
+                string tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}").ToUpperInvariant();
+
+                // ====== 驗證 TradeSha (模擬正確) ======
+                string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
+                if (!string.Equals(calcSha, tradeSha, StringComparison.OrdinalIgnoreCase))
+                    return BadRequest("TradeSha 驗證失敗");
+
+                // ====== 解密 TradeInfo ======
+                var decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
+                var result = JsonConvert.DeserializeObject<PaymentTradeInfoDto>(decrypted);
+
+                // ====== 檢查訂單 ======
+                var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == result.MerchantOrderNo);
+                if (order != null && result.RespondCode == "00")
+                {
+                    var plan = db.Plan.Find(order.PlanId);
+                    if (plan != null)
+                    {
+                        AddOrUpdatePlanUsage(order.CompanyId, order.PlanId, plan.MaxParticipants, plan.DurationDays);
+                    }
+                }
+
+                // ====== 回傳給前端測試 ======
+                return Ok(new
+                {
+                    Message = "測試付款成功",
+                    RedirectUrl = $"https://pages/company/purchase/success?order={result.MerchantOrderNo}",
+                    TradeInfo = tradeInfo,
+                    TradeSha = tradeSha
+                });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
             }
         }
 

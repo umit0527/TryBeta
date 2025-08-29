@@ -78,21 +78,21 @@ namespace TryBeta.Models
 
             //企業購買的方案訂單表
             modelBuilder.Entity<Plan>()
-        .Property(p => p.Price)
-        .HasPrecision(18, 2);
+                .Property(p => p.Price)
+                .HasPrecision(18, 2);
 
             // ProgramSubmit -> Status 禁止 cascade delete
             modelBuilder.Entity<ProgramSubmit>()
-        .HasRequired(s => s.Status)
-        .WithMany()
-        .HasForeignKey(s => s.StatusId)
-        .WillCascadeOnDelete(false);
+                .HasRequired(s => s.Status)
+                .WithMany()
+                .HasForeignKey(s => s.StatusId)
+                .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<ParticipantInfoes>()
-           .HasRequired(p => p.District)
-           .WithMany()
-           .HasForeignKey(p => p.DistrictId)
-           .WillCascadeOnDelete(false);  // 關鍵：禁止 cascade
+                .HasRequired(p => p.District)
+                .WithMany()
+                .HasForeignKey(p => p.DistrictId)
+                .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<ParticipantInfoes>()
                 .HasRequired(p => p.City)
@@ -100,21 +100,33 @@ namespace TryBeta.Models
                 .HasForeignKey(p => p.CityId)
                 .WillCascadeOnDelete(false);
 
-            //明確指定外鍵：ProgramSubmit 的 StatusId
+            // 明確指定外鍵：ProgramSubmit 的 StatusId
             modelBuilder.Entity<ProgramSubmit>()
-        .HasRequired(p => p.Status)
-        .WithMany(s => s.ProgramSubmits)
-        .HasForeignKey(p => p.StatusId)
-        .WillCascadeOnDelete(false);
+                .HasRequired(p => p.Status)
+                .WithMany(s => s.ProgramSubmits)
+                .HasForeignKey(p => p.StatusId)
+                .WillCascadeOnDelete(false);
 
-            //明確指定外鍵：CompanyPlanOrder 的 OrderNum
+            // 明確指定外鍵：CompanyPlanOrder 的 OrderNum
             modelBuilder.Entity<CompanyPlanOrder>()
-        .HasIndex(o => o.OrderNum)
-        .IsUnique();
+                .HasIndex(o => o.OrderNum)
+                .IsUnique();
+
+            // ParticipantEvaluation -> Status 禁止 Cascade
+            modelBuilder.Entity<ParticipantEvaluation>()
+                .HasRequired(p => p.Status)
+                .WithMany()
+                .HasForeignKey(p => p.StatusId)
+                .WillCascadeOnDelete(false);
+
+            // ProgramPlan -> ProgramPlanStatus 禁止 Cascade
+            modelBuilder.Entity<ProgramPlan>()
+                .HasRequired(p => p.Status)
+                .WithMany()
+                .HasForeignKey(p => p.StatusId)
+                .WillCascadeOnDelete(false);
 
             base.OnModelCreating(modelBuilder);
         }
-
-
     }
 }

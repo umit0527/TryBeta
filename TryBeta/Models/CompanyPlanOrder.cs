@@ -72,6 +72,9 @@ namespace TryBeta.Models
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.Now;      // 更新時間
 
+        [JsonProperty("paid_at")]
+        public DateTime? PaidAt { get; set; } = null;      // 付款時間
+
         // 關聯屬性 
         public virtual CompanyInfoes CompanyInfoes { get; set; } // 企業資訊
         public virtual Plan Plan { get; set; }       // 方案資訊
