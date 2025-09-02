@@ -622,10 +622,10 @@ namespace TryBeta.Controllers
             switch (status_id)
             {
                 case 15: // 已通過
-                    query = query.Where(e =>  e.StatusId == 4);
+                    query = query.Where(e => e.StatusId == 4);
                     break;
                 case 16: // 已拒絕
-                    query = query.Where(e => e.StatusId == 5 );
+                    query = query.Where(e => e.StatusId == 5);
                     break;
                 case 17: // 未評價 
                     query = query.Where(e => e.StatusId == 17);
@@ -700,7 +700,7 @@ namespace TryBeta.Controllers
                     .Where(img => img.ProgramPlanId == plan.Id)
                     .OrderBy(img => img.Id)
                     .FirstOrDefault();
- 
+
                 return new HomePageDto
                 {
                     Id = plan.Id,
@@ -734,6 +734,7 @@ namespace TryBeta.Controllers
                                      {
                                          Participant = p,
                                          IdentityTitle = i.Title,
+                                         ProgramName = prog.Name,
                                          Comment = ev.Comment,
                                          Score = ev.Score,
                                          EvaluationDate = ev.UpdatedAt
@@ -746,6 +747,7 @@ namespace TryBeta.Controllers
                              IdentityTitle = x.IdentityTitle,
                              Age = DateTime.Today.Year - x.Participant.Birthday.Year -
                                    (DateTime.Today.DayOfYear < x.Participant.Birthday.DayOfYear ? 1 : 0),
+                             ProgramName = x.ProgramName,
                              Comment = x.Comment,
                              Score = x.Score,
                              EvaluationDate = x.EvaluationDate
@@ -1069,7 +1071,7 @@ namespace TryBeta.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // PUT: api/v1/users/{userId}/programs/{programId}/evaluations  體驗者修改評價
+        // PUT: api/v1/users/{userId}/programs/{programId}/evaluations  體驗者送出/修改評價
         [HttpPut]
         [Route("~/api/v1/users/{userId}/programs/{programId}/evaluations")]
         [JwtAuthFilter]
@@ -1150,7 +1152,7 @@ namespace TryBeta.Controllers
             // 找已有評價
             var existingReview = db.ParticipantEvaluations
                 .FirstOrDefault(r => r.ProgramPlanId == programId && r.ParticipantId == participant.Id);
-            if (existingReview == null) return BadRequest("尚未提交過評價，請使用 POST 新增");
+            if (existingReview == null) return BadRequest("尚未提交過評價，請聯繫平台管理員");
 
             // 更新評價
             existingReview.Score = dto.Score;
@@ -1171,6 +1173,29 @@ namespace TryBeta.Controllers
             db.EvaluationReviews.Add(aiReview);
             db.SaveChanges();
 
+            // 非同步寄給企業通知
+            if (!flagged) //如果審核通過
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        string companyEmail = program.ContactEmail;          // 企業Email
+                        string participantName = participant.Name;           // 體驗者姓名
+                        await EmailService.SendEvaluationSubmittedEmailToCompany(
+                            companyEmail,
+                            participantName,
+                            program.Name,
+                            existingReview.Score,
+                            existingReview.Comment
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"寄信給企業失敗: {ex.Message}");
+                    }
+                });
+            }
             // 組裝回傳
             var reviewResponse = new
             {
@@ -1264,8 +1289,8 @@ namespace TryBeta.Controllers
 
                     db.SaveChanges();
                 }
-                    // 5. 回傳乾淨 JSON
-                    return Ok(new
+                // 5. 回傳乾淨 JSON
+                return Ok(new
                 {
                     success = true,
                     message = "申請已取消",
@@ -1327,7 +1352,7 @@ namespace TryBeta.Controllers
 
                 // 6. 防止重複申請同一個計畫
                 var existingSubmit = db.ProgramSubmits
-                    .FirstOrDefault(s => s.ProgramPlanId == programId && s.ParticipantId == participant.Id);
+                    .FirstOrDefault(s => s.ProgramPlanId == programId && s.ParticipantId == participant.Id && s.StatusId != 4);
                 if (existingSubmit != null)
                     return BadRequest("已申請該體驗計畫");
 
@@ -1350,8 +1375,8 @@ namespace TryBeta.Controllers
                     return BadRequest("履歷類型錯誤");
                 }
 
-                // 8. 生成申請編號 PA-2025-0818-001
-                string prefix = "PA";
+                // 8. 生成申請編號 PAR-2025-0818-001
+                string prefix = "PAR";
                 string year = DateTime.Now.Year.ToString();
                 string shortDate = DateTime.Now.ToString("MMdd"); // MMdd
                 var today = DateTime.Today;
@@ -1396,140 +1421,140 @@ namespace TryBeta.Controllers
             }
         }
 
-        // POST: api/v1/users/{userId}/programs/{programId}/evaluation    體驗者提交評價
-        [HttpPost]
-        [Route("~/api/v1/users/{userId}/programs/{programId}/evaluations")]
-        [JwtAuthFilter]
-        public async Task<IHttpActionResult> SubmitReview(int userId, int programId, [FromBody] ParticipantEvaluationDto dto)
-        {
-            // 驗證 ModelState
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+        //// POST: api/v1/users/{userId}/programs/{programId}/evaluation    體驗者提交評價
+        //[HttpPost]
+        //[Route("~/api/v1/users/{userId}/programs/{programId}/evaluations")]
+        //[JwtAuthFilter]
+        //public async Task<IHttpActionResult> SubmitReview(int userId, int programId, [FromBody] ParticipantEvaluationDto dto)
+        //{
+        //    // 驗證 ModelState
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(ModelState);
 
-            // 讀取 OpenAI API Key
-            var jsonText = File.ReadAllText(HttpContext.Current.Server.MapPath("~/OpenAISettings.json"));
-            dynamic jsonObj = JsonConvert.DeserializeObject(jsonText);
-            string apiKey = jsonObj.OpenAI.ApiKey;
+        //    // 讀取 OpenAI API Key
+        //    var jsonText = File.ReadAllText(HttpContext.Current.Server.MapPath("~/OpenAISettings.json"));
+        //    dynamic jsonObj = JsonConvert.DeserializeObject(jsonText);
+        //    string apiKey = jsonObj.OpenAI.ApiKey;
 
-            if (string.IsNullOrEmpty(apiKey))
-                return InternalServerError(new Exception("OpenAI API Key 未設定"));
+        //    if (string.IsNullOrEmpty(apiKey))
+        //        return InternalServerError(new Exception("OpenAI API Key 未設定"));
 
-            // Moderation API 審核
-            bool flagged = false;
-            var flaggedCategories = new List<string>();
-            string moderationResultJson = string.Empty;
+        //    // Moderation API 審核
+        //    bool flagged = false;
+        //    var flaggedCategories = new List<string>();
+        //    string moderationResultJson = string.Empty;
 
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+        //    using (var client = new HttpClient())
+        //    {
+        //        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
 
-                var payload = new
-                {
-                    model = "omni-moderation-latest",
-                    input = dto.Comment
-                };
+        //        var payload = new
+        //        {
+        //            model = "omni-moderation-latest",
+        //            input = dto.Comment
+        //        };
 
-                var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-                var moderationResponse = await client.PostAsync("https://api.openai.com/v1/moderations", content);
-                moderationResultJson = await moderationResponse.Content.ReadAsStringAsync();
+        //        var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+        //        var moderationResponse = await client.PostAsync("https://api.openai.com/v1/moderations", content);
+        //        moderationResultJson = await moderationResponse.Content.ReadAsStringAsync();
 
-                if (!moderationResponse.IsSuccessStatusCode)
-                {
-                    return Content(HttpStatusCode.ServiceUnavailable, new
-                    {
-                        message = "Moderation API 呼叫失敗，請稍後再試。",
-                        error = moderationResultJson
-                    });
-                }
+        //        if (!moderationResponse.IsSuccessStatusCode)
+        //        {
+        //            return Content(HttpStatusCode.ServiceUnavailable, new
+        //            {
+        //                message = "Moderation API 呼叫失敗，請稍後再試。",
+        //                error = moderationResultJson
+        //            });
+        //        }
 
-                    // 解析回傳結果
-                    var moderationObj = JsonConvert.DeserializeObject<ModerationResponse>(moderationResultJson);
-                if (moderationObj?.Results != null && moderationObj.Results.Count > 0)
-                {
-                    var first = moderationObj.Results[0];
-                    if (first.Categories != null)
-                    {
-                        foreach (var kv in first.Categories)
-                        {
-                            if (kv.Value)
-                                flaggedCategories.Add(kv.Key);
-                        }
-                    }
-                    flagged = flaggedCategories.Count > 0;
-                }
-            }
+        //            // 解析回傳結果
+        //            var moderationObj = JsonConvert.DeserializeObject<ModerationResponse>(moderationResultJson);
+        //        if (moderationObj?.Results != null && moderationObj.Results.Count > 0)
+        //        {
+        //            var first = moderationObj.Results[0];
+        //            if (first.Categories != null)
+        //            {
+        //                foreach (var kv in first.Categories)
+        //                {
+        //                    if (kv.Value)
+        //                        flaggedCategories.Add(kv.Key);
+        //                }
+        //            }
+        //            flagged = flaggedCategories.Count > 0;
+        //        }
+        //    }
 
-            // 找 ParticipantInfo
-            var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == userId);
-            if (participant == null) return BadRequest("找不到對應的體驗者");
+        //    // 找 ParticipantInfo
+        //    var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == userId);
+        //    if (participant == null) return BadRequest("找不到對應的體驗者");
 
-            // 找 ProgramSubmit
-            var application = db.ProgramSubmits
-                .FirstOrDefault(s => s.ParticipantId == participant.Id && s.ProgramPlanId == programId);
-            if (application == null) return BadRequest("找不到對應的體驗申請");
-            if (application.StatusId != 2) return BadRequest("尚未通過企業審核");
+        //    // 找 ProgramSubmit
+        //    var application = db.ProgramSubmits
+        //        .FirstOrDefault(s => s.ParticipantId == participant.Id && s.ProgramPlanId == programId);
+        //    if (application == null) return BadRequest("找不到對應的體驗申請");
+        //    if (application.StatusId != 2) return BadRequest("尚未通過企業審核");
 
-            // 找 ProgramPlan
-            var program = db.ProgramPlan.FirstOrDefault(p => p.Id == programId);
-            if (program == null) return BadRequest("找不到該體驗計畫");
-            if (DateTime.Now <= program.ProgramEndDate) return BadRequest("體驗尚未結束");
+        //    // 找 ProgramPlan
+        //    var program = db.ProgramPlan.FirstOrDefault(p => p.Id == programId);
+        //    if (program == null) return BadRequest("找不到該體驗計畫");
+        //    if (DateTime.Now <= program.ProgramEndDate) return BadRequest("體驗尚未結束");
 
-            // 檢查是否已有評價
-            var existingReview = db.ParticipantEvaluations
-                .FirstOrDefault(r => r.ProgramPlanId == programId && r.ParticipantId == participant.Id);
-            if (existingReview != null) return BadRequest("該體驗已提交評價");
+        //    // 檢查是否已有評價
+        //    var existingReview = db.ParticipantEvaluations
+        //        .FirstOrDefault(r => r.ProgramPlanId == programId && r.ParticipantId == participant.Id);
+        //    if (existingReview != null) return BadRequest("該體驗已提交評價");
 
-            // 產生評價編號
-            string todayStr = DateTime.Now.ToString("yyyyMMdd");
-            int todayCount = db.ParticipantEvaluations.Count(r => r.SerialNum.StartsWith("REV-" + todayStr + "-"));
-            string serialNum = $"REV-{todayStr}-{(todayCount + 1).ToString("D4")}";
+        //    // 產生評價編號
+        //    string todayStr = DateTime.Now.ToString("yyyyMMdd");
+        //    int todayCount = db.ParticipantEvaluations.Count(r => r.SerialNum.StartsWith("REV-" + todayStr + "-"));
+        //    string serialNum = $"REV-{todayStr}-{(todayCount + 1).ToString("D4")}";
 
-            // 建立 ParticipantEvaluation
-            var review = new ParticipantEvaluation
-            {
-                ParticipantId = participant.Id,
-                ProgramPlanId = programId,
-                Score = dto.Score,
-                Comment = dto.Comment,
-                SerialNum = serialNum,
-                StatusId = flagged ? 3 : 2 // AI審核結果 3=System Rejected, 2=System Pass
-            };
-            db.ParticipantEvaluations.Add(review);
-            db.SaveChanges(); // 先存 review 取得 Id
+        //    // 建立 ParticipantEvaluation
+        //    var review = new ParticipantEvaluation
+        //    {
+        //        ParticipantId = participant.Id,
+        //        ProgramPlanId = programId,
+        //        Score = dto.Score,
+        //        Comment = dto.Comment,
+        //        SerialNum = serialNum,
+        //        StatusId = flagged ? 3 : 2 // AI審核結果 3=System Rejected, 2=System Pass
+        //    };
+        //    db.ParticipantEvaluations.Add(review);
+        //    db.SaveChanges(); // 先存 review 取得 Id
 
-            // 建立 AI 系統審核結果
-            var aiReview = new EvaluationReview
-            {
-                EvaluationId = review.Id,
-                ReviewedAt = DateTime.Now,
-                ReviewerId = 11,
-                ReviewTypeId = ReviewTypeEnum.System,
-                StatusId = flagged ? 3 : 2,
-                Comment = flagged ? string.Join(",", flaggedCategories) : "通過"
-            };
-            db.EvaluationReviews.Add(aiReview);
-            db.SaveChanges();
+        //    // 建立 AI 系統審核結果
+        //    var aiReview = new EvaluationReview
+        //    {
+        //        EvaluationId = review.Id,
+        //        ReviewedAt = DateTime.Now,
+        //        ReviewerId = 11,
+        //        ReviewTypeId = ReviewTypeEnum.System,
+        //        StatusId = flagged ? 3 : 2,
+        //        Comment = flagged ? string.Join(",", flaggedCategories) : "通過"
+        //    };
+        //    db.EvaluationReviews.Add(aiReview);
+        //    db.SaveChanges();
 
-            // 組裝回傳
-            var reviewResponse = new
-            {
-                ProgramName = program.Name,
-                ProgramStartDate = program.ProgramStartDate,
-                ProgramEndDate = program.ProgramEndDate,
-                CompanyName = program.Company.Name,
-                Score = review.Score,
-                Comment = review.Comment,
-                SerialNum = review.SerialNum,
-                AiStatus = aiReview.StatusId
-                //AiComment = aiReview.Comment,
-                //ModerationRawJson = moderationResultJson // Postman 可直接看到 AI 回傳
-            };
+        //    // 組裝回傳
+        //    var reviewResponse = new
+        //    {
+        //        ProgramName = program.Name,
+        //        ProgramStartDate = program.ProgramStartDate,
+        //        ProgramEndDate = program.ProgramEndDate,
+        //        CompanyName = program.Company.Name,
+        //        Score = review.Score,
+        //        Comment = review.Comment,
+        //        SerialNum = review.SerialNum,
+        //        AiStatus = aiReview.StatusId
+        //        //AiComment = aiReview.Comment,
+        //        //ModerationRawJson = moderationResultJson // Postman 可直接看到 AI 回傳
+        //    };
 
-            if (flagged)
-                return Content(HttpStatusCode.BadRequest, new { message = "評價內容被判定為不當，請修改後再提交。", review = reviewResponse });
+        //    if (flagged)
+        //        return Content(HttpStatusCode.BadRequest, new { message = "評價內容被判定為不當，請修改後再提交。", review = reviewResponse });
 
-            return Ok(reviewResponse);
-        }
+        //    return Ok(reviewResponse);
+        //}
 
         //POST: /api/v1/favorites 體驗者收藏體驗計畫
         [HttpPost]

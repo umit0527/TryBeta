@@ -644,6 +644,14 @@
     <Compile Include="Migrations\202508290810336_adjust GoogleId Length in User Table.Designer.cs">
       <DependentUpon>202508290810336_adjust GoogleId Length in User Table.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508301143365_add Position.cs" />
+    <Compile Include="Migrations\202508301143365_add Position.Designer.cs">
+      <DependentUpon>202508301143365_add Position.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202509010630314_add Url Feild in ProgramPlanImages Table.cs" />
+    <Compile Include="Migrations\202509010630314_add Url Feild in ProgramPlanImages Table.Designer.cs">
+      <DependentUpon>202509010630314_add Url Feild in ProgramPlanImages Table.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AdminInfoes.cs" />
     <Compile Include="Models\AdminLoginDto.cs" />
@@ -1149,6 +1157,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508290810336_adjust GoogleId Length in User Table.resx">
       <DependentUpon>202508290810336_adjust GoogleId Length in User Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508301143365_add Position.resx">
+      <DependentUpon>202508301143365_add Position.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509010630314_add Url Feild in ProgramPlanImages Table.resx">
+      <DependentUpon>202509010630314_add Url Feild in ProgramPlanImages Table.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
