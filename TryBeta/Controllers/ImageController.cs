@@ -78,10 +78,9 @@ namespace TryBeta.Controllers
                 if (!provider.FileData.Any())
                     return BadRequest("沒有收到檔案");
 
-                var baseUrl = Request.RequestUri.GetLeftPart(UriPartial.Authority);
                 var results = new List<object>();
                 var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-                long maxSize = 5 * 1024 * 1024;
+                long maxSize = 5 * 1024 * 1024;  // 5MB
 
                 foreach (var fileData in provider.FileData)
                 {
@@ -92,7 +91,7 @@ namespace TryBeta.Controllers
                     if (!allowedExt.Contains(ext))
                     {
                         File.Delete(fileData.LocalFileName);
-                        continue; // 跳過不合法的檔案
+                        continue;
                     }
 
                     // 檔案大小驗證
@@ -100,21 +99,22 @@ namespace TryBeta.Controllers
                     if (fileInfo.Length > maxSize)
                     {
                         File.Delete(fileData.LocalFileName);
-                        continue; // 跳過超過大小的檔案
+                        continue;
                     }
 
-                    // 產生唯一檔名並移動
-                    var newFileName = Guid.NewGuid().ToString("N") + ext;
+                    // 產生檔名：原檔名 + 時間戳
+                    var nameWithoutExt = Path.GetFileNameWithoutExtension(originalFileName);
+                    var newFileName = nameWithoutExt + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ext;
                     var newFilePath = Path.Combine(uploadRoot, newFileName);
                     File.Move(fileData.LocalFileName, newFilePath);
 
-                    var fileUrl = $"{baseUrl}/Images/{newFileName}";
+                    // 存相對路徑到 DB
+                    var relativePath = "~/Images/" + newFileName;
 
-                    // 建立 DB 紀錄
                     var programImage = new ProgramPlanImage
                     {
                         ProgramPlanId = programId,
-                        Url = fileUrl,
+                        ImgPath = relativePath,
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now
                     };
@@ -125,7 +125,7 @@ namespace TryBeta.Controllers
                     {
                         id = programImage.Id,
                         programplan_id = programId,
-                        img_path = fileUrl,
+                        img_path = relativePath, // <- 相對路徑
                         created_at = programImage.CreatedAt
                     });
                 }

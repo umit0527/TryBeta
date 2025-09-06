@@ -50,8 +50,8 @@ namespace TryBeta.Controllers
         {
             try
             {
-                var now = DateTime.Now;
 
+                var now = DateTime.Now;
                 var request = HttpContext.Current.Request;
                 var baseUrl = request.Url.GetLeftPart(UriPartial.Authority);
 
@@ -60,65 +60,49 @@ namespace TryBeta.Controllers
                     .Include(p => p.Industry)
                     .Include(p => p.JobTitle)
                     .Include(p => p.Status)
-                    //.Include(p => p.Steps)
                     .Include(p => p.ProgramPlanImages)
                     .Include(p => p.Company)
                     .AsQueryable();
 
                 // 過濾掉不符狀態或刊登過期的體驗
                 query = query.Where(p =>
-                (p.StatusId == 2 || p.StatusId == 4 || p.StatusId == 7 || p.StatusId == 15) &&
-                p.PublishStartDate <= now &&       // 新增：刊登已開始
-                p.PublishEndDate >= now            // 刊登尚未結束
-);
+                    (p.StatusId == 2 || p.StatusId == 4 || p.StatusId == 7 || p.StatusId == 15) &&
+                    p.PublishStartDate <= now &&
+                    p.PublishEndDate >= now
+                );
 
                 // 關鍵字搜尋
                 if (!string.IsNullOrEmpty(search))
                 {
                     query = query.Where(p =>
-                     p.Name.Contains(search) ||
-                     p.Industry.Title.Contains(search) ||
-                     p.JobTitle.Title.Contains(search) ||
-                     p.Address.Contains(search) ||
-                     p.Company.Name.Contains(search)
-                     );
+                        p.Name.Contains(search) ||
+                        p.Industry.Title.Contains(search) ||
+                        p.JobTitle.Title.Contains(search) ||
+                        p.Address.Contains(search) ||
+                        p.Company.Name.Contains(search)
+                    );
                 }
 
                 // 產業篩選
                 if (industry_id.HasValue)
-                {
                     query = query.Where(p => p.IndustryId == industry_id.Value);
-                }
 
                 // 職務篩選
                 if (job_title_id.HasValue)
-                {
                     query = query.Where(p => p.JobTitleId == job_title_id.Value);
-                }
 
                 // 地區篩選
                 if (!string.IsNullOrEmpty(city_id))
                 {
-                    var cityName = db.City
-                                     .Where(c => c.Id.ToString() == city_id)
-                                     .Select(c => c.Name)
-                                     .FirstOrDefault();
-
+                    var cityName = db.City.Where(c => c.Id.ToString() == city_id).Select(c => c.Name).FirstOrDefault();
                     if (!string.IsNullOrEmpty(cityName))
                     {
                         query = query.Where(p => p.Address.Contains(cityName));
-
-                        // 如果同時選擇鄉鎮
                         if (!string.IsNullOrEmpty(district_id))
                         {
-                            var districtName = db.Districts
-                                                 .Where(d => d.Id.ToString() == district_id)
-                                                 .Select(d => d.Name)
-                                                 .FirstOrDefault();
+                            var districtName = db.Districts.Where(d => d.Id.ToString() == district_id).Select(d => d.Name).FirstOrDefault();
                             if (!string.IsNullOrEmpty(districtName))
-                            {
                                 query = query.Where(p => p.Address.Contains(districtName));
-                            }
                         }
                     }
                 }
@@ -126,131 +110,126 @@ namespace TryBeta.Controllers
                 // 排序
                 switch (sort)
                 {
-                    case "publish_start_asc":
-                        query = query.OrderBy(p => p.PublishStartDate);
+                    case "publish_start_asc": query = query.OrderBy(p => p.PublishStartDate); break;
+                    case "publish_start_desc": query = query.OrderByDescending(p => p.PublishStartDate); break;
+                    case "publish_end_asc": query = query.OrderBy(p => p.PublishEndDate); break;
+                    case "publish_end_desc": query = query.OrderByDescending(p => p.PublishEndDate); break;
+                    case "program_start_asc": query = query.OrderBy(p => p.ProgramStartDate); break;
+                    case "program_start_desc": query = query.OrderByDescending(p => p.ProgramStartDate); break;
+                    case "hot":
+                        // 熱門排序先在記憶體計算（避免 DataReader 錯誤）
+                        query = query.ToList()
+                                     .OrderByDescending(p =>
+                                         p.ViewsCount * 1 +
+                                         p.FavoritesCount * 3 +
+                                         db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id) * 5
+                                     ).AsQueryable();
                         break;
-                    case "publish_start_desc":
-                        query = query.OrderByDescending(p => p.PublishStartDate);
-                        break;
-                    case "publish_end_asc":
-                        query = query.OrderBy(p => p.PublishEndDate);
-                        break;
-                    case "publish_end_desc":
-                        query = query.OrderByDescending(p => p.PublishEndDate);
-                        break;
-                    case "program_start_asc":
-                        query = query.OrderBy(p => p.ProgramStartDate);
-                        break;
-                    case "program_start_desc":
-                        query = query.OrderByDescending(p => p.ProgramStartDate);
-                        break;
-                    case "hot": // 熱門排序
-                        query = query
-                            .OrderByDescending(p =>
-                                p.ViewsCount * 1 +
-                                p.FavoritesCount * 3 +
-                                db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id) * 5
-                            );
-                        break;
-                    default:
-                        query = query.OrderByDescending(p => p.PublishStartDate);
-                        break;
+                    default: query = query.OrderByDescending(p => p.PublishStartDate); break;
                 }
 
                 // 分頁
                 var total = query.Count();
-                var items = query
-                    .Skip((page - 1) * limit)
-                    .Take(limit)
-                    .ToList()
+                var pageItems = query.Skip((page - 1) * limit).Take(limit).ToList();
+
+                // 分頁 ProgramPlan Id 列表
+                var programIds = pageItems.Select(p => p.Id).ToList();
+
+                // 一次抓已申請人數
+                var submitCounts = db.ProgramSubmits
+                    .Where(s => programIds.Contains(s.ProgramPlanId))
+                    .GroupBy(s => s.ProgramPlanId)
+                    .Select(g => new { ProgramPlanId = g.Key, Count = g.Count() })
+                    .ToDictionary(x => x.ProgramPlanId, x => x.Count);
+
+                // 處理分頁 items
+                var items = pageItems.Select(p =>
+                {
+                    var appliedCount = submitCounts.ContainsKey(p.Id) ? submitCounts[p.Id] : 0;
+
+                    int? daysLeft = null;
+                    bool? isOngoing = null;
+                    if (now < p.ProgramStartDate) daysLeft = (p.PublishEndDate - now).Days;
+                    else if (now >= p.ProgramStartDate && now <= p.ProgramEndDate) isOngoing = true;
+                    else isOngoing = false;
+
+                    var score = p.ViewsCount * 1 + p.FavoritesCount * 3 + appliedCount * 5;
+
+                    var coverImagePath = p.ProgramPlanImages.OrderBy(img => img.Id).Select(img => img.ImgPath).FirstOrDefault();
+                    string coverImageUrl = string.IsNullOrEmpty(coverImagePath) ? null : $"{baseUrl}/api/v1/programs/image/{coverImagePath.Replace("~/", "").TrimStart('/')}";
+
+                    return new
+                    {
+                        p.Id,
+                        p.Name,
+                        Intro = TruncateIntroByChars(p.Intro, 50),
+                        p.Address,
+                        Industry = new { p.Industry.Id, p.Industry.Title },
+                        JobTitle = new { p.JobTitle.Id, p.JobTitle.Title },
+                        p.PublishStartDate,
+                        p.PublishEndDate,
+                        p.ProgramStartDate,
+                        p.ProgramEndDate,
+                        CoverImage = coverImageUrl,
+                        AppliedCount = appliedCount,
+                        DaysLeft = daysLeft,
+                        IsOngoing = isOngoing,
+                        ViewsCount = p.ViewsCount,
+                        FavoritesCount = p.FavoritesCount,
+                        Score = score
+                    };
+                }).ToList();
+
+                // 取得熱門體驗（不受分頁限制，取前 5）
+                var allPrograms = db.ProgramPlan
+                    .Include(p => p.ProgramPlanImages)
+                    .Include(p => p.Company)
+                    .Where(p => (p.StatusId == 2 || p.StatusId == 4 || p.StatusId == 7 || p.StatusId == 15) && p.PublishEndDate >= now)
+                    .ToList();
+
+                // 先拿 Id 列表（primitive type）
+                var allProgramIds = allPrograms.Select(p => p.Id).ToList();
+
+                // 一次抓熱門 ProgramSubmits
+                var allSubmitCounts = db.ProgramSubmits
+                    .Where(s => allProgramIds.Contains(s.ProgramPlanId))
+                    .GroupBy(s => s.ProgramPlanId)
+                    .Select(g => new { ProgramPlanId = g.Key, Count = g.Count() })
+                    .ToDictionary(x => x.ProgramPlanId, x => x.Count);
+
+                var popularPrograms = allPrograms
+                    .Where(p => p.StatusId == 2 || p.StatusId == 4) // 與首頁一致
+                    .OrderByDescending(p => p.Score)               // 使用資料庫 Score
+                    .Take(10)                                      // 與首頁一致
                     .Select(p =>
                     {
-                        // 已申請人數
-                        var appliedCount = db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id);
+                        var appliedCount = allSubmitCounts.ContainsKey(p.Id) ? allSubmitCounts[p.Id] : 0;
 
-                        // 判斷 DaysLeft 或 IsOngoing
                         int? daysLeft = null;
                         bool? isOngoing = null;
+                        if (now < p.ProgramStartDate) daysLeft = (p.PublishEndDate - now).Days;
+                        else if (now >= p.ProgramStartDate && now <= p.ProgramEndDate) isOngoing = true;
+                        else isOngoing = false;
 
-                        if (now < p.ProgramStartDate)
-                        {
-                            daysLeft = (p.PublishEndDate - now).Days;
-                        }
-                        else if (now >= p.ProgramStartDate && now <= p.ProgramEndDate)
-                        {
-                            isOngoing = true;
-                        }
-                        else
-                        {
-                            isOngoing = false;
-                        }
-
-                        // 三個熱門指標
-                        var viewsCount = p.ViewsCount;
-                        var favoritesCount = p.FavoritesCount;
-                        var score = viewsCount * 1 + favoritesCount * 3 + appliedCount * 5;
-
-                        // 轉成完整 URL
-                        var coverImagePath = p.ProgramPlanImages
-                            .OrderBy(img => img.Id)
-                            .Select(img => img.ImgPath)
-                            .FirstOrDefault();
-
-                        string coverImageUrl = null;
-                        if (!string.IsNullOrEmpty(coverImagePath))
-                        {
-                            // 移除 ~/ 前綴
-                            coverImagePath = coverImagePath.Replace("~/", "").TrimStart('/');
-
-                            coverImageUrl = $"{baseUrl}/api/v1/programs/image/{coverImagePath}";
-                        }
+                        var coverImagePath = p.ProgramPlanImages.OrderBy(img => img.Id).Select(img => img.ImgPath).FirstOrDefault();
+                        string coverImageUrl = string.IsNullOrEmpty(coverImagePath) ? null : $"{baseUrl}/api/v1/programs/image/{coverImagePath.Replace("~/", "").TrimStart('/')}";
 
                         return new
                         {
                             p.Id,
                             p.Name,
-                            Intro = TruncateIntroByChars(p.Intro, 50), //顯示前20個字
+                            Intro = TruncateIntroByChars(p.Intro, 50),
                             p.Address,
                             Industry = new { p.Industry.Id, p.Industry.Title },
-                            JobTitle = new { p.JobTitle.Id, p.JobTitle.Title },
-                            p.PublishStartDate,
-                            p.PublishEndDate,
                             p.ProgramStartDate,
                             p.ProgramEndDate,
                             CoverImage = coverImageUrl,
                             AppliedCount = appliedCount,
                             DaysLeft = daysLeft,
                             IsOngoing = isOngoing,
-                            ViewsCount = viewsCount,
-                            FavoritesCount = favoritesCount,
-                            Score = score
-                        };
-                    })
-                    .ToList();
-
-                // 取得熱門體驗（不受分頁限制，取前 5）
-                var popularPrograms = db.ProgramPlan
-                    .Where(p => (p.StatusId == 2 || p.StatusId == 4 || p.StatusId == 7 || p.StatusId == 15) && p.PublishEndDate >= now)
-                    .OrderByDescending(p => p.ViewsCount * 1 + p.FavoritesCount * 3 + db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id) * 5)
-                    .Take(5)
-                    .ToList()
-                    .Select(p =>
-                    {
-                        var coverImagePath = p.ProgramPlanImages.OrderBy(img => img.Id).Select(img => img.ImgPath).FirstOrDefault();
-                        string coverImageUrl = null;
-                        if (!string.IsNullOrEmpty(coverImagePath))
-                        {
-                            coverImagePath = coverImagePath.Replace("~/", "").TrimStart('/');
-                            coverImageUrl = $"{baseUrl}/api/v1/programs/image/{coverImagePath}";
-                        }
-
-                        var appliedCount = db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id);
-                        return new
-                        {
-                            p.Id,
-                            p.Name,
-                            CoverImage = coverImageUrl,
-                            Score = p.ViewsCount * 1 + p.FavoritesCount * 3 + appliedCount * 5
+                            ViewsCount = p.ViewsCount,
+                            FavoritesCount = p.FavoritesCount,
+                            Score = p.Score
                         };
                     })
                     .ToList();
@@ -767,7 +746,7 @@ namespace TryBeta.Controllers
                     AppliedCount = plan.AppliedCount,
                     CompanyName = plan.Company.Name,
                     Name = plan.Name,
-                    Intro = plan.Intro,
+                    Intro = TruncateIntroByChars(plan.Intro, 50), // 截斷前50個字
                     Address = plan.Address,
                     ProgramStartDate = plan.ProgramStartDate,
                     ProgramEndDate = plan.ProgramEndDate,
