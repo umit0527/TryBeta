@@ -32,7 +32,7 @@ namespace TryBeta.Controllers
         [Route("{participantid:int}")]
         [JwtAuthFilter]
         [ResponseType(typeof(ParticipantRegisterDto))]
-        public IHttpActionResult GetParticipant(int id)
+        public IHttpActionResult GetParticipant(int participantid)
         {
             // 先從 JwtAuthFilter 裡取得 UserId
             if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
@@ -41,40 +41,53 @@ namespace TryBeta.Controllers
             }
             int userId = (int)userIdObj;
 
-            // 權限判斷：確認該 userId 是否屬於 id 這個體驗者
-            bool hasAccess = db.ParticipantInfoes.Any(c => c.Id == id && c.UserId == userId);
+            // 權限判斷
+            bool hasAccess = db.ParticipantInfoes.Any(c => c.Id == participantid && c.UserId == userId);
             if (!hasAccess)
             {
                 var resp = Request.CreateResponse(HttpStatusCode.Unauthorized, new { message = "權限不足" });
                 return ResponseMessage(resp);
             }
 
-            // 1. 從資料庫抓
+            // 從資料庫抓
             var participantEntity = db.ParticipantInfoes.Include(p => p.Identity)
                                                         .Include(p => p.User)
-                                                        .FirstOrDefault(c => c.Id == id);
+                                                        .FirstOrDefault(c => c.Id == participantid);
             if (participantEntity == null)
             {
                 return NotFound();
             }
 
-            // 2. Entity轉DTO（這裡簡單手動轉）
+            // baseUrl 用來拼完整 headshot URL
+            string baseUrl = $"{Request.RequestUri.Scheme}://{Request.RequestUri.Host}:{Request.RequestUri.Port}";
+
+            string headshotUrl = null;
+            if (!string.IsNullOrEmpty(participantEntity.Headshot))
+            {
+                string filePath = participantEntity.Headshot.Replace("~/", "").TrimStart('/');
+                if (!filePath.Contains("Participant"))
+                {
+                    filePath = $"Images/Participant/{System.IO.Path.GetFileName(filePath)}";
+                }
+                headshotUrl = $"{baseUrl}/api/v1/programs/image/{filePath}";
+            }
+
+            // Entity轉DTO
             var dto = new ParticipantDto
             {
                 Name = participantEntity.Name,
                 Phone = participantEntity.Phone,
                 Birthday = participantEntity.Birthday,
-                Headshot = participantEntity.Headshot,
+                Headshot = headshotUrl ?? "",
                 CityId = participantEntity.CityId,
                 DistrictId = participantEntity.DistrictId,
                 Street = participantEntity.Street,
                 IdentityId = participantEntity.IdentityId,
                 IdentityElse = participantEntity.IdentityElse,
-                IdentityName = participantEntity.Identity?.Title, // Identity 對應欄位
+                IdentityName = participantEntity.Identity?.Title,
                 Gender = participantEntity.Gender
             };
 
-            // 3. 回傳DTO
             return Ok(dto);
         }
 

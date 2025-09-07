@@ -243,6 +243,86 @@ namespace TryBeta.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
+        // POST: api/v1/orders 建立方案訂單
+        [HttpPost]
+        [Route("~/api/v1/orders")]
+        [JwtAuthFilter]
+        public IHttpActionResult CreateCompanyPlanOrder([FromBody] CompanyPlanOrder dto)
+        {
+            try
+            {
+                if (dto == null)
+                    return BadRequest("缺少必要資料");
+
+                // 1. 驗證 Company 是否存在
+                var company = db.Companyinfoes.FirstOrDefault(c => c.Id == dto.CompanyId);
+                if (company == null)
+                    return NotFound();
+
+                // 2. 驗證 Plan 是否存在
+                var plan = db.Plan.FirstOrDefault(p => p.Id == dto.PlanId);
+                if (plan == null)
+                    return NotFound();
+
+                // 3. 日期驗證
+                if (dto.EndDate.HasValue && dto.EndDate <= dto.StartDate)
+                    return BadRequest("結束日期必須大於開始日期");
+
+                // 4. 自動產生訂單編號（ORD-YYYYMMDD-流水號）
+                var today = DateTime.Now.ToString("yyyyMMdd");
+                var prefix = "ORD-" + today;
+
+                // 計算今天已存在訂單數量
+                var countToday = db.CompanyPlanOrders.Count(o => o.OrderNum.StartsWith(prefix)) + 1;
+
+                // 三位數流水號
+                var orderNum = $"{prefix}-{countToday:D3}";
+
+                // 5. 建立訂單（避免前端亂傳敏感欄位）
+                var order = new CompanyPlanOrder
+                {
+                    OrderNum = orderNum,
+                    CompanyId = dto.CompanyId,
+                    PlanId = dto.PlanId,
+                    Price = dto.Price,
+                    PurchaseDate = DateTime.Now,
+                    StartDate = dto.StartDate,
+                    EndDate = dto.EndDate,
+                    OrderStatus = "Created",
+                    PaymentStatus = string.IsNullOrEmpty(dto.PaymentStatus) ? "Pending" : dto.PaymentStatus,
+                    PaymentMethod = dto.PaymentMethod,
+                    Card4No = dto.Card4No,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    PaidAt = dto.PaymentStatus == "Paid" ? (DateTime?)DateTime.Now : null
+                };
+
+                db.CompanyPlanOrders.Add(order);
+                db.SaveChanges();
+
+                // 6. 精簡回傳資料，避免外鍵敏感資訊洩漏
+                return Ok(new
+                {
+                    message = "訂單建立成功",
+                    data = new
+                    {
+                        order.Id,
+                        order.OrderNum,
+                        order.Price,
+                        order.PaymentStatus,
+                        order.PaymentMethod,
+                        order.PurchaseDate,
+                        order.StartDate,
+                        order.EndDate
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
         // POST: api/v1/payments 藍新金流：建立訂單
         [HttpPost]
         [Route("")]

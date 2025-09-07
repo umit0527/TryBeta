@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jose;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -35,15 +36,13 @@ namespace TryBeta.Controllers
         [ResponseType(typeof(CompanyRegisterDto))]
         public IHttpActionResult GetMyCompanyInfo()
         {
-            // 1. 從 JwtAuthFilter 裡取得 UserId
+            // 1. 從 JwtAuthFilter 取得 UserId
             if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
-            {
-                return Unauthorized(); // Token 無效或缺少
-            }
+                return Unauthorized();
+
             int userId = (int)userIdObj;
 
-            // 2. 從資料庫抓取登入者所屬的公司資料
-            //    Include 關聯表：CompanyContacts、CompanyImages、User
+            // 2. 從資料庫抓登入企業資料，Include 關聯表
             var companyEntity = db.Companyinfoes
                                   .Include(c => c.CompanyContacts)
                                   .Include(c => c.CompanyImages)
@@ -51,11 +50,12 @@ namespace TryBeta.Controllers
                                   .FirstOrDefault(c => c.UserId == userId);
 
             if (companyEntity == null)
-            {
                 return NotFound();
-            }
 
-            // 3. Entity 轉 DTO（這裡簡單手動轉）
+            // 取得網站基底 URL 指向 GetImage API
+            string baseUrl = $"{Request.RequestUri.Scheme}://{Request.RequestUri.Host}:{Request.RequestUri.Port}/api/v1/programs/image/";
+
+            // 3. 組 DTO
             var dto = new CompanyRegisterDto
             {
                 Name = companyEntity.Name,
@@ -65,9 +65,10 @@ namespace TryBeta.Controllers
                 Website = companyEntity.Website,
                 Intro = companyEntity.Intro,
                 ScaleId = companyEntity.ScaleId,
-                Account = companyEntity.User.Account,  // 回傳帳號（密碼不回傳）
+                Account = companyEntity.User.Account,
                 Email = companyEntity.User.Email,
-                // 轉聯絡人
+
+                // 聯絡人
                 CompanyContact = companyEntity.CompanyContacts == null ? null : new CompanyContactDto
                 {
                     Name = companyEntity.CompanyContacts.Name,
@@ -75,13 +76,20 @@ namespace TryBeta.Controllers
                     Email = companyEntity.CompanyContacts.Email,
                     Phone = companyEntity.CompanyContacts.Phone
                 },
-                // 轉圖片
+
+                // 所有圖片，透過 GetImage API 生成可用路徑
                 CompanyImg = companyEntity.CompanyImages.Select(img => new CompanyImgDto
                 {
                     Type = img.Type,
-                    ImgPath = img.ImgPath
-                }).ToList()
-            };
+                    ImgPath = baseUrl + img.ImgPath.TrimStart('~', '/')
+                }).ToList(),
+
+                // 企業 Logo
+                CompanyLogo = companyEntity.CompanyImages
+                                   .Where(img => img.Type == "Logo")
+                                   .Select(img => baseUrl + img.ImgPath.TrimStart('~', '/'))
+                                   .FirstOrDefault()
+        };
 
             // 4. 回傳 DTO
             return Ok(dto);
