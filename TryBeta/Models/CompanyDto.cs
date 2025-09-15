@@ -90,11 +90,7 @@ namespace TryBeta.Models
             [JsonProperty("img_path")]
             public string ImgPath { get; set; }
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> API-Programs
+
 
         public class CompanyPlanOrderDto  //企業方案訂單
         {
@@ -106,10 +102,9 @@ namespace TryBeta.Models
             public int Maxparticipants { get; set; }
             public string PaymentMethod { get; set; }
             public string PaymentStatus { get; set; }
-<<<<<<< HEAD
-=======
+
             public string LastCardNum { get; set; }    
->>>>>>> API-Programs
+
             public DateTime StartDate { get; set; }
             public DateTime? EndDate { get; set; }
 
@@ -121,9 +116,6 @@ namespace TryBeta.Models
             public int Id { get; set; }
             public string Name { get; set; }
         }
-<<<<<<< HEAD
->>>>>>> API-Plan
-=======
->>>>>>> API-Programs
+
     }
 }
