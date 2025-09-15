@@ -703,7 +703,7 @@ namespace TryBeta.Controllers
                                         .OrderBy(ci => ci.Id)
                                         .Select(ci => ci.ImgPath)
                                         .FirstOrDefault(),
-                    EvaluationDate = e.CreatedAt
+                    EvaluationAt = e.CreatedAt
                 })
                 .ToList();
 

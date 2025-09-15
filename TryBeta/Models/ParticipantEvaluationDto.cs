@@ -50,8 +50,9 @@ namespace TryBeta.Models
         [JsonProperty("company_logo")]
         public string CompanyLogo { get; set; }  // 企業 Logo (體驗者端的所有評價列表用)
 
-        [JsonProperty("evaluation_date")]
-        public DateTime EvaluationDate { get; set; }  // 評價日期 (體驗者端的所有評價列表用)
+        [JsonProperty("evaluation_at")]
+        public DateTime EvaluationAt { get; set; }  // 評價日期 (體驗者端的所有評價列表用)
+
 
         //[JsonProperty("debug")]
         //public string Debug { get; set; }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Configuration;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
@@ -153,6 +154,7 @@ namespace TryBeta.Controllers
                     .Where(i => i.Id == programPlan.IndustryId)
                     .Select(i => new { i.Id, i.Title })
                     .FirstOrDefault();
+
                 var jobTitle = db.Positions
                     .Where(j => j.Id == programPlan.JobTitleId)
                     .Select(j => new { j.Id, j.Title })
@@ -846,6 +848,8 @@ namespace TryBeta.Controllers
         {
             try
             {
+                if (dto == null)
+                    return BadRequest("請提供 ProgramPlan 資料");
                 // 1. 驗證最大.最少人數
                 if (dto.MaxPeople < dto.MinPeople)
                     return BadRequest("最大人數不得小於最少人數");
@@ -901,6 +905,21 @@ namespace TryBeta.Controllers
                 int todayCount = db.ProgramPlan.Count(p => p.CreatedAt >= today && p.CreatedAt < tomorrow) + 1;
                 string serialNumber = $"PRJ-{DateTime.Now:yyyyMMdd}-{todayCount:D3}";
 
+                if (string.IsNullOrWhiteSpace(dto.Address))
+                    return BadRequest("地址不能為空");
+
+                // 4. 安全生成 Google Map Embed URL
+                string googleMapEmbedUrl;
+                try
+                {
+                    googleMapEmbedUrl = GoogleMapsHelper.GenerateEmbedUrl(dto.Address);
+                }
+                catch (Exception ex)
+                {
+                    return InternalServerError(ex);
+                }
+
+
                 // 4. 建立 ProgramPlan
                 var programPlan = new ProgramPlan
                 {
@@ -911,7 +930,8 @@ namespace TryBeta.Controllers
                     IndustryId = dto.IndustryId,
                     JobTitleId = dto.JobTitleId,
                     Address = dto.Address,
-                    AddressMap = dto.AddressMap,
+                    //AddressMap = "<iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d920.6727521477954!2d120.3098858695309!3d22.62801093658566!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x346e0491c81682db%3A0xca409b5dd8fb42e5!2zODAw6auY6ZuE5biC5paw6IiI5Y2A5rCR55Sf5LiA6LevNTbomZ8!5e0!3m2!1szh-TW!2stw!4v1757230026728!5m2!1szh-TW!2stw\" width=\"600\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\"></iframe>",//googleMapEmbedUrl,
+                    AddressMap= googleMapEmbedUrl,
                     ContactName = dto.ContactName,
                     ContactPhone = dto.ContactPhone,
                     ContactEmail = dto.ContactEmail,
