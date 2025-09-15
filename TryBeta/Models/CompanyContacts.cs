@@ -11,10 +11,7 @@ namespace TryBeta.Models
 {
     public class CompanyContacts
     {
-        [Key]
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
+        [Key, ForeignKey("CompanyInfo")] // CompanyId 當作主鍵和外鍵
         [JsonProperty("company_id")]
         public int CompanyId { get; set; }
 

@@ -31,7 +31,7 @@ namespace TryBeta.Models
             if (request.Headers.Authorization == null || request.Headers.Authorization.Scheme != "Bearer")
             {
                 // 可考慮配合前端專案開發期限，不修改 StatusCode 預設 200，將請求失敗搭配 Status: false 供前端判斷
-                string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "請重新登入" }); // JwtToken 遺失，需導引重新登入
+                string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "請登入" }); // JwtToken 遺失，需導引重新登入
                 var errorMessage = new HttpResponseMessage()
                 {
                     // StatusCode = System.Net.HttpStatusCode.Unauthorized, // 401
@@ -59,7 +59,7 @@ namespace TryBeta.Models
                     if (IsTokenExpired(jwtObject["Exp"].ToString()))
                     {
                         string messageJson = JsonConvert.SerializeObject(new
-                        { Status = false, Message = "請重新登入" }); // JwtToken 過期，需導引重新登入
+                        { Status = false, Message = "Token過期，請重新登入" }); // JwtToken 過期，需導引重新登入
                         var errorMessage = new HttpResponseMessage()
                         {
                             // StatusCode = System.Net.HttpStatusCode.Unauthorized, // 401
@@ -74,7 +74,7 @@ namespace TryBeta.Models
                 catch (Exception)
                 {
                     // 解密失敗
-                    string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "請重新登入" }); // JwtToken 不符，需導引重新登入
+                    string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "Token不符，請重新登入" }); // JwtToken 不符，需導引重新登入
                     var errorMessage = new HttpResponseMessage()
                     {
                         // StatusCode = System.Net.HttpStatusCode.Unauthorized, // 401

@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
+using System.Web.UI.WebControls;
 using TryBeta.Models;
 using static TryBeta.Models.CompanInfoDto;
 
@@ -29,8 +30,8 @@ namespace TryBeta.Controllers
 
         // GET: api/Company/ 取得登入企業的基本資料
         [HttpGet]
-        [Route("{userid:int}")]
-        [JwtAuthFilter] 
+        [Route("")]
+        [JwtAuthFilter]
         [ResponseType(typeof(CompanyRegisterDto))]
         public IHttpActionResult GetMyCompanyInfo()
         {
@@ -51,7 +52,7 @@ namespace TryBeta.Controllers
 
             if (companyEntity == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
 
             // 3. Entity 轉 DTO（這裡簡單手動轉）
@@ -67,13 +68,13 @@ namespace TryBeta.Controllers
                 Account = companyEntity.User.Account,  // 回傳帳號（密碼不回傳）
                 Email = companyEntity.User.Email,
                 // 轉聯絡人
-                CompanyContact = companyEntity.CompanyContacts.Select(contact => new CompanyContactDto
+                CompanyContact = companyEntity.CompanyContacts == null ? null : new CompanyContactDto
                 {
-                    Name = contact.Name,
-                    JobTitle = contact.JobTitle,
-                    Email = contact.Email,
-                    Phone = contact.Phone
-                }).ToList(),
+                    Name = companyEntity.CompanyContacts.Name,
+                    JobTitle = companyEntity.CompanyContacts.JobTitle,
+                    Email = companyEntity.CompanyContacts.Email,
+                    Phone = companyEntity.CompanyContacts.Phone
+                },
                 // 轉圖片
                 CompanyImg = companyEntity.CompanyImages.Select(img => new CompanyImgDto
                 {
@@ -179,7 +180,6 @@ namespace TryBeta.Controllers
             }
 
             var hashedPassword = PasswordHasher.HashPassword(dto.Password); // 將密碼(明碼)加鹽雜湊
-            
             // 若帳號和email是獨立 User 表的資料，需要先建立 User
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -192,7 +192,7 @@ namespace TryBeta.Controllers
                         Email = dto.Email,
                         PasswordHash = hashedPassword,
                         Role = "Company",
-                        Status = 1, // 預設啟用
+                        StatusId = 1, // 預設啟用
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now
                     };
@@ -217,22 +217,19 @@ namespace TryBeta.Controllers
                     db.SaveChanges();
 
                     // 建立聯絡人資料
-                    if (dto.CompanyContact != null && dto.CompanyContact.Count > 0)
+                    if (dto.CompanyContact != null)
                     {
-                        foreach (var contactDto in dto.CompanyContact)
+                        var contact = new CompanyContacts
                         {
-                            var contact = new CompanyContacts
-                            {
-                                CompanyId = company.Id,
-                                Name = contactDto.Name,
-                                JobTitle = contactDto.JobTitle,
-                                Email = contactDto.Email,
-                                Phone = contactDto.Phone,
-                                CreatedAt = DateTime.Now,
-                                UpdatedAt = DateTime.Now
-                            };
-                            db.CompanyContact.Add(contact);
-                        }
+                            CompanyId = company.Id,
+                            Name = dto.CompanyContact.Name,
+                            JobTitle = dto.CompanyContact.JobTitle,
+                            Email = dto.CompanyContact.Email,
+                            Phone = dto.CompanyContact.Phone,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now
+                        };
+                        db.CompanyContact.Add(contact);
                         db.SaveChanges();
                     }
 
@@ -265,7 +262,7 @@ namespace TryBeta.Controllers
 
                     return Content(HttpStatusCode.Created, new
                     {
-                        status=201,
+                        status = 201,
                         message = "註冊成功",
                         Name = dto.Name,
                         IndustryId = dto.IndustryId,

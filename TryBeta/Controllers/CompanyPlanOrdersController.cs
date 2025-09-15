@@ -70,6 +70,7 @@ namespace TryBeta.Controllers
                 Price= order.Plan.Price,
                 DurationDays=order.Plan.DurationDays,
                 Maxparticipants=order.Plan.MaxParticipants,
+                LastCardNum=order.LastCardNum,
                 StartDate = order.StartDate,
                 EndDate = order.EndDate,
                 PaymentMethod=order.PaymentMethod,

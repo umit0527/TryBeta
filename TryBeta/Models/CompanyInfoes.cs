@@ -51,8 +51,8 @@ namespace TryBeta.Models
         [ForeignKey("UserId")]
         public virtual Users User { get; set; }
 
-        // 導覽屬性 (導航到 CompanyContacts)
-        public virtual ICollection<CompanyContacts> CompanyContacts { get; set; }
+        //// 導覽屬性 (導航到 CompanyContacts)
+        public virtual CompanyContacts CompanyContacts { get; set; }
 
         // 導覽屬性 (導航到 CompanyImages)
         public virtual ICollection<CompanyImages> CompanyImages { get; set; }

@@ -54,7 +54,12 @@ namespace TryBeta.Models
         [MaxLength(50)]
         [Required]
         public string PaymentMethod { get; set; }    // 付款方式（CreditCard, BankTransfer...）
-        
+
+        [JsonProperty("last_card_num")]
+        [MaxLength(4)]
+        [Required]
+        public string LastCardNum { get; set; }    // 卡片末四碼
+
         [JsonProperty("created_at")]
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;      // 建立時間

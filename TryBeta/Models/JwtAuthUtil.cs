@@ -65,7 +65,7 @@ namespace TryBeta.Models
                 { "Id", (int)tokenData["Id"] },
                 { "Account", tokenData["Account"].ToString() },
                 { "NickName", tokenData["NickName"].ToString() },
-                { "Exp", DateTime.Now.AddMinutes(30).ToString() } // JwtToken 時效刷新設定 30 分
+                { "Exp", DateTime.Now.AddDays(365).ToString() } // JwtToken 時效刷新設定 1年
             };
 
             //產生刷新時效的 JwtToken

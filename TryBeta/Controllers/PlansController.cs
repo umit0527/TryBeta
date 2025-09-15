@@ -13,7 +13,7 @@ using TryBeta.Models;
 
 namespace TryBeta.Controllers
 {
-    [RoutePrefix("api/v1/plan")]
+    [RoutePrefix("api/v1/plans")]
     public class PlansController : ApiController
     {
         private TryBetaDbContext db = new TryBetaDbContext();
@@ -27,6 +27,7 @@ namespace TryBeta.Controllers
         [HttpGet]
         [Route("")]
         [ResponseType(typeof(IEnumerable<Plan>))]
+        [JwtAuthFilter]
         public IHttpActionResult GetPlans()
         {
 

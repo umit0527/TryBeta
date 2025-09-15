@@ -3,6 +3,7 @@
   "WorkspaceRootPath": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\",
   "Documents": [
     {
+<<<<<<< HEAD
       "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\models\\companydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\models\\companydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -27,10 +28,37 @@
       "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
     },
     {
+=======
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\controllers\\programplanscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\controllers\\programplanscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\controllers\\publicprogramplanscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\controllers\\publicprogramplanscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\models\\programplans.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\models\\programplans.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\models\\programplandto .cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\models\\programplandto .cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|c:\\users\\\u856D\u5B87\u5B8F\\desktop\\trybeta - \u8907\u88FD\\trybeta\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\models\\programplanimages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\models\\programplanimages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+>>>>>>> API-Programs
       "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\models\\dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\models\\dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+<<<<<<< HEAD
       "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\webconnect.config||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\webconnect.config||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
@@ -43,10 +71,13 @@
       "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\models\\plan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+=======
+>>>>>>> API-Programs
       "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\migrations\\configuration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\migrations\\configuration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+<<<<<<< HEAD
       "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -61,6 +92,22 @@
     {
       "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\models\\passwordhash.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\models\\passwordhash.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+=======
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\webconnect.config||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\webconnect.config||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\controllers\\participantcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\controllers\\participantcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\models\\userstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\models\\userstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\trybeta\\models\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A21D74A8-4172-416E-88B9-173387D8ED20}|TryBeta\\TryBeta.csproj|solutionrelative:trybeta\\models\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+>>>>>>> API-Programs
     }
   ],
   "DocumentGroupContainers": [
@@ -70,6 +117,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
+<<<<<<< HEAD
           "SelectedChildIndex": 10,
           "Children": [
             {
@@ -84,10 +132,26 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-14T09:50:57.778Z",
               "EditorCaption": ""
+=======
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ProgramPlanImages.cs",
+              "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\ProgramPlanImages.cs",
+              "RelativeDocumentMoniker": "TryBeta\\Models\\ProgramPlanImages.cs",
+              "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\ProgramPlanImages.cs",
+              "RelativeToolTip": "TryBeta\\Models\\ProgramPlanImages.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAowAoAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-17T06:20:31.62Z"
+>>>>>>> API-Programs
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
+<<<<<<< HEAD
               "Title": "CompanyPlanOrdersController.cs",
               "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Controllers\\CompanyPlanOrdersController.cs",
               "RelativeDocumentMoniker": "TryBeta\\Controllers\\CompanyPlanOrdersController.cs",
@@ -96,11 +160,22 @@
               "ViewState": "AgIAAD0AAAAAAAAAAAAwwEgAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-14T07:52:45.561Z",
+=======
+              "Title": "ProgramPlanDto .cs",
+              "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\ProgramPlanDto .cs",
+              "RelativeDocumentMoniker": "TryBeta\\Models\\ProgramPlanDto .cs",
+              "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\ProgramPlanDto .cs",
+              "RelativeToolTip": "TryBeta\\Models\\ProgramPlanDto .cs",
+              "ViewState": "AgIAAGUAAAAAAAAAAAAswG4AAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-17T06:02:10.183Z",
+>>>>>>> API-Programs
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
+<<<<<<< HEAD
               "Title": "CompanyPlanOrder.cs",
               "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\CompanyPlanOrder.cs",
               "RelativeDocumentMoniker": "TryBeta\\Models\\CompanyPlanOrder.cs",
@@ -109,10 +184,21 @@
               "ViewState": "AgIAAAsAAAAAAAAAAAAxwBIAAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-14T06:56:36.185Z",
+=======
+              "Title": "ProgramPlans.cs",
+              "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\ProgramPlans.cs",
+              "RelativeDocumentMoniker": "TryBeta\\Models\\ProgramPlans.cs",
+              "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\ProgramPlans.cs",
+              "RelativeToolTip": "TryBeta\\Models\\ProgramPlans.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAowCgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-17T06:01:32.203Z",
+>>>>>>> API-Programs
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 8,
               "Title": "PlansController.cs",
               "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Controllers\\PlansController.cs",
@@ -196,11 +282,23 @@
               "ViewState": "AgIAACkAAAAAAAAAAAAwwDYAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-11T15:42:59.78Z",
+=======
+              "DocumentIndex": 1,
+              "Title": "PublicProgramPlansController.cs",
+              "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Controllers\\PublicProgramPlansController.cs",
+              "RelativeDocumentMoniker": "TryBeta\\Controllers\\PublicProgramPlansController.cs",
+              "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Controllers\\PublicProgramPlansController.cs",
+              "RelativeToolTip": "TryBeta\\Controllers\\PublicProgramPlansController.cs",
+              "ViewState": "AgIAADsAAAAAAAAAAAAwwFAAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-17T05:53:58.331Z",
+>>>>>>> API-Programs
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
+<<<<<<< HEAD
               "Title": "CompanyDto.cs",
               "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\CompanyDto.cs",
               "RelativeDocumentMoniker": "TryBeta\\Models\\CompanyDto.cs",
@@ -209,10 +307,21 @@
               "ViewState": "AgIAACIAAAAAAAAAAAAQwCMAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-11T15:48:23.307Z",
+=======
+              "Title": "ProgramPlansController.cs",
+              "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Controllers\\ProgramPlansController.cs",
+              "RelativeDocumentMoniker": "TryBeta\\Controllers\\ProgramPlansController.cs",
+              "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Controllers\\ProgramPlansController.cs",
+              "RelativeToolTip": "TryBeta\\Controllers\\ProgramPlansController.cs",
+              "ViewState": "AgIAAKwBAAAAAAAAAAAkwLQBAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-16T14:48:03.503Z",
+>>>>>>> API-Programs
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 14,
               "Title": "PasswordHash.cs",
               "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\PasswordHash.cs",
@@ -222,6 +331,53 @@
               "ViewState": "AgIAADUAAAAAAAAAAAAswDwAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-11T15:49:35.654Z"
+=======
+              "DocumentIndex": 9,
+              "Title": "ParticipantController.cs",
+              "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Controllers\\ParticipantController.cs",
+              "RelativeDocumentMoniker": "TryBeta\\Controllers\\ParticipantController.cs",
+              "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Controllers\\ParticipantController.cs",
+              "RelativeToolTip": "TryBeta\\Controllers\\ParticipantController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAUwNEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-16T14:25:13.186Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "UserStatus.cs",
+              "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\UserStatus.cs",
+              "RelativeDocumentMoniker": "TryBeta\\Models\\UserStatus.cs",
+              "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\UserStatus.cs",
+              "RelativeToolTip": "TryBeta\\Models\\UserStatus.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAswBUAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-16T14:12:51.903Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Users.cs",
+              "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\Users.cs",
+              "RelativeDocumentMoniker": "TryBeta\\Models\\Users.cs",
+              "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\Users.cs",
+              "RelativeToolTip": "TryBeta\\Models\\Users.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAAA7wDEAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-16T14:12:06.37Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Configuration.cs",
+              "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Migrations\\Configuration.cs",
+              "RelativeDocumentMoniker": "TryBeta\\Migrations\\Configuration.cs",
+              "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Migrations\\Configuration.cs",
+              "RelativeToolTip": "TryBeta\\Migrations\\Configuration.cs",
+              "ViewState": "AgIAAJMCAAAAAAAAAAAwwKgCAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-12T13:21:04.827Z"
+>>>>>>> API-Programs
             },
             {
               "$type": "Document",
@@ -231,6 +387,7 @@
               "RelativeDocumentMoniker": "TryBeta\\Models\\DbContext.cs",
               "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Models\\DbContext.cs",
               "RelativeToolTip": "TryBeta\\Models\\DbContext.cs",
+<<<<<<< HEAD
               "ViewState": "AgIAADAAAAAAAAAAAAAwwEUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-11T15:46:38.285Z",
@@ -239,6 +396,15 @@
             {
               "$type": "Document",
               "DocumentIndex": 7,
+=======
+              "ViewState": "AgIAACUAAAAAAAAAAAA+wC0AAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-11T15:46:38.285Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+>>>>>>> API-Programs
               "Title": "WebConnect.config",
               "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\WebConnect.config",
               "RelativeDocumentMoniker": "TryBeta\\WebConnect.config",
@@ -251,13 +417,21 @@
             },
             {
               "$type": "Document",
+<<<<<<< HEAD
               "DocumentIndex": 5,
+=======
+              "DocumentIndex": 4,
+>>>>>>> API-Programs
               "Title": "Web.config",
               "DocumentMoniker": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Web.config",
               "RelativeDocumentMoniker": "TryBeta\\Web.config",
               "ToolTip": "C:\\Users\\\u856D\u5B87\u5B8F\\Desktop\\TryBeta - \u8907\u88FD\\TryBeta\\Web.config",
               "RelativeToolTip": "TryBeta\\Web.config",
+<<<<<<< HEAD
               "ViewState": "AgIAAAkAAAAAAAAAAAAAAA4AAAAtAAAAAAAAAA==",
+=======
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAA8AAAAQAAAAAAAAAA==",
+>>>>>>> API-Programs
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
               "WhenOpened": "2025-08-13T08:53:36.419Z",
               "EditorCaption": ""

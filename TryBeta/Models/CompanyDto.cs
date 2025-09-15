@@ -55,7 +55,7 @@ namespace TryBeta.Models
             public string Password { get; set; } //暫存前端輸入進來的密碼，非雜湊過
 
             // 新增聯絡人列表
-            public List<CompanyContactDto> CompanyContact { get; set; }
+            public CompanyContactDto CompanyContact { get; set; }
 
             //圖片資料（logo / cover / 環境）
             public List<CompanyImgDto> CompanyImg { get; set; }
@@ -91,7 +91,10 @@ namespace TryBeta.Models
             public string ImgPath { get; set; }
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> API-Programs
 
         public class CompanyPlanOrderDto  //企業方案訂單
         {
@@ -103,6 +106,10 @@ namespace TryBeta.Models
             public int Maxparticipants { get; set; }
             public string PaymentMethod { get; set; }
             public string PaymentStatus { get; set; }
+<<<<<<< HEAD
+=======
+            public string LastCardNum { get; set; }    
+>>>>>>> API-Programs
             public DateTime StartDate { get; set; }
             public DateTime? EndDate { get; set; }
 
@@ -114,6 +121,9 @@ namespace TryBeta.Models
             public int Id { get; set; }
             public string Name { get; set; }
         }
+<<<<<<< HEAD
 >>>>>>> API-Plan
+=======
+>>>>>>> API-Programs
     }
 }
