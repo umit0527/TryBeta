@@ -364,6 +364,66 @@
     <Compile Include="Migrations\202508180721412_FixProgramSubmitStatus.Designer.cs">
       <DependentUpon>202508180721412_FixProgramSubmitStatus.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508181003517_adjust ProramSubmitStatus Feild.cs" />
+    <Compile Include="Migrations\202508181003517_adjust ProramSubmitStatus Feild.Designer.cs">
+      <DependentUpon>202508181003517_adjust ProramSubmitStatus Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181007239_adjust ProgramPlanStatus Feild.cs" />
+    <Compile Include="Migrations\202508181007239_adjust ProgramPlanStatus Feild.Designer.cs">
+      <DependentUpon>202508181007239_adjust ProgramPlanStatus Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181437120_add Serial Number on ParogramPlan Table.cs" />
+    <Compile Include="Migrations\202508181437120_add Serial Number on ParogramPlan Table.Designer.cs">
+      <DependentUpon>202508181437120_add Serial Number on ParogramPlan Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181520090_add ParticipantSerialNumber on Table ProgramPlans.cs" />
+    <Compile Include="Migrations\202508181520090_add ParticipantSerialNumber on Table ProgramPlans.Designer.cs">
+      <DependentUpon>202508181520090_add ParticipantSerialNumber on Table ProgramPlans.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181544473_fix ProgramSubmit.cs" />
+    <Compile Include="Migrations\202508181544473_fix ProgramSubmit.Designer.cs">
+      <DependentUpon>202508181544473_fix ProgramSubmit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508181556559_fixProgramSubmit2.cs" />
+    <Compile Include="Migrations\202508181556559_fixProgramSubmit2.Designer.cs">
+      <DependentUpon>202508181556559_fixProgramSubmit2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190531039_add ParticipantEducation &amp; ParticipantDetail.cs" />
+    <Compile Include="Migrations\202508190531039_add ParticipantEducation &amp; ParticipantDetail.Designer.cs">
+      <DependentUpon>202508190531039_add ParticipantEducation &amp; ParticipantDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190541133_fix user login 500.cs" />
+    <Compile Include="Migrations\202508190541133_fix user login 500.Designer.cs">
+      <DependentUpon>202508190541133_fix user login 500.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190551117_add ParticipantDetailDto StatusName.cs" />
+    <Compile Include="Migrations\202508190551117_add ParticipantDetailDto StatusName.Designer.cs">
+      <DependentUpon>202508190551117_add ParticipantDetailDto StatusName.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190607243_add ParticipantReview Model.cs" />
+    <Compile Include="Migrations\202508190607243_add ParticipantReview Model.Designer.cs">
+      <DependentUpon>202508190607243_add ParticipantReview Model.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190620238_adjust ProgramPlan Feild SerialNum.cs" />
+    <Compile Include="Migrations\202508190620238_adjust ProgramPlan Feild SerialNum.Designer.cs">
+      <DependentUpon>202508190620238_adjust ProgramPlan Feild SerialNum.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190623206_adjust SerialNum.cs" />
+    <Compile Include="Migrations\202508190623206_adjust SerialNum.Designer.cs">
+      <DependentUpon>202508190623206_adjust SerialNum.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190734534_add ProgramSubmiyStatues seed.cs" />
+    <Compile Include="Migrations\202508190734534_add ProgramSubmiyStatues seed.Designer.cs">
+      <DependentUpon>202508190734534_add ProgramSubmiyStatues seed.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508190837371_add ParticipantReviewDto.cs" />
+    <Compile Include="Migrations\202508190837371_add ParticipantReviewDto.Designer.cs">
+      <DependentUpon>202508190837371_add ParticipantReviewDto.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508191002475_adjust ParticipantEvaluationDto.cs" />
+    <Compile Include="Migrations\202508191002475_adjust ParticipantEvaluationDto.Designer.cs">
+      <DependentUpon>202508191002475_adjust ParticipantEvaluationDto.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
@@ -380,7 +440,11 @@
     <Compile Include="Models\Industry.cs" />
     <Compile Include="Models\JwtAuthFilter.cs" />
     <Compile Include="Models\JwtAuthUtil.cs" />
+    <Compile Include="Models\ParticipantDetailDto.cs" />
     <Compile Include="Models\ParticipantDto.cs" />
+    <Compile Include="Models\ParticipantEducation.cs" />
+    <Compile Include="Models\ParticipantEvaluation.cs" />
+    <Compile Include="Models\ParticipantEvaluationDto.cs" />
     <Compile Include="Models\PasswordHash.cs" />
     <Compile Include="Models\Plan.cs" />
     <Compile Include="Models\PlanUsage.cs" />
@@ -579,6 +643,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508131241099_addParticipantLoginApi.resx">
       <DependentUpon>202508131241099_addParticipantLoginApi.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508131309588_adjustParticipatDtoName.resx">
       <DependentUpon>202508131309588_adjustParticipatDtoName.cs</DependentUpon>
@@ -666,6 +731,51 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508180721412_FixProgramSubmitStatus.resx">
       <DependentUpon>202508180721412_FixProgramSubmitStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181003517_adjust ProramSubmitStatus Feild.resx">
+      <DependentUpon>202508181003517_adjust ProramSubmitStatus Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181007239_adjust ProgramPlanStatus Feild.resx">
+      <DependentUpon>202508181007239_adjust ProgramPlanStatus Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181437120_add Serial Number on ParogramPlan Table.resx">
+      <DependentUpon>202508181437120_add Serial Number on ParogramPlan Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181520090_add ParticipantSerialNumber on Table ProgramPlans.resx">
+      <DependentUpon>202508181520090_add ParticipantSerialNumber on Table ProgramPlans.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181544473_fix ProgramSubmit.resx">
+      <DependentUpon>202508181544473_fix ProgramSubmit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508181556559_fixProgramSubmit2.resx">
+      <DependentUpon>202508181556559_fixProgramSubmit2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190531039_add ParticipantEducation &amp; ParticipantDetail.resx">
+      <DependentUpon>202508190531039_add ParticipantEducation &amp; ParticipantDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190541133_fix user login 500.resx">
+      <DependentUpon>202508190541133_fix user login 500.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190551117_add ParticipantDetailDto StatusName.resx">
+      <DependentUpon>202508190551117_add ParticipantDetailDto StatusName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190607243_add ParticipantReview Model.resx">
+      <DependentUpon>202508190607243_add ParticipantReview Model.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190620238_adjust ProgramPlan Feild SerialNum.resx">
+      <DependentUpon>202508190620238_adjust ProgramPlan Feild SerialNum.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190623206_adjust SerialNum.resx">
+      <DependentUpon>202508190623206_adjust SerialNum.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190734534_add ProgramSubmiyStatues seed.resx">
+      <DependentUpon>202508190734534_add ProgramSubmiyStatues seed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508190837371_add ParticipantReviewDto.resx">
+      <DependentUpon>202508190837371_add ParticipantReviewDto.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508191002475_adjust ParticipantEvaluationDto.resx">
+      <DependentUpon>202508191002475_adjust ParticipantEvaluationDto.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

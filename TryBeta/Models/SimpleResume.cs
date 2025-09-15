@@ -35,5 +35,11 @@ namespace TryBeta.Models
         // 導覽屬性 (關聯 User)
         [ForeignKey("UserId")]
         public virtual Users User { get; set; }
+
+        // 關聯到技巧(一對多)
+        public virtual ICollection<ResumeSkill> Skills { get; set; } = new List<ResumeSkill>();
+
+        // 導覽屬性，Portfolio 附件列表
+        public virtual ICollection<PortfolioFiles> PortfolioFiles { get; set; } = new List<PortfolioFiles>();
     }
 }

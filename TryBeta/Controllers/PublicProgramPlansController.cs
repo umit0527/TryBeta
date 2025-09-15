@@ -387,10 +387,17 @@ namespace TryBeta.Controllers
             // 排序
             switch (sort?.ToLower())
             {
+<<<<<<< HEAD
                 case "submit_asc":  //申請日期舊到新
                     query = query.OrderBy(s => s.SubmitAt);
                     break;
                 case "submit_desc": //申請日期新到舊
+=======
+                case "submit_asc":  // 申請日期舊到新
+                    query = query.OrderBy(s => s.SubmitAt);
+                    break;
+                case "submit_desc": // 申請日期新到舊
+>>>>>>> API-ParticipantEvaluation
                     query = query.OrderByDescending(s => s.SubmitAt);
                     break;
                 case "program_start_asc":  // 體驗開始日期舊到新
@@ -417,7 +424,11 @@ namespace TryBeta.Controllers
                 case "publish_end_desc":  // 刊登結束日期新到舊
                     query = query.OrderByDescending(s => s.ProgramPlan.PublishEndDate);
                     break;
+<<<<<<< HEAD
                 default:   //預設申請日期新到舊
+=======
+                default:   // 預設申請日期新到舊
+>>>>>>> API-ParticipantEvaluation
                     query = query.OrderByDescending(s => s.SubmitAt);
                     break;
             }
@@ -476,6 +487,37 @@ namespace TryBeta.Controllers
             });
         }
 
+<<<<<<< HEAD
+=======
+        // GET: api/v1/users/{userId}/programs/{programId}/evaluation 取得體驗者的單一體驗評價頁資訊(填寫評價內容)
+        [HttpGet]
+        [Route("~/api/v1/users/{userId}/programs/{programId}/evaluation")]
+        [JwtAuthFilter]
+        public IHttpActionResult GetProgramEvaluation(int programId)
+        {
+            var plan = db.ProgramPlan
+                .FirstOrDefault(p => p.Id == programId);
+
+            if (plan == null)
+                return NotFound();
+
+            var companyName = db.Companyinfoes
+                .Where(c => c.Id == plan.CompanyId)
+                .Select(c => c.Name)
+                .FirstOrDefault();
+
+            var dto = new ParticipantEvaluationDto
+            {
+                ProgramName = plan.Name,
+                ProgramStartDate = plan.ProgramStartDate,
+                ProgramEndDate = plan.ProgramEndDate,
+                CompanyName = companyName
+            };
+
+            return Ok(dto);
+        }
+
+>>>>>>> API-ParticipantEvaluation
         // PUT: api/PublicProgramPlans/5
         [ResponseType(typeof(void))]
         public IHttpActionResult PutProgramPlan(int id, ProgramPlan programPlan)
@@ -573,18 +615,41 @@ namespace TryBeta.Controllers
                     return BadRequest("履歷類型錯誤");
                 }
 
+<<<<<<< HEAD
                 // 7. 建立 ProgramSubmit
+=======
+                // 7. 生成申請編號 PA-2025-0818-001
+                string prefix = "PA";
+                string year = DateTime.Now.Year.ToString();
+                string shortDate = DateTime.Now.ToString("MMdd"); // MMdd
+                var today = DateTime.Today;
+                var tomorrow = today.AddDays(1);
+
+                int countToday = db.ProgramSubmits
+                    .Count(s => s.SubmitAt >= today && s.SubmitAt < tomorrow) + 1;
+                string participantSerialNumber = $"{prefix}-{year}-{shortDate}-{countToday:D3}";
+
+                // 8. 建立 ProgramSubmit
+>>>>>>> API-ParticipantEvaluation
                 var submit = new ProgramSubmit
                 {
                     ProgramPlanId = programId,
                     ParticipantId = participant.Id,
                     ParticipantsCount = dto.ParticipantsCount,
+<<<<<<< HEAD
                     Note = dto.Note,
+=======
+>>>>>>> API-ParticipantEvaluation
                     MotivationContent = dto.MotivationContent,
                     ResumeType = dto.ResumeType,
                     SubmitAt = DateTime.Now,
                     StatusId = 1, // 待審核
+<<<<<<< HEAD
                     AgreeTerms = dto.AgreeTerms
+=======
+                    AgreeTerms = dto.AgreeTerms,
+                    ParticipantSerialNum = participantSerialNumber
+>>>>>>> API-ParticipantEvaluation
                 };
 
                 if (resumeType == "simple resume")
@@ -598,8 +663,13 @@ namespace TryBeta.Controllers
                 return Ok(new
                 {
                     success = true,
+<<<<<<< HEAD
                     //application_id = submit.Id,
                     message = "申請已送出，請等待企業審核"
+=======
+                    application_number = submit.ParticipantSerialNum,
+                    message = "申請已送出，等待企業審核"
+>>>>>>> API-ParticipantEvaluation
                 });
             }
             catch (Exception ex)
@@ -607,6 +677,59 @@ namespace TryBeta.Controllers
                 return InternalServerError(ex);
             }
         }
+<<<<<<< HEAD
+=======
+        
+        // POST: api/v1/users/{userId}/programs/{programId}/evaluation    體驗者提交評價
+        [HttpPost]
+        [Route("~/api/v1/users/{userId}/programs/{programId}/evaluations")]
+        [JwtAuthFilter]
+        public IHttpActionResult SubmitReview(int userId, int programId, [FromBody] ParticipantEvaluationDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // 先找到對應的 ParticipantInfo
+            var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == userId);
+            if (participant == null)
+                return BadRequest("找不到對應的體驗者");
+
+            // 檢查是否已有評價
+            var existingReview = db.ParticipantEvaluations
+                .FirstOrDefault(r => r.ProgramPlanId == programId && r.ParticipantId == participant.Id);
+
+            if (existingReview != null)
+                return BadRequest("該體驗已提交評價");
+
+            // 建立資料庫實體
+            var review = new ParticipantEvaluation
+            {
+                ParticipantId = participant.Id,   // 從 URL 取
+                ProgramPlanId = programId,        // 從 URL 取
+                Score = dto.Score,
+                Comment = dto.Comment
+            };
+
+            db.ParticipantEvaluations.Add(review);
+            db.SaveChanges();
+
+            // 取得 ProgramPlan 與 Company 資訊
+            var response = db.ParticipantEvaluations
+                .Where(r => r.Id == review.Id)
+                .Select(r => new ParticipantEvaluationDto
+                {
+                    ProgramName = r.Program.Name,
+                    ProgramStartDate = r.Program.ProgramStartDate,
+                    ProgramEndDate = r.Program.ProgramEndDate,
+                    CompanyName = r.Program.Company.Name,
+                    Score = r.Score,
+                    Comment = r.Comment
+                })
+                .FirstOrDefault();
+
+            return Ok(response);
+        }
+>>>>>>> API-ParticipantEvaluation
 
         // DELETE: api/PublicProgramPlans/5
         [ResponseType(typeof(ProgramPlan))]

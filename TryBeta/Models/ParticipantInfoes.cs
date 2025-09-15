@@ -65,14 +65,35 @@ namespace TryBeta.Models
         [JsonProperty("user_id")]
         public int UserId { get; set; }
 
+<<<<<<< HEAD
         // 導覽屬性 (導航到 User)
         [ForeignKey("UserId")]
         public virtual Users User { get; set; }
 
+=======
+>>>>>>> API-ParticipantEvaluation
         [JsonProperty("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+<<<<<<< HEAD
+=======
+
+        // 導覽屬性 (導航到 User)
+        [ForeignKey("UserId")]
+        public virtual Users User { get; set; }
+
+        // 導覽屬性 (導航到 ParticipantEducation)
+        public virtual ParticipantEducation Education { get; set; }
+
+        // 導覽到 City 表
+        [ForeignKey("CityId")]
+        public virtual City City { get; set; }
+
+        // 導覽到 District 表
+        [ForeignKey("DistrictId")]
+        public virtual District District { get; set; }
+>>>>>>> API-ParticipantEvaluation
     }
 }

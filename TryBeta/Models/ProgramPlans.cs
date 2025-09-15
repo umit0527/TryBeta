@@ -20,6 +20,11 @@ namespace TryBeta.Models
         public int CompanyId { get; set; }
 
         [Required]
+        [StringLength(50)]
+        [JsonProperty("serial_num")]
+        public string SerialNum { get; set; }
+
+        [Required]
         [StringLength(255)]
         [JsonProperty("name")]
         public string Name { get; set; }
