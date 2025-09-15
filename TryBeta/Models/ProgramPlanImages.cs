@@ -22,9 +22,12 @@ namespace TryBeta.Models
         /// <summary>
         /// 圖片儲存路徑或網址
         /// </summary>
-        [Required]
+        //[Required]
         [JsonProperty("img_path")]
         public string ImgPath { get; set; }
+
+        [JsonProperty("url")]
+        public string Url { get; set; }
 
         [JsonProperty("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;

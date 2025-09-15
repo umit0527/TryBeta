@@ -17,7 +17,7 @@ namespace TryBeta.Models
         private static string SmtpUser = "trybeta0910@gmail.com";
         private static string SmtpPass = "jtrn xnvu khnh movu";
 
-        //審核結果
+        //寄給體驗者審核結果
         public static async Task SendReviewResultAsync(int participantId, string status, string comment, string participantEmail, string programTitle)
         {
             string subject;
@@ -62,7 +62,7 @@ namespace TryBeta.Models
             }
         }
 
-        //可評價
+        //寄給體驗者可評價
         public static async Task<string> SendEvaluationAvailableEmail(
     TryBetaDbContext db,
     int userId,
@@ -104,6 +104,38 @@ namespace TryBeta.Models
             {
                 System.Diagnostics.Debug.WriteLine($"發送可評價 Email 失敗: {ex.Message}");
                 return $"發送可評價 Email 失敗: {ex.Message}";
+            }
+        }
+
+        //寄給企業收到評價
+        public static async Task SendEvaluationSubmittedEmailToCompany(
+    string companyEmail,
+    string participantName,
+    string programTitle,
+    int score,
+    string comment)
+        {
+            string subject = $"【{programTitle}】收到新的體驗評價";
+            string body = $"您好！\n\n" +
+                          $"體驗者 {participantName} 已提交對「{programTitle}」的評價。\n\n" +
+                          $"評分：{score}\n" +
+                          $"留言：{comment}\n\n" +
+                          $"請登入後台查看完整評價內容。";
+
+            using (var client = new SmtpClient(SmtpHost, SmtpPort))
+            {
+                client.Credentials = new NetworkCredential(SmtpUser, SmtpPass);
+                client.EnableSsl = true;
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(SmtpUser, "Tryβ 短期職業體驗平台"),
+                    Subject = subject,
+                    Body = body
+                };
+                mailMessage.To.Add(companyEmail);
+
+                await client.SendMailAsync(mailMessage);
             }
         }
     }

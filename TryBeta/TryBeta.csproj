@@ -55,6 +55,15 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Google.Apis, Version=1.70.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.1.70.0\lib\net462\Google.Apis.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis.Auth, Version=1.70.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Auth.1.70.0\lib\net462\Google.Apis.Auth.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Apis.Core, Version=1.70.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Core.1.70.0\lib\net462\Google.Apis.Core.dll</HintPath>
+    </Reference>
     <Reference Include="jose-jwt, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\jose-jwt.5.2.0\lib\net472\jose-jwt.dll</HintPath>
     </Reference>
@@ -93,6 +102,7 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
     </Reference>
@@ -626,6 +636,22 @@
     <Compile Include="Migrations\202508280517198_adjust feild ProramPlan &amp; Favorite Table.Designer.cs">
       <DependentUpon>202508280517198_adjust feild ProramPlan &amp; Favorite Table.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508290807102_add Google Post.cs" />
+    <Compile Include="Migrations\202508290807102_add Google Post.Designer.cs">
+      <DependentUpon>202508290807102_add Google Post.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508290810336_adjust GoogleId Length in User Table.cs" />
+    <Compile Include="Migrations\202508290810336_adjust GoogleId Length in User Table.Designer.cs">
+      <DependentUpon>202508290810336_adjust GoogleId Length in User Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508301143365_add Position.cs" />
+    <Compile Include="Migrations\202508301143365_add Position.Designer.cs">
+      <DependentUpon>202508301143365_add Position.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202509010630314_add Url Feild in ProgramPlanImages Table.cs" />
+    <Compile Include="Migrations\202509010630314_add Url Feild in ProgramPlanImages Table.Designer.cs">
+      <DependentUpon>202509010630314_add Url Feild in ProgramPlanImages Table.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AdminInfoes.cs" />
     <Compile Include="Models\AdminLoginDto.cs" />
@@ -647,6 +673,7 @@
     <Compile Include="Models\ExistingResume.cs" />
     <Compile Include="Models\Favorite.cs" />
     <Compile Include="Models\FavoriteDto.cs" />
+    <Compile Include="Models\GoogleDto.cs" />
     <Compile Include="Models\Identity.cs" />
     <Compile Include="Models\Industry.cs" />
     <Compile Include="Models\JwtAuthFilter.cs" />
@@ -1124,6 +1151,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508280517198_adjust feild ProramPlan &amp; Favorite Table.resx">
       <DependentUpon>202508280517198_adjust feild ProramPlan &amp; Favorite Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508290807102_add Google Post.resx">
+      <DependentUpon>202508290807102_add Google Post.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508290810336_adjust GoogleId Length in User Table.resx">
+      <DependentUpon>202508290810336_adjust GoogleId Length in User Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508301143365_add Position.resx">
+      <DependentUpon>202508301143365_add Position.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509010630314_add Url Feild in ProgramPlanImages Table.resx">
+      <DependentUpon>202509010630314_add Url Feild in ProgramPlanImages Table.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

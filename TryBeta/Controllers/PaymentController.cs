@@ -266,79 +266,94 @@ namespace TryBeta.Controllers
             if (company == null)
                 return BadRequest("企業不存在或無權限");
 
-            // 建立訂單
-            // 取得今天日期字串
-            string dateStr = DateTime.Now.ToString("yyyyMMdd");
-
-            // 計算今天已經有多少訂單，先抓今天的訂單到記憶體
-            var todayOrders = db.CompanyPlanOrders
-                .AsEnumerable() // <- 這會把資料拉到記憶體
-                .Where(o => o.OrderNum.StartsWith($"ORD-{dateStr}-"))
-                .Count();
-
-            // 流水號 +1
-            string sequence = (todayOrders + 1).ToString("D3"); // 3位數，不足補0
-
-            // 組成訂單編號
-            string merchantOrderNo = $"ORD-{dateStr}-{sequence}";
-
-            var order = new CompanyPlanOrder
+            try
             {
-                OrderNum = merchantOrderNo,
-                CompanyId = chargeData.CompanyId,
-                PlanId = chargeData.PlanId,
-                Price = plan.Price,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(plan.DurationDays),
-                PaymentStatus = "Pending",
-                OrderStatus = "Created",
-                PaymentMethod = string.IsNullOrEmpty(chargeData.PaymentMethod) ? "CreditCard" : chargeData.PaymentMethod,
-                Card4No = "",
-            };
-            db.CompanyPlanOrders.Add(order);
-            db.SaveChanges();
+                // 建立訂單
+                // 取得今天日期字串
+                string dateStr = DateTime.Now.ToString("yyyyMMdd");
 
-            // 生成藍新金流 TradeInfo / TradeSha (JSON 格式)
-            string hashKey = ConfigurationManager.AppSettings["HashKey"];
-            string hashIV = ConfigurationManager.AppSettings["HashIV"];
-            string merchantID = ConfigurationManager.AppSettings["MerchantID"];
-            string version = "2.0";
+                // 計算今天已經有多少訂單，先抓今天的訂單到記憶體
+                var todayOrders = db.CompanyPlanOrders
+                    .AsEnumerable() // <- 這會把資料拉到記憶體
+                    .Where(o => o.OrderNum.StartsWith($"ORD-{dateStr}-"))
+                    .Count();
 
-            // 將所有資料先轉成 JSON
-            var tradeDict = new
-            {
-                MerchantID = merchantID,
-                RespondType = "JSON",
-                TimeStamp = (int)(DateTime.Now - new DateTime(1970, 1, 1)).TotalSeconds,
-                Version = version,
-                MerchantOrderNo = merchantOrderNo,
-                Amt = plan.Price,
-                ItemDesc = plan.Name,
-                TradeLimit = 600,
-                NotifyURL = chargeData.NotifyUrl,
-                ReturnURL = chargeData.ReturnUrl,
-                Email = chargeData.Email,
-                LoginType = 0, // 0 表示不需要登入藍新金流會員
-                CREDIT = order.PaymentMethod == "CreditCard" ? "1" : "0"
-            };
+                // 流水號 +1
+                string sequence = (todayOrders + 1).ToString("D3"); // 3位數，不足補0
 
-            string tradeJson = JsonConvert.SerializeObject(tradeDict);
-            string tradeInfo = CryptoUtil.EncryptAESHex(tradeJson, hashKey, hashIV);
-            string tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
+                // 組成訂單編號
+                string merchantOrderNo = $"ORD-{dateStr}-{sequence}";
 
-            return Ok(new
-            {
-                Status = true,
-                OrderNum = merchantOrderNo,
-                PaymentData = new
+                var order = new CompanyPlanOrder
+                {
+                    OrderNum = merchantOrderNo,
+                    CompanyId = chargeData.CompanyId,
+                    PlanId = chargeData.PlanId,
+                    Price = plan.Price,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(plan.DurationDays),
+                    PaymentStatus = "Pending",
+                    OrderStatus = "Created",
+                    PaymentMethod = string.IsNullOrEmpty(chargeData.PaymentMethod) ? "CreditCard" : chargeData.PaymentMethod,
+                    Card4No = "",
+                };
+                db.CompanyPlanOrders.Add(order);
+                db.SaveChanges();
+
+                // 生成藍新金流 TradeInfo / TradeSha (JSON 格式)
+                string hashKey = ConfigurationManager.AppSettings["HashKey"];
+                string hashIV = ConfigurationManager.AppSettings["HashIV"];
+                string merchantID = ConfigurationManager.AppSettings["MerchantID"];
+                string version = "2.0";
+
+                // 將所有資料先轉成 JSON
+                var tradeDict = new
                 {
                     MerchantID = merchantID,
-                    TradeInfo = tradeInfo,
-                    TradeSha = tradeSha,
-                    Version = version
-                },
-                PayGetWay = "https://ccore.newebpay.com/MPG/mpg_getway"
-            });
+                    RespondType = "JSON",
+                    TimeStamp = (int)(DateTime.Now - new DateTime(1970, 1, 1)).TotalSeconds,
+                    Version = version,
+                    MerchantOrderNo = merchantOrderNo,
+                    Amt = plan.Price,
+                    ItemDesc = plan.Name,
+                    TradeLimit = 600,
+                    NotifyURL = chargeData.NotifyUrl,
+                    ReturnURL = chargeData.ReturnUrl,
+                    Email = chargeData.Email,
+                    LoginType = 0, // 0 表示不需要登入藍新金流會員
+                    CREDIT = order.PaymentMethod == "CreditCard" ? "1" : "0"
+                };
+
+                string tradeJson = JsonConvert.SerializeObject(tradeDict);
+                string tradeInfo = CryptoUtil.EncryptAESHex(tradeJson, hashKey, hashIV);
+                string tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
+
+                return Ok(new
+                {
+                    Status = true,
+                    OrderNum = merchantOrderNo,
+                    PaymentData = new
+                    {
+                        MerchantID = merchantID,
+                        TradeInfo = tradeInfo,
+                        TradeSha = tradeSha,
+                        Version = version
+                    },
+                    PayGetWay = "https://ccore.newebpay.com/MPG/mpg_getway"
+                });
+            }
+            catch (Exception ex)
+            {
+                // 可以記錄錯誤日誌，方便後續排查
+                // log.Error("建立訂單失敗", ex);
+
+                return Content(HttpStatusCode.InternalServerError, new
+                {
+                    Status = false,
+                    Message = "建立訂單失敗",
+                    Error = ex.Message
+                });
+            }
         }
 
         // POST: api/v1/payments/callback 藍新金流：根據結果更改資料庫

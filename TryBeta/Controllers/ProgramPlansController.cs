@@ -5,10 +5,12 @@ using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.UI;
@@ -819,7 +821,7 @@ namespace TryBeta.Controllers
                     ProgramStartDate = dto.ProgramStartDate,
                     ProgramEndDate = dto.ProgramEndDate,
                     ProgramDurationDays = (dto.ProgramEndDate - dto.ProgramStartDate).Days + 1,
-                    StatusId = 1,
+                    StatusId = 2,  //預設通過
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
@@ -840,22 +842,39 @@ namespace TryBeta.Controllers
                     db.ProgramStep.Add(step);
                 }
 
-                // 7. 建立圖片
-                if (dto.Images != null && dto.Images.Any())
-                {
-                    if (dto.Images.Count > 4) return BadRequest("最多只能上傳 4 張圖片");
+                //// 處理暫存圖片 → 正式資料夾
+                //if (dto.Images != null && dto.Images.Any())
+                //{
+                //    if (dto.Images.Count > 4) return BadRequest("最多只能上傳 4 張圖片");
 
-                    foreach (var imgUrl in dto.Images)
-                    {
-                        var image = new ProgramPlanImage
-                        {
-                            ProgramPlanId = programPlan.Id,
-                            ImgPath = imgUrl,
-                            CreatedAt = DateTime.Now
-                        };
-                        db.ProgramPlanImages.Add(image);
-                    }
-                }
+                //    var uploadRoot = HttpContext.Current.Server.MapPath("~/Uploads/Programs");
+                //    var programFolder = Path.Combine(uploadRoot, serialNumber);
+                //    if (!Directory.Exists(programFolder))
+                //        Directory.CreateDirectory(programFolder);
+
+                //    foreach (var tempUrl in dto.Images)
+                //    {
+                //        // 取得檔名
+                //        var fileName = Path.GetFileName(new Uri(tempUrl).LocalPath);
+                //        var tempPath = HttpContext.Current.Server.MapPath("~/Uploads/Programs/temp/" + fileName);
+                //        if (!File.Exists(tempPath)) continue; // 檔案不存在就跳過
+
+                //        // 搬移到正式資料夾
+                //        var newPath = Path.Combine(programFolder, fileName);
+                //        File.Move(tempPath, newPath);
+
+                //        // 建立資料庫紀錄
+                //        var fileUrl = $"{Request.RequestUri.GetLeftPart(UriPartial.Authority)}/Uploads/Programs/{serialNumber}/{fileName}";
+                //        var programImage = new ProgramPlanImage
+                //        {
+                //            ProgramPlanId = programPlan.Id,
+                //            Url = fileUrl,
+                //            CreatedAt = DateTime.Now,
+                //            UpdatedAt = DateTime.Now
+                //        };
+                //        db.ProgramPlanImages.Add(programImage);
+                //    }
+                //}
 
                 // 8. 扣掉剩餘人數
                 planUsage.RemainingPeople -= dto.MaxPeople;
@@ -934,6 +953,99 @@ namespace TryBeta.Controllers
             }
         }
 
+        // POST: api/v1/uploads 上傳照片
+        [HttpPost]
+        [Route("~/api/v1/programs/{programId}/images")]
+        [JwtAuthFilter]
+        public async Task<IHttpActionResult> UploadImage(int programId)
+        {
+            try
+            {
+                // 1. 確認 ProgramPlan 存在
+                var program = db.ProgramPlan.FirstOrDefault(p => p.Id == programId);
+                if (program == null)
+                    return NotFound();
+
+                // 2. 確認有檔案
+                if (!Request.Content.IsMimeMultipartContent())
+                    return BadRequest("Content type 必須是 multipart/form-data");
+
+                // 3. 設定上傳路徑
+                var uploadRoot = HttpContext.Current.Server.MapPath("~/Uploads/Programs");
+                if (!Directory.Exists(uploadRoot))
+                    Directory.CreateDirectory(uploadRoot);
+
+                // 4. 讀取所有檔案
+                var provider = new MultipartFormDataStreamProvider(uploadRoot);
+                await Request.Content.ReadAsMultipartAsync(provider);
+
+                if (!provider.FileData.Any())
+                    return BadRequest("沒有收到檔案");
+
+                var baseUrl = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+                var results = new List<object>();
+                var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                long maxSize = 5 * 1024 * 1024;
+
+                foreach (var fileData in provider.FileData)
+                {
+                    var originalFileName = Path.GetFileName(fileData.Headers.ContentDisposition.FileName.Trim('"'));
+                    var ext = Path.GetExtension(originalFileName).ToLower();
+
+                    // 檔案格式驗證
+                    if (!allowedExt.Contains(ext))
+                    {
+                        File.Delete(fileData.LocalFileName);
+                        continue; // 跳過不合法的檔案
+                    }
+
+                    // 檔案大小驗證
+                    var fileInfo = new FileInfo(fileData.LocalFileName);
+                    if (fileInfo.Length > maxSize)
+                    {
+                        File.Delete(fileData.LocalFileName);
+                        continue; // 跳過超過大小的檔案
+                    }
+
+                    // 產生唯一檔名並移動
+                    var newFileName = Guid.NewGuid().ToString("N") + ext;
+                    var newFilePath = Path.Combine(uploadRoot, newFileName);
+                    File.Move(fileData.LocalFileName, newFilePath);
+
+                    var fileUrl = $"{baseUrl}/Uploads/Programs/{newFileName}";
+
+                    // 建立 DB 紀錄
+                    var programImage = new ProgramPlanImage
+                    {
+                        ProgramPlanId = programId,
+                        Url = fileUrl,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+                    db.ProgramPlanImages.Add(programImage);
+                    db.SaveChanges();
+
+                    results.Add(new
+                    {
+                        id = programImage.Id,
+                        programplan_id = programId,
+                        img_path = fileUrl,
+                        created_at = programImage.CreatedAt
+                    });
+                }
+
+                if (!results.Any())
+                    return BadRequest("沒有符合格式或大小的檔案被上傳");
+
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+
         // PUT: api/ProgramPlans/5 審核體驗者通過或拒絕
         [HttpPut]
         [Route("~/api/v1/programs/{programId:int}/applications/{participantId:int}/review")]
@@ -955,15 +1067,20 @@ namespace TryBeta.Controllers
             if (program == null)
                 return Content(System.Net.HttpStatusCode.Forbidden, new { message = "非本公司不得審核該體驗計畫" });
 
+            // 抓最新一筆有效申請 (排除已取消或舊紀錄)，因為有可能取消又申請
             var application = db.ProgramSubmits
                 .Include(a => a.Participant.User)
-                .FirstOrDefault(a => a.ProgramPlanId == programId && a.ParticipantId == participantId);
+                .Where(a => a.ProgramPlanId == programId && a.ParticipantId == participantId)
+                .OrderByDescending(a => a.SubmitAt)
+                .FirstOrDefault();
 
             if (application == null)
                 return NotFound();
 
+            int newStatusId;
             if (dto.StatusId == (int)ReviewStatus.Approved)
             {
+                newStatusId = (int)ReviewStatus.Approved;
                 if (program.AppliedCount >= program.MaxPeople)
                     return BadRequest($"此體驗計畫已達人數上限 ({program.MaxPeople}人)，無法再核准新的申請。");
 
@@ -986,15 +1103,19 @@ namespace TryBeta.Controllers
                               + program.FavoritesCount * 3
                               + program.AppliedCount * 5;
             }
+            else
+            {
+                newStatusId = (int)ReviewStatus.Rejected; // 婉拒 = 3
+            }
 
             // 更新申請狀態
-            application.StatusId = dto.StatusId;
+            application.StatusId = newStatusId;
             application.ReviewedAt = DateTime.Now;
 
             var review = new ProgramSubmitReview
             {
                 ProgramSubmitId = application.Id,
-                StatusId = dto.StatusId,
+                StatusId = newStatusId,
                 Comment = dto.Comment,
                 ReviewedAt = DateTime.Now,
                 ReviewerId = companyId

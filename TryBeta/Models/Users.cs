@@ -38,6 +38,10 @@ namespace TryBeta.Models
         [ForeignKey("UserStatus")]
         public int StatusId { get; set; }  // 停用, 啟用
 
+        [JsonProperty("google_id")]
+        [MaxLength(100)]
+        public string GoogleId { get; set; }  // Google 的唯一識別 ID
+
         [Required]
         [JsonProperty("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
