@@ -649,7 +649,7 @@ namespace TryBeta.Controllers
         ProgramName = s.ProgramPlan.Name,
         ProgramStartDate = s.ProgramPlan.ProgramStartDate,
         ProgramEndDate = s.ProgramPlan.ProgramEndDate,
-        ParticipationStatus = s.StatusId == 2 ? "Attended" : (s.StatusId == 4 ? "Cancelled" : "Pending Review"),
+        ParticipationStatus = s.StatusId == 2 ? "已參加" : (s.StatusId == 4 ? "已取消" : "待審核"),
         CancelReason = s.StatusId == 4 ? s.CancelReason : null,
         ReviewScore = (s.StatusId == 2 || s.StatusId == 17)
                         ? db.ParticipantEvaluations
@@ -674,6 +674,7 @@ namespace TryBeta.Controllers
         // GET: api/v1/company/{companyId}/evaluations  企業取得評價列表資訊
         [HttpGet]
         [Route("~/api/v1/company/{companyId}/evaluations")]
+        [JwtAuthFilter]
         public IHttpActionResult GetCompanyEvaluations(
             int companyId,
             string search = null,
@@ -685,10 +686,10 @@ namespace TryBeta.Controllers
             int limit = 20)
         {
             var query = db.ParticipantEvaluations
-                .Where(e => e.Program.CompanyId == companyId)  //該企業的體驗評價
-                .Where(e => e.StatusId == 2 || e.StatusId == 4 || e.StatusId == 15);  //評價是審核通過的
+        .Where(e => e.Program.CompanyId == companyId)
+        .Where(e => e.StatusId == 2 || e.StatusId == 4 || e.StatusId == 15);
 
-            // 搜尋：體驗者名字 / 評價內容 / 計畫名稱
+            // 搜尋
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(e =>
@@ -703,13 +704,13 @@ namespace TryBeta.Controllers
                 query = query.Where(e => e.Score == score.Value);
             }
 
-            // 篩選日期區間
+            // 篩選日期
             if (start_date.HasValue)
                 query = query.Where(e => e.CreatedAt >= start_date.Value);
             if (end_date.HasValue)
             {
-                var endDateInclusive = end_date.Value.Date.AddDays(1); // 把時間拉到隔天 0:00
-                query = query.Where(e => e.CreatedAt < endDateInclusive); // 小於隔天 0:00 => 包含整天
+                var endDateInclusive = end_date.Value.Date.AddDays(1);
+                query = query.Where(e => e.CreatedAt < endDateInclusive);
             }
 
             // 排序
@@ -724,13 +725,28 @@ namespace TryBeta.Controllers
                     break;
             }
 
-            // 總筆數
             var totalCount = query.Count();
 
-            // baseUrl 用來拼 headshot URL
-            string baseUrl = $"{Request.RequestUri.Scheme}://{Request.RequestUri.Host}:{Request.RequestUri.Port}";
+            // baseUrl
+            var request = HttpContext.Current.Request;
+            var baseUrl = request.Url.GetLeftPart(UriPartial.Authority);
 
-            // 投影需要欄位 + ToList
+            // normalizePath for headshot
+            Func<string, string> normalizePath = (path) =>
+            {
+                if (string.IsNullOrEmpty(path)) return null;
+
+                path = path.Replace("~/", "").Replace("\\", "/").TrimStart('/');
+
+                if (!path.Contains("Participant"))
+                {
+                    path = $"Images/Participant/{System.IO.Path.GetFileName(path)}";
+                }
+
+                return $"{baseUrl}/api/v1/programs/image/{path}";
+            };
+
+            // 投影
             var tempList = query
                 .Skip((page - 1) * limit)
                 .Take(limit)
@@ -749,34 +765,19 @@ namespace TryBeta.Controllers
                 })
                 .ToList();
 
-            // 計算年齡 + 拼 headshot URL
-            var evaluations = tempList.Select(e =>
+            var evaluations = tempList.Select(e => new
             {
-                string headshotUrl = null;
-                if (!string.IsNullOrEmpty(e.Headshot))
-                {
-                    string filePath = e.Headshot.Replace("~/", "").TrimStart('/');
-                    if (!filePath.Contains("Participant"))
-                    {
-                        filePath = $"Images/Participant/{System.IO.Path.GetFileName(filePath)}";
-                    }
-                    headshotUrl = $"{baseUrl}/api/v1/programs/image/{filePath}";
-                }
-
-                return new
-                {
-                    e.Id,
-                    ParticipantName = e.Name,
-                    e.Identity,
-                    ParticipantAge = DateTime.Today.Year - e.Birthday.Year -
-                                     (DateTime.Today.DayOfYear < e.Birthday.DayOfYear ? 1 : 0),
-                    Headshot = headshotUrl ?? "",
-                    ProgramName = e.Name,
-                    e.ProgramPlanId,
-                    e.Score,
-                    e.Comment,
-                    EvaluationDate = e.CreatedAt
-                };
+                e.Id,
+                ParticipantName = e.Name,
+                e.Identity,
+                ParticipantAge = DateTime.Today.Year - e.Birthday.Year -
+                                 (DateTime.Today.DayOfYear < e.Birthday.DayOfYear ? 1 : 0),
+                Headshot = normalizePath(e.Headshot) ?? "",
+                e.ProgramPlanId,
+                ProgramPlanName = e.ProgramName,
+                e.Score,
+                e.Comment,
+                EvaluationDate = e.CreatedAt
             }).ToList();
 
             var result = new

@@ -684,11 +684,23 @@ namespace TryBeta.Controllers
             // 總筆數
             var totalCount = query.Count();
 
+            // baseUrl
+            var request = HttpContext.Current.Request;
+            var baseUrl = request.Url.GetLeftPart(UriPartial.Authority);
+
+            // 處理圖片路徑 → API URL
+            Func<string, string> normalizePath = (path) =>
+            {
+                if (string.IsNullOrEmpty(path)) return null;
+                path = path.Replace("~/", "").Replace("\\", "/").TrimStart('/');
+                return $"{baseUrl}/api/v1/programs/image/{path}";
+            };
+
             // 分頁 + 投影
             var evaluations = query
                 .Skip((page - 1) * limit)
                 .Take(limit)
-                .Select(e => new ParticipantEvaluationDto
+                .Select(e => new
                 {
                     ProgramId = e.ProgramPlanId,
                     StatusId = (ReviewStatus)e.StatusId,
@@ -699,11 +711,26 @@ namespace TryBeta.Controllers
                     ProgramStartDate = e.Program.ProgramStartDate,
                     ProgramEndDate = e.Program.ProgramEndDate,
                     CompanyName = e.Program.Company.Name,
-                    CompanyLogo = e.Program.Company.CompanyImages
+                    CompanyLogoPath = e.Program.Company.CompanyImages
                                         .OrderBy(ci => ci.Id)
                                         .Select(ci => ci.ImgPath)
                                         .FirstOrDefault(),
                     EvaluationAt = e.CreatedAt
+                })
+                .ToList()
+                .Select(e => new ParticipantEvaluationDto
+                {
+                    ProgramId = e.ProgramId,
+                    StatusId = e.StatusId,
+                    Score = e.Score,
+                    Comment = e.Comment,
+                    SerialNum = e.SerialNum,
+                    ProgramName = e.ProgramName,
+                    ProgramStartDate = e.ProgramStartDate,
+                    ProgramEndDate = e.ProgramEndDate,
+                    CompanyName = e.CompanyName,
+                    CompanyLogo = normalizePath(e.CompanyLogoPath),
+                    EvaluationAt = e.EvaluationAt
                 })
                 .ToList();
 
