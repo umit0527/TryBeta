@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace TryBeta
 {
@@ -13,6 +14,11 @@ namespace TryBeta
 
             // Web API 路由
             config.MapHttpAttributeRoutes();
+
+            // 啟用 CORS
+            // 設定允許的來源
+            //var cors = new EnableCorsAttribute("*", "*", "*");
+            //config.EnableCors(cors);
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",

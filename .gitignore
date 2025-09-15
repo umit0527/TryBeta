@@ -416,3 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+webconnect.config
+TryBeta/OpenAISettings.json
+TryBeta/NewebPaySettings.config
