@@ -15,6 +15,15 @@ namespace TryBeta.Models
     }
     public class ProgramPlanDto : IValidatableObject
     {
+        [JsonProperty("company_name")]
+        public string CompanyName { get; set; }  // 給體驗者端用
+
+        [JsonProperty("company_logo")]
+        public string CompanyLogo { get; set; }  // 給體驗者端用
+
+        [JsonProperty("company_cover")]
+        public string CompanyCover { get; set; }  // 給體驗者端用
+
         [Required(ErrorMessage = "請輸入名稱")]
         [MaxLength(200, ErrorMessage = "名稱最多200字")]
         [JsonProperty("name")]
@@ -107,10 +116,16 @@ namespace TryBeta.Models
         [JsonProperty("is_ongoing")]
         public bool? IsOngoing { get; set; }    // 體驗是否進行中 (體驗進行後用，給體驗者端呈現用)
 
+        public SimpleEntityDto Industry { get; set; }
+        public SimpleEntityDto JobTitle { get; set; }
+        public SimpleEntityDto Status { get; set; }
+
+
         // 圖片清單
-        public List<string> Images { get; set; } = new List<string>();
+        public List<string> Images { get; set; } = new List<string>();  //企業端上傳圖片用
 
         public List<ProgramStepDto> Steps { get; set; } = new List<ProgramStepDto>();
+
 
 
         /// <summary>
@@ -150,5 +165,22 @@ namespace TryBeta.Models
                 new[] { nameof(MaxPeople), nameof(MinPeople) });
             }
         }
+        public class SimpleEntityDto
+        {
+            public int Id { get; set; }
+            public string Title { get; set; }
+        }
+        public class StepDto
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string Description { get; set; }
+        }
+
+        //public class ImageDto
+        //{
+        //    public int Id { get; set; }
+        //    public string Url { get; set; }
+        //}
     }
 }

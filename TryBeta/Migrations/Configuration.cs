@@ -681,6 +681,15 @@ new UserStatus { Title = "Expired" },
 new UserStatus { Title = "Unused" },
 new UserStatus { Title = "Full" }
 );
+            //體驗者申請狀態表
+            context.ProgramSubmitStatuses.AddOrUpdate(
+    s => s.Id,
+    new ProgramSubmitStatus { Id = 1, Title = "待審核" },
+    new ProgramSubmitStatus { Id = 2, Title = "已通過" },
+    new ProgramSubmitStatus { Id = 3, Title = "已拒絕" }
+    );
+
+
 
         }
     }

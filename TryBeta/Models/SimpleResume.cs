@@ -24,7 +24,7 @@ namespace TryBeta.Models
 
         // 預設履歷：0 = 關閉，1 = 啟用
         [JsonProperty("is_active")]
-        public int IsActive { get; set; } = 0;
+        public bool IsActive { get; set; }
 
         [JsonProperty("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
