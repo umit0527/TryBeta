@@ -9,7 +9,7 @@ namespace TryBeta.Models
 {
     public class CompanInfoDto
     {
-        public class CompanyRegisterDto
+        public class CompanyRegisterDto  //企業註冊
         {
             // 公司資料
             [JsonProperty("name")]
@@ -61,7 +61,7 @@ namespace TryBeta.Models
             public List<CompanyImgDto> CompanyImg { get; set; }
 
         }
-        public class CompanyContactDto
+        public class CompanyContactDto  //企業聯絡人
         {
             [JsonProperty("name")]
             [Required(ErrorMessage = "請輸入聯絡人名稱")]
@@ -82,7 +82,7 @@ namespace TryBeta.Models
 
             public string Phone { get; set; }
         }
-        public class CompanyImgDto
+        public class CompanyImgDto  //企業基本資料的圖片
         {
             [JsonProperty("type")]
             public string Type { get; set; }
@@ -90,5 +90,30 @@ namespace TryBeta.Models
             [JsonProperty("img_path")]
             public string ImgPath { get; set; }
         }
+<<<<<<< HEAD
+=======
+
+        public class CompanyPlanOrderDto  //企業方案訂單
+        {
+            public int Id { get; set; }
+            public string OrderNum { get; set; }
+            public string PlanName { get; set; }
+            public int DurationDays { get; set; }
+            public decimal Price { get; set; }
+            public int Maxparticipants { get; set; }
+            public string PaymentMethod { get; set; }
+            public string PaymentStatus { get; set; }
+            public DateTime StartDate { get; set; }
+            public DateTime? EndDate { get; set; }
+
+            public CompanyInfoDto Company { get; set; }
+        }
+
+        public class CompanyInfoDto  //給企業方案訂單用的
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+>>>>>>> API-Plan
     }
 }

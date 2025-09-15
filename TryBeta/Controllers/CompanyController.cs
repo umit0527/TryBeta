@@ -19,7 +19,7 @@ namespace TryBeta.Controllers
     {
         private TryBetaDbContext db = new TryBetaDbContext();
 
-        // GET: api/CompanyRegister 
+        // GET: api/Company 
         [HttpGet]
         [Route("")]
         public IQueryable<CompanyInfoes> GetCompanyinfos()
@@ -27,40 +27,34 @@ namespace TryBeta.Controllers
             return db.Companyinfoes;
         }
 
-        // GET: api/CompanyRegister/5 取得基本資料
-        
+        // GET: api/Company/ 取得登入企業的基本資料
         [HttpGet]
-        [Route("{id:int}")]
-        [JwtAuthFilter]
+        [Route("{userid:int}")]
+        [JwtAuthFilter] 
         [ResponseType(typeof(CompanyRegisterDto))]
-        public IHttpActionResult GetCompanyInfo(int id)
+        public IHttpActionResult GetMyCompanyInfo()
         {
-            // 先從 JwtAuthFilter 裡取得 UserId
+            // 1. 從 JwtAuthFilter 裡取得 UserId
             if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
             {
-                return Unauthorized();
+                return Unauthorized(); // Token 無效或缺少
             }
             int userId = (int)userIdObj;
 
-            // 權限判斷：確認該 userId 是否屬於 id 這個公司
-            bool hasAccess = db.Companyinfoes.Any(c => c.Id == id && c.UserId == userId);
-            if (!hasAccess)
-            {
-                var resp = Request.CreateResponse(HttpStatusCode.Unauthorized, new { message = "權限不足" });
-                return ResponseMessage(resp);
-            }
+            // 2. 從資料庫抓取登入者所屬的公司資料
+            //    Include 關聯表：CompanyContacts、CompanyImages、User
+            var companyEntity = db.Companyinfoes
+                                  .Include(c => c.CompanyContacts)
+                                  .Include(c => c.CompanyImages)
+                                  .Include(c => c.User)
+                                  .FirstOrDefault(c => c.UserId == userId);
 
-            // 1. 從資料庫抓
-            var companyEntity = db.Companyinfoes.Include(c => c.CompanyContacts)
-                                                .Include(c => c.CompanyImages)
-                                                .Include(c => c.User)
-                                                .FirstOrDefault(c => c.Id == id);
             if (companyEntity == null)
             {
-                return NotFound();
+                return NotFound(); 
             }
 
-            // 2. Entity轉DTO（這裡簡單手動轉）
+            // 3. Entity 轉 DTO（這裡簡單手動轉）
             var dto = new CompanyRegisterDto
             {
                 Name = companyEntity.Name,
@@ -70,7 +64,7 @@ namespace TryBeta.Controllers
                 Website = companyEntity.Website,
                 Intro = companyEntity.Intro,
                 ScaleId = companyEntity.ScaleId,
-                Account = companyEntity.User.Account,  // 假設你要回帳號（但一般不會回密碼）
+                Account = companyEntity.User.Account,  // 回傳帳號（密碼不回傳）
                 Email = companyEntity.User.Email,
                 // 轉聯絡人
                 CompanyContact = companyEntity.CompanyContacts.Select(contact => new CompanyContactDto
@@ -88,7 +82,7 @@ namespace TryBeta.Controllers
                 }).ToList()
             };
 
-            // 3. 回傳DTO
+            // 4. 回傳 DTO
             return Ok(dto);
         }
 

@@ -34,6 +34,8 @@ namespace TryBeta.Models
         public DbSet<Position> Positions { get; set; }  //職務表
         public DbSet<City> City { get; set; }  //城市表
         public DbSet<District> Districts { get; set; }  //鄉鎮表
+        public DbSet<Plan> Plan { get; set; } //方案表
+        public DbSet<CompanyPlanOrder> CompanyPlanOrders { get; set; } //企業方案訂單
 
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -53,6 +55,12 @@ namespace TryBeta.Models
                 .WithMany()
                 .HasForeignKey(u => u.UserId)
                 .WillCascadeOnDelete(false);
+
+            //企業購買的方案訂單表
+            modelBuilder.Entity<Plan>()
+        .Property(p => p.Price)
+        .HasPrecision(18, 2);
+
 
             base.OnModelCreating(modelBuilder);
         }

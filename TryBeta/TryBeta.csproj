@@ -187,8 +187,10 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\CompanyController.cs" />
+    <Compile Include="Controllers\CompanyPlanOrdersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ParticipantController.cs" />
+    <Compile Include="Controllers\PlansController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -237,6 +239,26 @@
     <Compile Include="Migrations\202508131309588_adjustParticipatDtoName.Designer.cs">
       <DependentUpon>202508131309588_adjustParticipatDtoName.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508140617190_test.cs" />
+    <Compile Include="Migrations\202508140617190_test.Designer.cs">
+      <DependentUpon>202508140617190_test.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508140719318_addPlanModel.cs" />
+    <Compile Include="Migrations\202508140719318_addPlanModel.Designer.cs">
+      <DependentUpon>202508140719318_addPlanModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508140733040_addPlanSeed.cs" />
+    <Compile Include="Migrations\202508140733040_addPlanSeed.Designer.cs">
+      <DependentUpon>202508140733040_addPlanSeed.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508140738284_adjustPlanSeed.cs" />
+    <Compile Include="Migrations\202508140738284_adjustPlanSeed.Designer.cs">
+      <DependentUpon>202508140738284_adjustPlanSeed.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508140950518_addCompanyPlanOrderDto.cs" />
+    <Compile Include="Migrations\202508140950518_addCompanyPlanOrderDto.Designer.cs">
+      <DependentUpon>202508140950518_addCompanyPlanOrderDto.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
@@ -244,6 +266,7 @@
     <Compile Include="Models\CompanyImages.cs" />
     <Compile Include="Models\CompanyInfoes.cs" />
     <Compile Include="Models\CompanyLoginDto.cs" />
+    <Compile Include="Models\CompanyPlanOrder.cs" />
     <Compile Include="Models\CompanyScales.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\District.cs" />
@@ -254,6 +277,7 @@
     <Compile Include="Models\JwtAuthUtil.cs" />
     <Compile Include="Models\ParticipantDto.cs" />
     <Compile Include="Models\PasswordHash.cs" />
+    <Compile Include="Models\Plan.cs" />
     <Compile Include="Models\PortfolioLinks.cs" />
     <Compile Include="Models\Position.cs" />
     <Compile Include="Models\ResumeEducation.cs" />
@@ -441,6 +465,21 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508131309588_adjustParticipatDtoName.resx">
       <DependentUpon>202508131309588_adjustParticipatDtoName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140617190_test.resx">
+      <DependentUpon>202508140617190_test.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140719318_addPlanModel.resx">
+      <DependentUpon>202508140719318_addPlanModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140733040_addPlanSeed.resx">
+      <DependentUpon>202508140733040_addPlanSeed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140738284_adjustPlanSeed.resx">
+      <DependentUpon>202508140738284_adjustPlanSeed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508140950518_addCompanyPlanOrderDto.resx">
+      <DependentUpon>202508140950518_addCompanyPlanOrderDto.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

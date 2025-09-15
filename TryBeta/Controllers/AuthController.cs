@@ -71,7 +71,7 @@ namespace TryBeta.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Auth
+        // POST: api/Auth 企業登入
         [HttpPost]
         [Route("company/login")]
         [ResponseType(typeof(Users))]
@@ -139,9 +139,9 @@ namespace TryBeta.Controllers
             });
         }
 
-        // POST: api/Auth
+        // POST: api/Auth 體驗者登入
         [HttpPost]
-        [Route("users/login")]
+        [Route("users/login")] 
         [ResponseType(typeof(Users))]
         public IHttpActionResult PostParticipantLogin(ParticipantLoginDto dto)
         {

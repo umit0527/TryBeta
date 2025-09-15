@@ -629,7 +629,30 @@
                 new District { Name = "七美鄉", CityId = penghu.Id }
             );
 
+            //方案表
+            var plansData = new[]
+{
+    new { Name = "方案A", Price = 1000, DurationDays = 30, MaxParticipants = 10 },
+    new { Name = "方案B", Price = 2000, DurationDays = 60, MaxParticipants = 30 },
+    new { Name = "方案C", Price = 2700, DurationDays = 90, MaxParticipants = 50 },
+    new { Name = "方案D", Price = 5000, DurationDays = 180, MaxParticipants = 100 },
+    new { Name = "方案E", Price = 9000, DurationDays = 365, MaxParticipants = 200 }
+};
 
+            // 將資料轉成 Plan 實例並 AddOrUpdate
+            foreach (var pd in plansData)
+            {
+                context.Plan.AddOrUpdate(
+                    p => p.Name, // 用 Name 當唯一鍵判斷新增或更新
+                    new Plan
+                    {
+                        Name = pd.Name,
+                        Price = pd.Price,
+                        DurationDays = pd.DurationDays,
+                        MaxParticipants = pd.MaxParticipants
+                    }
+                );
+            }
         }
     }
 }
