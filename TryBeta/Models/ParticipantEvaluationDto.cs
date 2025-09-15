@@ -16,6 +16,9 @@ namespace TryBeta.Models
     }
     public class ParticipantEvaluationDto
     {
+        [JsonProperty("program_id")]
+        public int ProgramId { get; set; }
+
         [JsonProperty("status_id")]
         public ReviewStatus StatusId { get; set; }  // 1: 待審核, 2: 已通過, 3: 已拒絕
 

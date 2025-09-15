@@ -421,9 +421,13 @@ webconnect.config
 TryBeta/OpenAISettings.json
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 TryBeta/NewebPaySettings.config
 >>>>>>> API-NewebPay
 =======
 TryBeta/NewebPaySettings.config
 >>>>>>> API-Google
+=======
+TryBeta/NewebPaySettings.config
+>>>>>>> API-Image

@@ -126,6 +126,7 @@ namespace TryBeta.Controllers
                     user.Account,
                     user.Email,
                     user.Role,
+                    companyId = company?.Id
                 }
                 
             });

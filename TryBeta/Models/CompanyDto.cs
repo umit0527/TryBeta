@@ -37,6 +37,9 @@ namespace TryBeta.Models
             [JsonProperty("scale_id")]
             public int ScaleId { get; set; }
 
+            [JsonProperty("company_logo")]
+            public string CompanyLogo { get; set; }
+
             // 使用者帳號資料
             [JsonProperty("account")]
             [Required(ErrorMessage = "請輸入帳號")]
