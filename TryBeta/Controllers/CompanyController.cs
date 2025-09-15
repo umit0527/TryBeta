@@ -14,12 +14,12 @@ using static TryBeta.Models.CompanInfoDto;
 
 namespace TryBeta.Controllers
 {
-    [RoutePrefix("api/company")]
+    [RoutePrefix("api/v1/company")]
     public class CompanyController : ApiController
     {
         private TryBetaDbContext db = new TryBetaDbContext();
 
-        // GET: api/CompanyRegister
+        // GET: api/CompanyRegister 
         [HttpGet]
         [Route("")]
         public IQueryable<CompanyInfoes> GetCompanyinfos()
@@ -27,12 +27,29 @@ namespace TryBeta.Controllers
             return db.Companyinfoes;
         }
 
-        // GET: api/CompanyRegister/5
+        // GET: api/CompanyRegister/5 取得基本資料
+        
         [HttpGet]
         [Route("{id:int}")]
+        [JwtAuthFilter]
         [ResponseType(typeof(CompanyRegisterDto))]
         public IHttpActionResult GetCompanyInfo(int id)
         {
+            // 先從 JwtAuthFilter 裡取得 UserId
+            if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
+            {
+                return Unauthorized();
+            }
+            int userId = (int)userIdObj;
+
+            // 權限判斷：確認該 userId 是否屬於 id 這個公司
+            bool hasAccess = db.Companyinfoes.Any(c => c.Id == id && c.UserId == userId);
+            if (!hasAccess)
+            {
+                var resp = Request.CreateResponse(HttpStatusCode.Unauthorized, new { message = "權限不足" });
+                return ResponseMessage(resp);
+            }
+
             // 1. 從資料庫抓
             var companyEntity = db.Companyinfoes.Include(c => c.CompanyContacts)
                                                 .Include(c => c.CompanyImages)
@@ -112,48 +129,63 @@ namespace TryBeta.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/CompanyRegister 
+        // POST: api/Company 註冊 
         [HttpPost]
         [Route("")]
         [ResponseType(typeof(CompanyInfoes))]
         public IHttpActionResult PostCompanyInfo(CompanyRegisterDto dto)
         {
+            var allErrors = new List<string>();
+
+            // 先跑 ModelState 驗證
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                var modelErrors = ModelState.Values.SelectMany(v => v.Errors)
                                   .Select(e => e.ErrorMessage)
                                   .ToList();
-                var content = new { status = 400, message = "資料驗證失敗", errors = errors };
-                return Content(HttpStatusCode.BadRequest, content);
+                allErrors.AddRange(modelErrors);
             }
 
             // 檢查帳號、Email 在 Users 表中是否已存在，409
             bool accountExists = db.Users.Any(u => u.Account == dto.Account);
             if (accountExists)
             {
-                return Conflict("該帳號已被使用");
+                allErrors.Add("該帳號已被使用");
             }
 
             bool emailExists = db.Users.Any(u => u.Email == dto.Email);
             if (emailExists)
             {
-                return Conflict("該 Email 已被使用");
+                allErrors.Add("該 Email 已被使用");
             }
 
             // 企業名稱和統編在 CompanyInfo 表中檢查
             bool nameExists = db.Companyinfoes.Any(c => c.Name == dto.Name);
             if (nameExists)
             {
-                return Conflict("該企業名稱已被使用");
+                allErrors.Add("該企業名稱已被使用");
             }
 
             bool taxExists = db.Companyinfoes.Any(c => c.TaxIdNum == dto.TaxIdNum);
             if (taxExists)
             {
-                return Conflict("該統編已被使用");
+                allErrors.Add("該統編已被使用");
+            }
+
+            // 如果有任何錯誤就統一回傳
+            if (allErrors.Any())
+            {
+                var content = new
+                {
+                    status = 400,
+                    message = "註冊資料有誤",
+                    errors = allErrors
+                };
+                return Content(HttpStatusCode.BadRequest, content);
             }
 
             var hashedPassword = PasswordHasher.HashPassword(dto.Password); // 將密碼(明碼)加鹽雜湊
+            
             // 若帳號和email是獨立 User 表的資料，需要先建立 User
             using (var transaction = db.Database.BeginTransaction())
             {
@@ -166,7 +198,7 @@ namespace TryBeta.Controllers
                         Email = dto.Email,
                         PasswordHash = hashedPassword,
                         Role = "Company",
-                        Status = 1,
+                        Status = 1, // 預設啟用
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now
                     };
@@ -237,7 +269,21 @@ namespace TryBeta.Controllers
                     }
                     transaction.Commit();
 
-                    return Content(HttpStatusCode.Created, company);  //201
+                    return Content(HttpStatusCode.Created, new
+                    {
+                        status=201,
+                        message = "註冊成功",
+                        Name = dto.Name,
+                        IndustryId = dto.IndustryId,
+                        TaxIdNum = dto.TaxIdNum,
+                        Address = dto.Address,
+                        Website = dto.Website,
+                        Intro = dto.Intro,
+                        ScaleId = dto.ScaleId,
+                        UserId = user.Id,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                    });  //201
                 }
                 catch (Exception ex)
                 {

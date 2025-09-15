@@ -19,7 +19,7 @@ namespace TryBeta.Models
             [JsonProperty("industry_id")]
             public int IndustryId { get; set; }
 
-            [JsonProperty("tax_id_number")]
+            [JsonProperty("tax_id_num")]
             [RegularExpression(@"^\d{8}$", ErrorMessage = "統一編號必須是 8 碼的數字")]
             public string TaxIdNum { get; set; }
 
@@ -42,13 +42,16 @@ namespace TryBeta.Models
             [RegularExpression(@"^[a-zA-Z0-9]+$", ErrorMessage = "帳號只能包含英文與數字")]
             public string Account { get; set; }
 
-            [JsonProperty]
+            [JsonProperty("email")]
+            [Required(ErrorMessage = "請輸入Email")]
             [EmailAddress(ErrorMessage = "格式不正確，請重新輸入")]
             public string Email { get; set; }
 
             [JsonProperty("password")]
             [Required(ErrorMessage = "請輸入密碼")]
             [RegularExpression(@"^[\x21-\x7E]+$", ErrorMessage = "密碼只能包含英文、數字與符號")]
+            [MinLength(6, ErrorMessage = "密碼至少需要 6 個字元")]
+            [MaxLength(100, ErrorMessage = "密碼最多不可超過 100 個字元")]
             public string Password { get; set; } //暫存前端輸入進來的密碼，非雜湊過
 
             // 新增聯絡人列表
