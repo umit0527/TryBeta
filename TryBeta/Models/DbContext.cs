@@ -48,12 +48,8 @@ namespace TryBeta.Models
         public DbSet<ProgramPlanStatus> ProgramPlanStatuses { get; set; } //體驗計畫狀態表
         public DbSet<ProgramSubmit> ProgramSubmits { get; set; } //體驗計畫申請表 (體驗者)
         public DbSet<ProgramSubmitStatus> ProgramSubmitStatuses { get; set; } //體驗計畫申請狀態表 (體驗者)
-<<<<<<< HEAD
-=======
         public DbSet<ParticipantEvaluation> ParticipantEvaluations { get; set; } //體驗者(過去)評價表 (體驗者)
 
-
->>>>>>> API-ParticipantEvaluation
 
 
 
@@ -94,9 +90,6 @@ namespace TryBeta.Models
         .HasForeignKey(s => s.StatusId)
         .WillCascadeOnDelete(false);
 
-<<<<<<< HEAD
-            base.OnModelCreating(modelBuilder);
-=======
             modelBuilder.Entity<ParticipantInfoes>()
            .HasRequired(p => p.District)
            .WithMany()
@@ -108,7 +101,6 @@ namespace TryBeta.Models
                 .WithMany()
                 .HasForeignKey(p => p.CityId)
                 .WillCascadeOnDelete(false);
->>>>>>> API-ParticipantEvaluation
 
             base.OnModelCreating(modelBuilder);
         }

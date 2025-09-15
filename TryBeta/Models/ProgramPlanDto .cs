@@ -25,14 +25,11 @@ namespace TryBeta.Models
         [JsonProperty("company_cover")]
         public string CompanyCover { get; set; }
 
-<<<<<<< HEAD
-=======
         [Required]
         [StringLength(50)]
         [JsonProperty("serial_num")]
         public string SerialNum { get; set; }
 
->>>>>>> API-ParticipantEvaluation
         [Required(ErrorMessage = "請輸入名稱")]
         [MaxLength(200, ErrorMessage = "名稱最多200字")]
         [JsonProperty("name")]

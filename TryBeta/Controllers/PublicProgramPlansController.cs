@@ -387,17 +387,10 @@ namespace TryBeta.Controllers
             // 排序
             switch (sort?.ToLower())
             {
-<<<<<<< HEAD
-                case "submit_asc":  //申請日期舊到新
-                    query = query.OrderBy(s => s.SubmitAt);
-                    break;
-                case "submit_desc": //申請日期新到舊
-=======
                 case "submit_asc":  // 申請日期舊到新
                     query = query.OrderBy(s => s.SubmitAt);
                     break;
                 case "submit_desc": // 申請日期新到舊
->>>>>>> API-ParticipantEvaluation
                     query = query.OrderByDescending(s => s.SubmitAt);
                     break;
                 case "program_start_asc":  // 體驗開始日期舊到新
@@ -424,11 +417,7 @@ namespace TryBeta.Controllers
                 case "publish_end_desc":  // 刊登結束日期新到舊
                     query = query.OrderByDescending(s => s.ProgramPlan.PublishEndDate);
                     break;
-<<<<<<< HEAD
-                default:   //預設申請日期新到舊
-=======
                 default:   // 預設申請日期新到舊
->>>>>>> API-ParticipantEvaluation
                     query = query.OrderByDescending(s => s.SubmitAt);
                     break;
             }
@@ -487,8 +476,6 @@ namespace TryBeta.Controllers
             });
         }
 
-<<<<<<< HEAD
-=======
         // GET: api/v1/users/{userId}/programs/{programId}/evaluation 取得體驗者的單一體驗評價頁資訊(填寫評價內容)
         [HttpGet]
         [Route("~/api/v1/users/{userId}/programs/{programId}/evaluation")]
@@ -517,7 +504,6 @@ namespace TryBeta.Controllers
             return Ok(dto);
         }
 
->>>>>>> API-ParticipantEvaluation
         // PUT: api/PublicProgramPlans/5
         [ResponseType(typeof(void))]
         public IHttpActionResult PutProgramPlan(int id, ProgramPlan programPlan)
@@ -615,9 +601,6 @@ namespace TryBeta.Controllers
                     return BadRequest("履歷類型錯誤");
                 }
 
-<<<<<<< HEAD
-                // 7. 建立 ProgramSubmit
-=======
                 // 7. 生成申請編號 PA-2025-0818-001
                 string prefix = "PA";
                 string year = DateTime.Now.Year.ToString();
@@ -630,26 +613,17 @@ namespace TryBeta.Controllers
                 string participantSerialNumber = $"{prefix}-{year}-{shortDate}-{countToday:D3}";
 
                 // 8. 建立 ProgramSubmit
->>>>>>> API-ParticipantEvaluation
                 var submit = new ProgramSubmit
                 {
                     ProgramPlanId = programId,
                     ParticipantId = participant.Id,
                     ParticipantsCount = dto.ParticipantsCount,
-<<<<<<< HEAD
-                    Note = dto.Note,
-=======
->>>>>>> API-ParticipantEvaluation
                     MotivationContent = dto.MotivationContent,
                     ResumeType = dto.ResumeType,
                     SubmitAt = DateTime.Now,
                     StatusId = 1, // 待審核
-<<<<<<< HEAD
-                    AgreeTerms = dto.AgreeTerms
-=======
                     AgreeTerms = dto.AgreeTerms,
                     ParticipantSerialNum = participantSerialNumber
->>>>>>> API-ParticipantEvaluation
                 };
 
                 if (resumeType == "simple resume")
@@ -663,13 +637,8 @@ namespace TryBeta.Controllers
                 return Ok(new
                 {
                     success = true,
-<<<<<<< HEAD
-                    //application_id = submit.Id,
-                    message = "申請已送出，請等待企業審核"
-=======
                     application_number = submit.ParticipantSerialNum,
                     message = "申請已送出，等待企業審核"
->>>>>>> API-ParticipantEvaluation
                 });
             }
             catch (Exception ex)
@@ -677,8 +646,6 @@ namespace TryBeta.Controllers
                 return InternalServerError(ex);
             }
         }
-<<<<<<< HEAD
-=======
         
         // POST: api/v1/users/{userId}/programs/{programId}/evaluation    體驗者提交評價
         [HttpPost]
@@ -729,7 +696,6 @@ namespace TryBeta.Controllers
 
             return Ok(response);
         }
->>>>>>> API-ParticipantEvaluation
 
         // DELETE: api/PublicProgramPlans/5
         [ResponseType(typeof(ProgramPlan))]

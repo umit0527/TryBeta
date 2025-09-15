@@ -194,10 +194,7 @@ namespace TryBeta.Controllers
 
 
             var hashedPassword = PasswordHasher.HashPassword(dto.Password); // 將密碼(明碼)加鹽雜湊
-<<<<<<< HEAD
-=======
 
->>>>>>> API-ParticipantEvaluation
             // 若帳號和email是獨立 User 表的資料，需要先建立 User
             using (var transaction = db.Database.BeginTransaction())
             {

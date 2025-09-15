@@ -10,10 +10,8 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using TryBeta.Models;
-<<<<<<< HEAD
-=======
+
 using static TryBeta.Models.ParticipantDetailDto;
->>>>>>> API-ParticipantEvaluation
 
 namespace TryBeta.Controllers
 {
@@ -63,13 +61,6 @@ namespace TryBeta.Controllers
         //                p.StatusId,
         //                p.Name,
         //                p.Intro,
-<<<<<<< HEAD
-                        
-                        
-=======
-
-
->>>>>>> API-ParticipantEvaluation
         //                p.PublishStartDate,
         //                p.PublishDurationDays,
         //                p.ProgramStartDate,
@@ -99,11 +90,7 @@ namespace TryBeta.Controllers
 
         // GET: api/v1/company/{companyid}/programs/{programId} 取得單一體驗計畫詳情
         [HttpGet]
-<<<<<<< HEAD
         [Route("programs/{programId:int}")]  
-=======
-        [Route("programs/{programId:int}")]
->>>>>>> API-ParticipantEvaluation
         [JwtAuthFilter]
         public IHttpActionResult GetProgramPlan(int companyid, int programId)
         {
@@ -146,11 +133,7 @@ namespace TryBeta.Controllers
                 var industry = db.Industries
                     .Where(i => i.Id == programPlan.IndustryId)
                     .Select(i => new { i.Id, i.Title })
-<<<<<<< HEAD
-                    .FirstOrDefault(); 
-=======
                     .FirstOrDefault();
->>>>>>> API-ParticipantEvaluation
                 var jobTitle = db.Positions
                     .Where(j => j.Id == programPlan.JobTitleId)
                     .Select(j => new { j.Id, j.Title })
@@ -210,11 +193,8 @@ namespace TryBeta.Controllers
         string search = null,
         int? industry_id = null,
         int? job_title_id = null,
-<<<<<<< HEAD
-        int? status = null,   // 1=全部 2=已通過 3=已發布 4=待發布 5=已拒絕 6=審核中
-=======
-        int? status_id = null,
->>>>>>> API-ParticipantEvaluation
+
+        int? status_id = null,// 1=全部 2=已通過 3=已發布 4=待發布 5=已拒絕 6=審核中
         string sort = "publish_start_desc",
         int page = 1,
         int limit = 21)
@@ -238,13 +218,8 @@ namespace TryBeta.Controllers
                 // 關鍵字搜尋
                 if (!string.IsNullOrEmpty(search))
                 {
-<<<<<<< HEAD
-                    query = query.Where(p => p.Name.Contains(search) || 
-                                        p.Intro.Contains(search) || 
-=======
                     query = query.Where(p => p.Name.Contains(search) ||
                                         p.Intro.Contains(search) ||
->>>>>>> API-ParticipantEvaluation
                                         p.Steps.Any(s => s.Name.Contains(search) ||
                                         s.Description.Contains(search)));
                 }
@@ -261,38 +236,6 @@ namespace TryBeta.Controllers
                     query = query.Where(p => p.JobTitleId == job_title_id.Value);
                 }
 
-<<<<<<< HEAD
-                if (status.HasValue)
-                {
-                    var s = (ProgramPlanStatusEnum)status.Value;
-                    switch (s)
-                    {
-                        case ProgramPlanStatusEnum.SystemPass:
-                        case ProgramPlanStatusEnum.ManualPass:
-                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.SystemPass
-                                                   || p.StatusId == (int)ProgramPlanStatusEnum.ManualPass);
-                            break;
-
-                        case ProgramPlanStatusEnum.Published:
-                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.Published
-                                                   && p.PublishStartDate <= DateTime.Now
-                                                   && p.PublishEndDate >= DateTime.Now);
-                            break;
-
-                        case ProgramPlanStatusEnum.Pending:
-                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.Pending
-                                                   && p.PublishStartDate > DateTime.Now);
-                            break;
-
-                        case ProgramPlanStatusEnum.SystemRejected:
-                        case ProgramPlanStatusEnum.ManualRejected:
-                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.SystemRejected
-                                                   || p.StatusId == (int)ProgramPlanStatusEnum.ManualRejected);
-                            break;
-
-                        case ProgramPlanStatusEnum.UnderReview:
-                            query = query.Where(p => p.StatusId == (int)ProgramPlanStatusEnum.UnderReview);
-=======
                 // 狀態篩選
                 if (status_id.HasValue)
                 {
@@ -348,7 +291,6 @@ namespace TryBeta.Controllers
 
                         default:
                             // 不做篩選 (全部)
->>>>>>> API-ParticipantEvaluation
                             break;
                     }
                 }
@@ -427,7 +369,7 @@ namespace TryBeta.Controllers
             }
         }
 
-<<<<<<< HEAD
+
         // PUT: api/ProgramPlans/5
         [ResponseType(typeof(void))]
         public IHttpActionResult PutProgramPlans(int id, ProgramPlan programPlans)
@@ -476,7 +418,7 @@ namespace TryBeta.Controllers
 
             return CreatedAtRoute("DefaultApi", new { id = programPlans.Id }, programPlans);
         }
-=======
+
         // GET: api/v1/company/{companyid}/programs/{programId}/applications  查看單一體驗的申請者列表
         [HttpGet]
         [Route("~/api/v1/company/programs/{programId:int}/applications")]
@@ -712,7 +654,6 @@ namespace TryBeta.Controllers
 
         //    return CreatedAtRoute("DefaultApi", new { id = programPlans.Id }, programPlans);
         //}
->>>>>>> API-ParticipantEvaluation
 
         // POST: api/v1/program 新增體驗計畫
         [HttpPost]
@@ -721,24 +662,6 @@ namespace TryBeta.Controllers
         public IHttpActionResult CreateProgramPlan([FromBody] ProgramPlanDto dto)
         {
             try
-<<<<<<< HEAD
-            {   // 1. 驗證最大.最少人數與階段
-                if (dto.MaxPeople < dto.MinPeople)
-                {
-                    return BadRequest("最大人數不得小於最少人數");
-                }
-
-                //if (dto.Steps.Count > 5)
-                //{
-                //    return BadRequest("階段數量不能超過 5 個");
-                //}
-
-                // 2. 取得登入企業 ID
-                if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
-                {
-                    return Unauthorized();
-                }
-=======
             {
                 // 1. 驗證最大.最少人數
                 if (dto.MaxPeople < dto.MinPeople)
@@ -747,24 +670,10 @@ namespace TryBeta.Controllers
                 // 2. 取得登入企業 ID
                 if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
                     return Unauthorized();
->>>>>>> API-ParticipantEvaluation
                 int companyId = (int)userIdObj;
 
                 // 3. 檢查方案是否過期並更新狀態
                 var planUsage = db.PlanUsage
-<<<<<<< HEAD
-            .Include("Plan")
-            .Include("PlanUsageStatus")
-            .Where(p => p.CompanyId == companyId)
-            .OrderByDescending(p => p.StartDate)
-            .FirstOrDefault();
-
-                if (planUsage == null)
-                    return BadRequest("尚未購買方案或方案已過期");
-                // 4. 驗證方案狀態（過期 / 額滿）
-                bool changed = false;
-
-=======
                     .Include("Plan")
                     .Include("PlanUsageStatus")
                     .Where(p => p.CompanyId == companyId)
@@ -775,7 +684,6 @@ namespace TryBeta.Controllers
                     return BadRequest("尚未購買方案或方案已過期");
 
                 bool changed = false;
->>>>>>> API-ParticipantEvaluation
                 if (planUsage.EndDate.HasValue && planUsage.EndDate.Value.Date < DateTime.Now.Date)
                 {
                     planUsage.StatusId = 2; // expired
@@ -787,22 +695,6 @@ namespace TryBeta.Controllers
                     changed = true;
                 }
 
-<<<<<<< HEAD
-                if (changed)
-                    db.SaveChanges();
-
-                if (planUsage.StatusId != 1) // 1 = active
-                    return BadRequest("方案不可用（已過期或已額滿）");
-
-                // 5. 驗證剩餘人數
-                if (planUsage.RemainingPeople < dto.MaxPeople)
-                    return BadRequest("體驗剩餘人數不足");
-
-                // 6. 建立 ProgramPlan
-                var programPlan = new ProgramPlan
-                {
-                    CompanyId = companyId,
-=======
                 if (changed) db.SaveChanges();
                 if (planUsage.StatusId != 1) return BadRequest("方案不可用（已過期或已額滿）");
                 if (planUsage.RemainingPeople < dto.MaxPeople) return BadRequest("體驗剩餘人數不足");
@@ -818,7 +710,6 @@ namespace TryBeta.Controllers
                 {
                     CompanyId = companyId,
                     SerialNum = serialNumber,
->>>>>>> API-ParticipantEvaluation
                     Name = dto.Name,
                     Intro = dto.Intro,
                     IndustryId = dto.IndustryId,
@@ -836,22 +727,14 @@ namespace TryBeta.Controllers
                     ProgramStartDate = dto.ProgramStartDate,
                     ProgramEndDate = dto.ProgramEndDate,
                     ProgramDurationDays = (dto.ProgramEndDate - dto.ProgramStartDate).Days + 1,
-<<<<<<< HEAD
-                    StatusId = 1, // 暫扣人數
-=======
-                    StatusId = 1,
->>>>>>> API-ParticipantEvaluation
+                    StatusId = 1,// 暫扣人數
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
                 db.ProgramPlan.Add(programPlan);
                 db.SaveChanges();
 
-<<<<<<< HEAD
-                // 7. 建立階段
-=======
                 // 6. 建立階段
->>>>>>> API-ParticipantEvaluation
                 foreach (var stepDto in dto.Steps)
                 {
                     var step = new ProgramStep
@@ -865,18 +748,10 @@ namespace TryBeta.Controllers
                     db.ProgramStep.Add(step);
                 }
 
-<<<<<<< HEAD
-                // 8. 建立圖片 (最多 4 張)
-                if (dto.Images != null && dto.Images.Any())
-                {
-                    if (dto.Images.Count > 4)
-                        return BadRequest("最多只能上傳 4 張圖片");
-=======
                 // 7. 建立圖片
                 if (dto.Images != null && dto.Images.Any())
                 {
                     if (dto.Images.Count > 4) return BadRequest("最多只能上傳 4 張圖片");
->>>>>>> API-ParticipantEvaluation
 
                     foreach (var imgUrl in dto.Images)
                     {
@@ -890,51 +765,6 @@ namespace TryBeta.Controllers
                     }
                 }
 
-<<<<<<< HEAD
-
-                // 9. 扣掉剩餘人數
-                planUsage.RemainingPeople -= dto.MaxPeople;
-                    if (planUsage.RemainingPeople <= 0)
-                    {
-                        planUsage.StatusId = 4; // full
-                    }
-                    db.SaveChanges();
-
-                    // 10. 取得狀態名稱
-                    var statusTitle = db.ProgramPlanStatuses
-                        .Where(s => s.Id == programPlan.StatusId)
-                        .Select(s => s.Title)
-                        .FirstOrDefault();
-
-                    // 11. 回傳 DTO
-                    var responseDto = new ProgramPlanDto
-                    {
-                        StatusId = programPlan.StatusId,
-                        StatusTitle = statusTitle,
-                        Name = programPlan.Name,
-                        Intro = programPlan.Intro,
-                        IndustryId = programPlan.IndustryId,
-                        JobTitleId = programPlan.JobTitleId,
-                        Address = programPlan.Address,
-                        AddressMap = programPlan.AddressMap,
-                        ContactName = programPlan.ContactName,
-                        ContactPhone = programPlan.ContactPhone,
-                        ContactEmail = programPlan.ContactEmail,
-                        MinPeople = programPlan.MinPeople,
-                        MaxPeople = programPlan.MaxPeople,
-                        PublishStartDate = programPlan.PublishStartDate,
-                        PublishDurationDays = programPlan.PublishDurationDays,
-                        PublishEndDate = programPlan.PublishEndDate,
-                        ProgramStartDate = programPlan.ProgramStartDate,
-                        ProgramDurationDays = programPlan.ProgramDurationDays,
-                        ProgramEndDate = programPlan.ProgramEndDate,
-                        Steps = dto.Steps,
-                        Images = dto.Images,
-                    };
-
-                    return Ok(responseDto);
-                }
-=======
                 // 8. 扣掉剩餘人數
                 planUsage.RemainingPeople -= dto.MaxPeople;
                 if (planUsage.RemainingPeople <= 0) planUsage.StatusId = 4; // full
@@ -997,7 +827,6 @@ namespace TryBeta.Controllers
 
                 return Ok(responseDto);
             }
->>>>>>> API-ParticipantEvaluation
             catch (DbEntityValidationException ex)
             {
                 var allErrors = ex.EntityValidationErrors
@@ -1013,8 +842,6 @@ namespace TryBeta.Controllers
             }
         }
 
-<<<<<<< HEAD
-=======
         // PUT: api/ProgramPlans/5
         [HttpPut]
         [Route("~/api/v1/programs/{programId:int}/applications/{participantId:int}/review")]
@@ -1069,7 +896,6 @@ namespace TryBeta.Controllers
             });
         }
 
->>>>>>> API-ParticipantEvaluation
         // DELETE: api/ProgramPlans/5
         [ResponseType(typeof(ProgramPlan))]
         public IHttpActionResult DeleteProgramPlans(int id)

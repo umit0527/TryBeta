@@ -657,15 +657,6 @@
             //體驗計畫狀態表
             context.ProgramPlanStatuses.AddOrUpdate(
 cs => cs.Title,
-<<<<<<< HEAD
-new ProgramPlanStatus { Title = "UnderReview" },
-new ProgramPlanStatus { Title = "SystemPass" },
-new ProgramPlanStatus { Title = "SystemRejected" },
-new ProgramPlanStatus { Title = "ManualPass" },
-new ProgramPlanStatus { Title = "ManualRejected" },
-new ProgramPlanStatus { Title = "Pending" },
-new ProgramPlanStatus { Title = "Published" }
-=======
 new ProgramPlanStatus { Title = "Under Review" },
 new ProgramPlanStatus { Title = "System Pass" },
 new ProgramPlanStatus { Title = "System Rejected" },
@@ -675,7 +666,6 @@ new ProgramPlanStatus { Title = "Pending" },
 new ProgramPlanStatus { Title = "Published" },
 new ProgramPlanStatus { Title = "All Pass" },
 new ProgramPlanStatus { Title = "All Rejected" }
->>>>>>> API-ParticipantEvaluation
 );
 
             //帳號密碼狀態表
@@ -693,14 +683,6 @@ new UserStatus { Title = "Expired" },
 new UserStatus { Title = "Unused" },
 new UserStatus { Title = "Full" }
 );
-<<<<<<< HEAD
-            //體驗者申請狀態表
-            context.ProgramSubmitStatuses.AddOrUpdate(
-    s => s.Id,
-    new ProgramSubmitStatus { Id = 1, Title = "待審核" },
-    new ProgramSubmitStatus { Id = 2, Title = "已通過" },
-    new ProgramSubmitStatus { Id = 3, Title = "已拒絕" }
-=======
 
             //企業審核/體驗者申請狀態表
             context.ProgramSubmitStatuses.AddOrUpdate(
@@ -710,7 +692,6 @@ new UserStatus { Title = "Full" }
     new ProgramSubmitStatus { Id = 3, Title = "Rejected" }, 
     new ProgramSubmitStatus { Id = 4, Title = "Cancelled" }
 
->>>>>>> API-ParticipantEvaluation
     );
 
 
