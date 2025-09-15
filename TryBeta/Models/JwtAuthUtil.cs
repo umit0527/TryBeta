@@ -37,7 +37,7 @@ namespace TryBeta.Models
                 { "Id", id },
                 { "Account", account },
                 { "NickName", name },
-                { "Exp", DateTime.Now.AddMinutes(30).ToString() } // JwtToken 時效設定 30 分
+                { "Exp", DateTime.Now.AddDays(365).ToString() } // JwtToken 時效設定 1 年
             };
 
             ////payload作法2
@@ -65,7 +65,7 @@ namespace TryBeta.Models
                 { "Id", (int)tokenData["Id"] },
                 { "Account", tokenData["Account"].ToString() },
                 { "NickName", tokenData["NickName"].ToString() },
-                { "Exp", DateTime.Now.AddDays(365).ToString() } // JwtToken 時效刷新設定 1年
+                { "Exp", DateTime.Now.AddDays(180).ToString() } // JwtToken 時效刷新設定 半年
             };
 
             //產生刷新時效的 JwtToken
@@ -101,6 +101,15 @@ namespace TryBeta.Models
         public Dictionary<string, object> GetPayload(string token)
         {
             return JWT.Decode<Dictionary<string, object>>(token, Encoding.UTF8.GetBytes(secretKey), JwsAlgorithm.HS512);
+        }
+
+        /// <summary>
+        /// 解析 Token，取得 Exp 過期時間
+        /// </summary>
+        public DateTime GetTokenExpiry(string token)
+        {
+            var payload = GetPayload(token);
+            return Convert.ToDateTime(payload["Exp"]);
         }
     }
 }

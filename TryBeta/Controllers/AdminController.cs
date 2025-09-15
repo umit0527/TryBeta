@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Validation;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -108,7 +109,7 @@ namespace TryBeta.Controllers
             });
         }
 
-        // GET: api/v1/admin/evaluation/{evaluationId}
+        // GET: api/v1/admin/evaluations/{evaluationId}
         // 管理員取得單一體驗的評價資訊
         [HttpGet]
         [Route("evaluations/{evaluationId:int}")]
@@ -186,7 +187,6 @@ namespace TryBeta.Controllers
 
             return Ok(new
             {
-                
                 currentStatus = currentReviewStatus?.status,
                 id = evaluation.Id,
                 evaluationSerialNum = evaluation.SerialNum,
@@ -250,14 +250,30 @@ namespace TryBeta.Controllers
             // 快取目前狀態到 ParticipantEvaluation
             evaluation.StatusId = dto.StatusId;
             evaluation.UpdatedAt = DateTime.Now;
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbEntityValidationException ex)
+            {
+                // 收集 validation error
+                var errors = ex.EntityValidationErrors
+                               .SelectMany(eve => eve.ValidationErrors)
+                               .Select(ve => $"{ve.PropertyName}: {ve.ErrorMessage}")
+                               .ToList();
 
-            db.SaveChanges();
+                // 使用 Content 回傳 JSON，避免 CS1503
+                return Content(System.Net.HttpStatusCode.BadRequest, new
+                {
+                    message = "Validation failed",
+                    errors = errors
+                });
+            }
 
-            // 安全取得 Status Title
             var statusTitle = db.ProgramPlanStatuses
-                .Where(s => s.Id == review.StatusId)
-                .Select(s => s.Title)
-                .FirstOrDefault();
+        .Where(s => s.Id == review.StatusId)
+        .Select(s => s.Title)
+        .FirstOrDefault();
 
             return Ok(new
             {

@@ -237,6 +237,7 @@
     <Compile Include="Controllers\CompanyPlanOrdersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ParticipantController.cs" />
+    <Compile Include="Controllers\PaymentController.cs" />
     <Compile Include="Controllers\PlansController.cs" />
     <Compile Include="Controllers\ProgramPlansController.cs" />
     <Compile Include="Controllers\ProgramRegistrationsController.cs" />
@@ -533,19 +534,115 @@
     <Compile Include="Migrations\202508230815046_add Favorite Table.Designer.cs">
       <DependentUpon>202508230815046_add Favorite Table.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508240723344_adjust JwtAuthFilter&amp;JwtAuthUtil &amp; add API Logout.cs" />
+    <Compile Include="Migrations\202508240723344_adjust JwtAuthFilter&amp;JwtAuthUtil &amp; add API Logout.Designer.cs">
+      <DependentUpon>202508240723344_adjust JwtAuthFilter&amp;JwtAuthUtil &amp; add API Logout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508240808196_adjust model feild.cs" />
+    <Compile Include="Migrations\202508240808196_adjust model feild.Designer.cs">
+      <DependentUpon>202508240808196_adjust model feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508240817295_add foreignkey in companyinfoes scaleid to companyscales.cs" />
+    <Compile Include="Migrations\202508240817295_add foreignkey in companyinfoes scaleid to companyscales.Designer.cs">
+      <DependentUpon>202508240817295_add foreignkey in companyinfoes scaleid to companyscales.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508241336487_add cancelat feild in programsubmt table.cs" />
+    <Compile Include="Migrations\202508241336487_add cancelat feild in programsubmt table.Designer.cs">
+      <DependentUpon>202508241336487_add cancelat feild in programsubmt table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508241420515_fix.cs" />
+    <Compile Include="Migrations\202508241420515_fix.Designer.cs">
+      <DependentUpon>202508241420515_fix.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508241425326_fix2.cs" />
+    <Compile Include="Migrations\202508241425326_fix2.Designer.cs">
+      <DependentUpon>202508241425326_fix2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508250701397_adjust CompanyPlanOrder.cs" />
+    <Compile Include="Migrations\202508250701397_adjust CompanyPlanOrder.Designer.cs">
+      <DependentUpon>202508250701397_adjust CompanyPlanOrder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508250708557_fix companyPlanOrder.cs" />
+    <Compile Include="Migrations\202508250708557_fix companyPlanOrder.Designer.cs">
+      <DependentUpon>202508250708557_fix companyPlanOrder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508250740023_fix CompanyPlanOrder2 .cs" />
+    <Compile Include="Migrations\202508250740023_fix CompanyPlanOrder2 .Designer.cs">
+      <DependentUpon>202508250740023_fix CompanyPlanOrder2 .cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508250820432_add PaymentController.cs" />
+    <Compile Include="Migrations\202508250820432_add PaymentController.Designer.cs">
+      <DependentUpon>202508250820432_add PaymentController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508250906287_adjust LastCardNum.cs" />
+    <Compile Include="Migrations\202508250906287_adjust LastCardNum.Designer.cs">
+      <DependentUpon>202508250906287_adjust LastCardNum.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508260742588_add PaidAt in CompanyPlanOrder Table.cs" />
+    <Compile Include="Migrations\202508260742588_add PaidAt in CompanyPlanOrder Table.Designer.cs">
+      <DependentUpon>202508260742588_add PaidAt in CompanyPlanOrder Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508260816530_fix remote.cs" />
+    <Compile Include="Migrations\202508260816530_fix remote.Designer.cs">
+      <DependentUpon>202508260816530_fix remote.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508271250209_fix ParticipantEvaluation Table.cs" />
+    <Compile Include="Migrations\202508271250209_fix ParticipantEvaluation Table.Designer.cs">
+      <DependentUpon>202508271250209_fix ParticipantEvaluation Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508271314382_fix PUT ReviewParticipant.cs" />
+    <Compile Include="Migrations\202508271314382_fix PUT ReviewParticipant.Designer.cs">
+      <DependentUpon>202508271314382_fix PUT ReviewParticipant.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508271330191_fix PUT ReviewParticipant 2.cs" />
+    <Compile Include="Migrations\202508271330191_fix PUT ReviewParticipant 2.Designer.cs">
+      <DependentUpon>202508271330191_fix PUT ReviewParticipant 2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508271444211_adjust comment in ProgramSubmitReview.cs" />
+    <Compile Include="Migrations\202508271444211_adjust comment in ProgramSubmitReview.Designer.cs">
+      <DependentUpon>202508271444211_adjust comment in ProgramSubmitReview.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508271450120_adjust comment in ParticipantEvaluation.cs" />
+    <Compile Include="Migrations\202508271450120_adjust comment in ParticipantEvaluation.Designer.cs">
+      <DependentUpon>202508271450120_adjust comment in ParticipantEvaluation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508271506303_add PlanId in ProgramPlan.cs" />
+    <Compile Include="Migrations\202508271506303_add PlanId in ProgramPlan.Designer.cs">
+      <DependentUpon>202508271506303_add PlanId in ProgramPlan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508271509449_fix ProgramPlan.cs" />
+    <Compile Include="Migrations\202508271509449_fix ProgramPlan.Designer.cs">
+      <DependentUpon>202508271509449_fix ProgramPlan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508280439529_connect ParticpantEvaluation StatusId to ProgramPlanStatus.cs" />
+    <Compile Include="Migrations\202508280439529_connect ParticpantEvaluation StatusId to ProgramPlanStatus.Designer.cs">
+      <DependentUpon>202508280439529_connect ParticpantEvaluation StatusId to ProgramPlanStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508280500231_SyncDbWithModle.cs" />
+    <Compile Include="Migrations\202508280500231_SyncDbWithModle.Designer.cs">
+      <DependentUpon>202508280500231_SyncDbWithModle.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508280517198_adjust feild ProramPlan &amp; Favorite Table.cs" />
+    <Compile Include="Migrations\202508280517198_adjust feild ProramPlan &amp; Favorite Table.Designer.cs">
+      <DependentUpon>202508280517198_adjust feild ProramPlan &amp; Favorite Table.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AdminInfoes.cs" />
     <Compile Include="Models\AdminLoginDto.cs" />
+    <Compile Include="Models\ChargeRequestDto.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
+    <Compile Include="Models\CompanyDetailDto.cs" />
     <Compile Include="Models\CompanyDto.cs" />
     <Compile Include="Models\CompanyImages.cs" />
     <Compile Include="Models\CompanyInfoes.cs" />
     <Compile Include="Models\CompanyLoginDto.cs" />
     <Compile Include="Models\CompanyPlanOrder.cs" />
     <Compile Include="Models\CompanyScales.cs" />
+    <Compile Include="Models\CryptoUtil.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\District.cs" />
+    <Compile Include="Models\EmailService.cs" />
     <Compile Include="Models\EvaluationReview.cs" />
     <Compile Include="Models\ExistingResume.cs" />
     <Compile Include="Models\Favorite.cs" />
@@ -585,6 +682,7 @@
     <Compile Include="Models\ProgramSubmitReviewDto.cs" />
     <Compile Include="Models\SimpleResume.cs" />
     <Compile Include="Models\ParticipantInfoes.cs" />
+    <Compile Include="Models\TokenBlacklist.cs" />
     <Compile Include="Models\TopProgramPlan.cs" />
     <Compile Include="Models\HomePageDto.cs" />
     <Compile Include="Models\UpdateEvaluationDto.cs" />
@@ -643,6 +741,7 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
+    <Content Include="NewebPaySettings.config" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -666,6 +765,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Default\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\bootstrap.min.js.map" />
@@ -955,6 +1055,75 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508230815046_add Favorite Table.resx">
       <DependentUpon>202508230815046_add Favorite Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508240723344_adjust JwtAuthFilter&amp;JwtAuthUtil &amp; add API Logout.resx">
+      <DependentUpon>202508240723344_adjust JwtAuthFilter&amp;JwtAuthUtil &amp; add API Logout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508240808196_adjust model feild.resx">
+      <DependentUpon>202508240808196_adjust model feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508240817295_add foreignkey in companyinfoes scaleid to companyscales.resx">
+      <DependentUpon>202508240817295_add foreignkey in companyinfoes scaleid to companyscales.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508241336487_add cancelat feild in programsubmt table.resx">
+      <DependentUpon>202508241336487_add cancelat feild in programsubmt table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508241420515_fix.resx">
+      <DependentUpon>202508241420515_fix.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508241425326_fix2.resx">
+      <DependentUpon>202508241425326_fix2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508250701397_adjust CompanyPlanOrder.resx">
+      <DependentUpon>202508250701397_adjust CompanyPlanOrder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508250708557_fix companyPlanOrder.resx">
+      <DependentUpon>202508250708557_fix companyPlanOrder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508250740023_fix CompanyPlanOrder2 .resx">
+      <DependentUpon>202508250740023_fix CompanyPlanOrder2 .cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508250820432_add PaymentController.resx">
+      <DependentUpon>202508250820432_add PaymentController.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508250906287_adjust LastCardNum.resx">
+      <DependentUpon>202508250906287_adjust LastCardNum.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508260742588_add PaidAt in CompanyPlanOrder Table.resx">
+      <DependentUpon>202508260742588_add PaidAt in CompanyPlanOrder Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508260816530_fix remote.resx">
+      <DependentUpon>202508260816530_fix remote.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508271250209_fix ParticipantEvaluation Table.resx">
+      <DependentUpon>202508271250209_fix ParticipantEvaluation Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508271314382_fix PUT ReviewParticipant.resx">
+      <DependentUpon>202508271314382_fix PUT ReviewParticipant.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508271330191_fix PUT ReviewParticipant 2.resx">
+      <DependentUpon>202508271330191_fix PUT ReviewParticipant 2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508271444211_adjust comment in ProgramSubmitReview.resx">
+      <DependentUpon>202508271444211_adjust comment in ProgramSubmitReview.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508271450120_adjust comment in ParticipantEvaluation.resx">
+      <DependentUpon>202508271450120_adjust comment in ParticipantEvaluation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508271506303_add PlanId in ProgramPlan.resx">
+      <DependentUpon>202508271506303_add PlanId in ProgramPlan.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508271509449_fix ProgramPlan.resx">
+      <DependentUpon>202508271509449_fix ProgramPlan.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508280439529_connect ParticpantEvaluation StatusId to ProgramPlanStatus.resx">
+      <DependentUpon>202508280439529_connect ParticpantEvaluation StatusId to ProgramPlanStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508280500231_SyncDbWithModle.resx">
+      <DependentUpon>202508280500231_SyncDbWithModle.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508280517198_adjust feild ProramPlan &amp; Favorite Table.resx">
+      <DependentUpon>202508280517198_adjust feild ProramPlan &amp; Favorite Table.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

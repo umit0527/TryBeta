@@ -10,7 +10,6 @@ namespace TryBeta.Models
     public class ProgramSubmitStatus
     {
         [Key]
-        [JsonProperty("id")]
         public int Id { get; set; }
 
         [Required]

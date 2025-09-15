@@ -34,16 +34,21 @@ namespace TryBeta.Models
         [JsonProperty("participant_serial_num")]
         public string ParticipantSerialNum { get; set; }
         
-
         // 申請人數
         [Required]
         [JsonProperty("participants_count")]
         public int ParticipantsCount { get; set; }
 
+        //----------------- 取消 -----------------
         // 取消體驗的原因
         [StringLength(500)]
         [JsonProperty("cancel_reason")]
         public string CancelReason { get; set; }
+
+        // 取消的時間
+        [JsonProperty("cancel_at")]
+        public DateTime? CancelAt { get; set; }
+        //------------------------------------
 
         // 申請日期
         [Required]
@@ -56,10 +61,10 @@ namespace TryBeta.Models
         public int StatusId { get; set; } = 1; // 1=待審核, 2=通過, 3=拒絕
 
         //修改申請狀態日期(審核通過或拒絕)
-        [Required]
         [JsonProperty("reviewed_at")]
-        public DateTime? ReviewedAt { get; set; } = DateTime.Today;
+        public DateTime? ReviewedAt { get; set; }
 
+        //----------------- 履歷 -----------------
         // 履歷類型: simple/existing
         [Required]
         [JsonProperty("resume_type")]
@@ -77,6 +82,7 @@ namespace TryBeta.Models
         [ForeignKey("SimpleResume")]
         public int? SimpleResumeId { get; set; }
         public virtual SimpleResume SimpleResume { get; set; }
+        //------------------------------------
 
         // 申請動機
         [Required]
@@ -91,6 +97,6 @@ namespace TryBeta.Models
         [ForeignKey("StatusId")]
         public virtual ProgramSubmitStatus Status { get; set; }
 
-
+        public ICollection<ParticipantEvaluation> Evaluations { get; set; }
     }
 }

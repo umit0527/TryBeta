@@ -15,6 +15,7 @@ namespace TryBeta.Models
         public int Id { get; set; }                  // 訂單 ID
 
         [JsonProperty("order_num")]
+        [MaxLength(50)]
         [Required]
         public string OrderNum { get; set; }         // 訂單編號
 
@@ -45,6 +46,11 @@ namespace TryBeta.Models
         [JsonProperty("end_date")]
         public DateTime? EndDate { get; set; }        // 方案到期日期
 
+        [JsonProperty("order_status")]
+        [MaxLength(50)]
+        [Required]
+        public string OrderStatus { get; set; }    // 訂單狀態（Created, Active, Expired, Cancelled）
+
         [JsonProperty("payment_status")]
         [MaxLength(50)]
         [Required]
@@ -55,10 +61,9 @@ namespace TryBeta.Models
         [Required]
         public string PaymentMethod { get; set; }    // 付款方式（CreditCard, BankTransfer...）
 
-        [JsonProperty("last_card_num")]
+        [JsonProperty("card_4_no")]
         [MaxLength(4)]
-        [Required]
-        public string LastCardNum { get; set; }    // 卡片末四碼
+        public string Card4No { get; set; }    // 卡片末四碼
 
         [JsonProperty("created_at")]
         [Required]
@@ -66,6 +71,9 @@ namespace TryBeta.Models
 
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.Now;      // 更新時間
+
+        [JsonProperty("paid_at")]
+        public DateTime? PaidAt { get; set; } = null;      // 付款時間
 
         // 關聯屬性 
         public virtual CompanyInfoes CompanyInfoes { get; set; } // 企業資訊

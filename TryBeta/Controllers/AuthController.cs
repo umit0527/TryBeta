@@ -6,6 +6,7 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Web.Http;
 using System.Web.Http.Description;
 using TryBeta.Models;
@@ -129,6 +130,58 @@ namespace TryBeta.Controllers
             });
         }
 
+        // POST: api/v1/company/logout 企業登出
+        [HttpPost]
+        [Route("company/logout")]
+        [JwtAuthFilter] // 必須登入才能登出
+        public IHttpActionResult PostCompanyLogout()
+        {
+            try
+            {
+                // 1. 取出 token
+                var token = Request.Headers.Authorization?.Parameter;
+                if (string.IsNullOrEmpty(token))
+                    return BadRequest("未找到 token");
+
+                // 2. 從 JWT payload 解析 userId 與過期時間
+                var jwtUtil = new JwtAuthUtil();
+                Dictionary<string, object> payload;
+                try
+                {
+                    payload = jwtUtil.GetPayload(token);
+                }
+                catch
+                {
+                    return BadRequest("Token 無效或已過期");
+                }
+
+                if (!payload.ContainsKey("Id") || !payload.ContainsKey("Exp"))
+                    return BadRequest("Token 資訊不完整");
+
+                int userId = Convert.ToInt32(payload["Id"]);
+                DateTime expiredAt = Convert.ToDateTime(payload["Exp"]);
+
+                // 3. 存進黑名單
+                using (var db = new TryBetaDbContext())
+                {
+                    db.TokenBlacklistes.Add(new TokenBlacklist
+                    {
+                        Token = token,
+                        UserId = userId,
+                        ExpiredAt = expiredAt,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                    db.SaveChanges();
+                }
+
+                return Ok(new { status = 200, message = "登出成功" });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
         // POST: api/Auth 體驗者登入
         [HttpPost]
         [Route("users/login")] 
@@ -184,6 +237,58 @@ namespace TryBeta.Controllers
                     user.Role,
                 }
             });
+        }
+
+        // POST: api/v1/users/logout 體驗者登出
+        [HttpPost]
+        [Route("users/logout")]
+        [JwtAuthFilter] // 必須登入才能登出
+        public IHttpActionResult PostParticipantLogout()
+        {
+            try
+            {
+                // 1. 取出 token
+                var token = Request.Headers.Authorization?.Parameter;
+                if (string.IsNullOrEmpty(token))
+                    return BadRequest("未找到 token");
+
+                // 2. 從 JWT payload 解析 userId 與過期時間
+                var jwtUtil = new JwtAuthUtil();
+                Dictionary<string, object> payload;
+                try
+                {
+                    payload = jwtUtil.GetPayload(token);
+                }
+                catch
+                {
+                    return BadRequest("Token 無效或已過期");
+                }
+
+                if (!payload.ContainsKey("Id") || !payload.ContainsKey("Exp"))
+                    return BadRequest("Token 資訊不完整");
+
+                int userId = Convert.ToInt32(payload["Id"]);
+                DateTime expiredAt = Convert.ToDateTime(payload["Exp"]);
+
+                // 3. 存進黑名單
+                using (var db = new TryBetaDbContext())
+                {
+                    db.TokenBlacklistes.Add(new TokenBlacklist
+                    {
+                        Token = token,
+                        UserId = userId,
+                        ExpiredAt = expiredAt,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                    db.SaveChanges();
+                }
+
+                return Ok(new { status = 200, message = "登出成功" });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // POST: api/v1/admin/login 管理員登入
@@ -250,6 +355,58 @@ namespace TryBeta.Controllers
                     user.Role
                 }
             });
+        }
+
+        // POST: api/v1/admin/logout 管理員登出
+        [HttpPost]
+        [Route("admin/logout")]
+        [JwtAuthFilter] // 必須登入才能登出
+        public IHttpActionResult PostAdminLogout()
+        {
+            try
+            {
+                // 1. 取出 token
+                var token = Request.Headers.Authorization?.Parameter;
+                if (string.IsNullOrEmpty(token))
+                    return BadRequest("未找到 token");
+
+                // 2. 從 JWT payload 解析 userId 與過期時間
+                var jwtUtil = new JwtAuthUtil();
+                Dictionary<string, object> payload;
+                try
+                {
+                    payload = jwtUtil.GetPayload(token);
+                }
+                catch
+                {
+                    return BadRequest("Token 無效或已過期");
+                }
+
+                if (!payload.ContainsKey("Id") || !payload.ContainsKey("Exp"))
+                    return BadRequest("Token 資訊不完整");
+
+                int userId = Convert.ToInt32(payload["Id"]);
+                DateTime expiredAt = Convert.ToDateTime(payload["Exp"]);
+
+                // 3. 存進黑名單
+                using (var db = new TryBetaDbContext())
+                {
+                    db.TokenBlacklistes.Add(new TokenBlacklist
+                    {
+                        Token = token,
+                        UserId = userId,
+                        ExpiredAt = expiredAt,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                    db.SaveChanges();
+                }
+
+                return Ok(new { status = 200, message = "登出成功" });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // DELETE: api/Auth/5

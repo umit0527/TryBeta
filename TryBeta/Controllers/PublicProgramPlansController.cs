@@ -20,6 +20,7 @@ using System.Configuration;
 using System.Web.Http.Results;
 using Jose;
 using System.Collections;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TryBeta.Controllers
 {
@@ -56,7 +57,7 @@ namespace TryBeta.Controllers
                     .Include(p => p.Industry)
                     .Include(p => p.JobTitle)
                     .Include(p => p.Status)
-                    .Include(p => p.Steps)
+                    //.Include(p => p.Steps)
                     .Include(p => p.ProgramPlanImages)
                     .Include(p => p.Company)
                     .AsQueryable();
@@ -74,7 +75,7 @@ namespace TryBeta.Controllers
                      p.Name.Contains(search) ||
                      p.Industry.Title.Contains(search) ||
                      p.JobTitle.Title.Contains(search) ||
-                     p.Address.Contains(search)||
+                     p.Address.Contains(search) ||
                      p.Company.Name.Contains(search)
                      );
                 }
@@ -201,13 +202,13 @@ namespace TryBeta.Controllers
                             .OrderBy(img => img.Id)
                             .Select(img => img.ImgPath)
                             .FirstOrDefault(),
-                            Steps = p.Steps.Select(s => new
-                            {
-                                s.Name,
-                                s.Description,
-                                s.CreatedAt,
-                                s.UpdatedAt
-                            }),
+                            //Steps = p.Steps.Select(s => new
+                            //{
+                            //    s.Name,
+                            //    s.Description,
+                            //    s.CreatedAt,
+                            //    s.UpdatedAt
+                            //}),
                             AppliedCount = appliedCount,
                             DaysLeft = daysLeft,
                             IsOngoing = isOngoing,
@@ -243,10 +244,14 @@ namespace TryBeta.Controllers
             try
             {
                 var now = DateTime.Now;
+                var startOfDay = now.Date;
+                var startOfWeek = now.Date.AddDays(-(int)now.DayOfWeek);
 
                 // 取得單一計畫 (限制狀態 + 刊登有效)
                 var plan = db.ProgramPlan
                     .Include(p => p.Status)
+                    .Include(p => p.Industry)
+                    .Include(p => p.JobTitle)
                     .FirstOrDefault(p =>
                         p.Id == programId &&
                         (p.StatusId == 2 || p.StatusId == 4 || p.StatusId == 7 || p.StatusId == 15) &&
@@ -280,24 +285,6 @@ namespace TryBeta.Controllers
                     .Where(a => a.ProgramPlanId == plan.Id && a.StatusId == 2)
                     .Sum(a => (int?)a.ParticipantsCount) ?? 0;
 
-                // 取得產業
-                var industry = db.Industries
-                    .Where(i => i.Id == plan.IndustryId)
-                    .Select(i => new ProgramPlanDto.SimpleEntityDto { Id = i.Id, Title = i.Title })
-                    .FirstOrDefault();
-
-                // 取得職務
-                var jobTitle = db.Positions
-                    .Where(j => j.Id == plan.JobTitleId)
-                    .Select(j => new ProgramPlanDto.SimpleEntityDto { Id = j.Id, Title = j.Title })
-                    .FirstOrDefault();
-
-                // 取得狀態
-                var status = db.ProgramPlanStatuses
-                    .Where(s => s.Id == plan.StatusId)
-                    .Select(s => new ProgramPlanDto.SimpleEntityDto { Id = s.Id, Title = s.Title })
-                    .FirstOrDefault();
-
                 // 取得 Steps
                 var steps = db.ProgramStep
                     .Where(s => s.ProgramPlanId == plan.Id)
@@ -312,13 +299,18 @@ namespace TryBeta.Controllers
                     .Select(i => i.ImgPath)
                     .ToList();
 
-                // **修改開始：先計算 totalViews，再建立 DTO**
-                // 取得總瀏覽數 (從 ProgramViews 表計算)
-                var totalViews = db.ProgramViews.Count(v => v.ProgramPlanId == plan.Id);
+                // 一次撈出 Views
+                var views = db.ProgramViews
+                    .Where(v => v.ProgramPlanId == plan.Id)
+                    .ToList();
+                var totalViews = views.Count;
+                var weeklyViews = views.Count(v => v.ViewedAt >= startOfWeek);
+                var dailyViews = views.Count(v => v.ViewedAt >= startOfDay);
 
                 // 建立 DTO
                 var dto = new ProgramPlanDto
                 {
+                    Id = plan.Id,
                     CompanyName = companyName,
                     CompanyLogo = logo,
                     CompanyCover = cover,
@@ -339,51 +331,38 @@ namespace TryBeta.Controllers
                     PublishEndDate = plan.PublishEndDate,
                     ProgramStartDate = plan.ProgramStartDate,
                     ProgramEndDate = plan.ProgramEndDate,
-                    ProgramDurationDays = (plan.ProgramEndDate - plan.ProgramStartDate).Days,
+                    ProgramDurationDays = (plan.ProgramEndDate - plan.ProgramStartDate).Days + 1, // 修正
                     StatusId = plan.StatusId,
-                    StatusTitle = status.Title,
-                    ViewsCount = plan.ViewsCount,
+                    StatusTitle = plan.Status.Title,
+                    ViewsCount = plan.ViewsCount, // 快取欄位
                     FavoritesCount = plan.FavoritesCount,
                     AppliedCount = appliedCount,
 
-                    // 關聯物件
-                    Industry = industry,
-                    JobTitle = jobTitle,
-                    Status = status,
+                    Industry = new ProgramPlanDto.SimpleEntityDto { Id = plan.Industry.Id, Title = plan.Industry.Title },
+                    JobTitle = new ProgramPlanDto.SimpleEntityDto { Id = plan.JobTitle.Id, Title = plan.JobTitle.Title },
+                    Status = new ProgramPlanDto.SimpleEntityDto { Id = plan.Status.Id, Title = plan.Status.Title },
 
                     Steps = steps,
-                    Images = images
+                    Images = images,
+
+                    TotalViews = totalViews,
+                    WeeklyViews = weeklyViews,
+                    DailyViews = dailyViews
                 };
 
-                // 判斷 DaysLeft / IsOngoing
+                // 判斷 DaysLeft
                 if (now < plan.ProgramStartDate)
                 {
                     dto.DaysLeft = Math.Max(0, (plan.ProgramStartDate - now).Days);
-                    //dto.IsOngoing = null;
                 }
                 else if (now >= plan.ProgramStartDate && now <= plan.ProgramEndDate)
                 {
-                    //dto.IsOngoing = true;
-                    dto.DaysLeft = null;
+                    dto.DaysLeft = null; // 可改成 (plan.ProgramEndDate - now).Days 顯示剩餘天數
                 }
                 else
                 {
-                    //dto.IsOngoing = false;
                     dto.DaysLeft = null;
                 }
-
-                // 瀏覽統計
-                var startOfWeek = now.Date.AddDays(-(int)now.DayOfWeek);
-                var startOfDay = now.Date;
-
-                // **修改開始：TotalViews 改用前面計算好的 totalViews 變數**
-                dto.TotalViews = totalViews;
-                // ViewsCount 仍然保留，但不再用於計算總數
-                dto.ViewsCount = plan.ViewsCount;
-
-                // 本週 / 今日仍用 ProgramViews 計算
-                dto.WeeklyViews = db.ProgramViews.Count(v => v.ProgramPlanId == plan.Id && v.ViewedAt >= startOfWeek);
-                dto.DailyViews = db.ProgramViews.Count(v => v.ProgramPlanId == plan.Id && v.ViewedAt >= startOfDay);
 
                 // ------------------------
                 // 累積瀏覽紀錄 (登入使用者 + 訪客每天只算一次)
@@ -393,14 +372,11 @@ namespace TryBeta.Controllers
                 {
                     userId = (int?)Request.Properties["UserId"];
                 }
-
                 var viewerIp = HttpContext.Current?.Request?.UserHostAddress;
 
                 bool hasViewedToday = false;
-
                 if (userId.HasValue)
                 {
-                    // 登入使用者：檢查今天是否已經看過
                     hasViewedToday = db.ProgramViews.Any(v =>
                         v.ProgramPlanId == plan.Id &&
                         v.ViewerUserId == userId.Value &&
@@ -409,7 +385,6 @@ namespace TryBeta.Controllers
                 }
                 else if (!string.IsNullOrEmpty(viewerIp))
                 {
-                    // 訪客：檢查今天是否已經用同 IP 看過
                     hasViewedToday = db.ProgramViews.Any(v =>
                         v.ProgramPlanId == plan.Id &&
                         v.ViewerUserId == null &&
@@ -424,12 +399,17 @@ namespace TryBeta.Controllers
                     {
                         ProgramPlanId = plan.Id,
                         ViewedAt = now,
-                        ViewerUserId = userId, // 未登入會是 null
+                        ViewerUserId = userId,
                         ViewerIp = viewerIp
                     });
 
-                    // 同步更新 ViewsCount
+                    // 同步更新 ViewsCount 快取
                     plan.ViewsCount += 1;
+
+                    // 更新熱門分數
+                    plan.Score = plan.ViewsCount * 1
+                                 + plan.FavoritesCount * 3
+                                 + plan.AppliedCount * 5;
 
                     db.SaveChanges();
                 }
@@ -611,6 +591,7 @@ namespace TryBeta.Controllers
         // GET: api/v1/users/{userId}/evaluations  體驗者取得自己所有體驗的評價資訊
         [HttpGet]
         [Route("~/api/v1/users/{userId}/evaluations")]
+        [JwtAuthFilter]
         public IHttpActionResult GetParticipantEvaluations(
             int userId,
             string search = null,
@@ -641,10 +622,10 @@ namespace TryBeta.Controllers
             switch (status_id)
             {
                 case 15: // 已通過
-                    query = query.Where(e => e.StatusId == 2 || e.StatusId == 4 || e.StatusId == 15);
+                    query = query.Where(e =>  e.StatusId == 4);
                     break;
                 case 16: // 已拒絕
-                    query = query.Where(e => e.StatusId == 3 || e.StatusId == 5 || e.StatusId == 16);
+                    query = query.Where(e => e.StatusId == 5 );
                     break;
                 case 17: // 未評價 
                     query = query.Where(e => e.StatusId == 17);
@@ -719,11 +700,15 @@ namespace TryBeta.Controllers
                     .Where(img => img.ProgramPlanId == plan.Id)
                     .OrderBy(img => img.Id)
                     .FirstOrDefault();
-
+ 
                 return new HomePageDto
                 {
                     Id = plan.Id,
                     Score = plan.Score,
+                    // 三個計數
+                    ViewsCount = plan.ViewsCount,
+                    FavoritesCount = plan.FavoritesCount,
+                    AppliedCount = plan.AppliedCount,
                     CompanyName = plan.Company.Name,
                     Name = plan.Name,
                     Intro = plan.Intro,
@@ -734,7 +719,7 @@ namespace TryBeta.Controllers
                     StatusId = plan.StatusId,
                     StatusTitle = plan.Status.Title,
                     CoverId = cover?.Id ?? 0,
-                    ImgPath = cover?.ImgPath,
+                    ImgPath = cover?.ImgPath
                 };
             }).ToList();
 
@@ -780,13 +765,14 @@ namespace TryBeta.Controllers
         // GET: api/v1/users/{userId}/favorites 取得收藏體驗列表資訊
         [HttpGet]
         [Route("~/api/v1/users/{userId}/favorites")]
+        [JwtAuthFilter]
         public IHttpActionResult GetUserFavorites(
             int userId,
             string search = null,
             int? industry_id = null,
             int? job_title_id = null,
             string city_id = null,
-            string district_id=null,
+            string district_id = null,
             string sort = "publish_start_desc",
             int page = 1,
             int limit = 21)
@@ -967,6 +953,87 @@ namespace TryBeta.Controllers
             }
         }
 
+        //GET:api/v1/programs/{programId}/company 取得企業詳情頁資訊
+        [HttpGet]
+        [Route("{programId}/company")]
+        public IHttpActionResult GetCompanyDetail(int programId)
+        {
+            var now = DateTime.Now;
+
+            var program = db.ProgramPlan
+                         .Include(p => p.Company)
+                         .Include(p => p.Company.CompanyContacts)
+                         .Include(p => p.Company.CompanyImages)
+                         .Include(p => p.Company.ProgramPlans.Select(pp => pp.ProgramPlanImages))
+                         .Include(p => p.Company.ProgramPlans.Select(pp => pp.Industry))
+                         .Include(p => p.Company.ProgramPlans.Select(pp => pp.JobTitle))
+                         .FirstOrDefault(p => p.Id == programId);
+
+            if (program == null || program.Company == null)
+                return NotFound();
+
+            var company = program.Company;
+
+            var dto = new
+            {
+                company.Id,
+                company.Name,
+                company.Intro,
+                Industry = company.Industry?.Title,
+                company.Website,
+                company.Address,
+                EmployeeNum = company.Scales?.EmployeeNum,
+                ContactName = company.CompanyContacts.Name,
+                ContactJobTitle = company.CompanyContacts.JobTitle,
+                ContactEmail = company.CompanyContacts.Email,
+                ContactPhone = company.CompanyContacts.Phone,
+                CoverImage = company.CompanyImages.FirstOrDefault(i => i.Type == "cover")?.ImgPath,
+                EnvironmentImages = company.CompanyImages.Where(i => i.Type == "environment").Select(i => i.ImgPath).ToList(),
+                ProgramPlans = company.ProgramPlans
+                .Where(p => (p.StatusId == 2 || p.StatusId == 4 || p.StatusId == 15)
+                            && p.PublishEndDate > now)
+                .Select(p =>
+                {
+                    var appliedCount = db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id);
+                    int? daysLeft = null;
+                    bool? isOngoing = null;
+
+                    if (now < p.ProgramStartDate)
+                        daysLeft = (p.PublishEndDate - now).Days;
+                    else if (now >= p.ProgramStartDate && now <= p.ProgramEndDate)
+                        isOngoing = true;
+                    else
+                        isOngoing = false;
+
+                    var score = p.ViewsCount * 1 + p.FavoritesCount * 3 + appliedCount * 5;
+
+                    return new
+                    {
+                        p.Id,
+                        p.Name,
+                        p.Intro,
+                        p.Address,
+                        Industry = p.Industry != null ? new { p.Industry.Id, p.Industry.Title } : null,
+                        JobTitle = p.JobTitle != null ? new { p.JobTitle.Id, p.JobTitle.Title } : null,
+                        p.PublishStartDate,
+                        p.PublishEndDate,
+                        p.ProgramStartDate,
+                        p.ProgramEndDate,
+                        CoverImage = p.ProgramPlanImages.OrderBy(img => img.Id).Select(img => img.ImgPath).FirstOrDefault(),
+                        AppliedCount = appliedCount,
+                        DaysLeft = daysLeft,
+                        IsOngoing = isOngoing,
+                        ViewsCount = p.ViewsCount,
+                        FavoritesCount = p.FavoritesCount,
+                        Score = score
+                    };
+                })
+                .ToList()
+            };
+
+            return Ok(dto);
+        }
+
         // PUT: api/PublicProgramPlans/5 
         [ResponseType(typeof(void))]
         public IHttpActionResult PutProgramPlan(int id, ProgramPlan programPlan)
@@ -1121,6 +1188,99 @@ namespace TryBeta.Controllers
                 return Content(HttpStatusCode.BadRequest, new { message = "評價內容被判定為不當，請修改後再提交。", review = reviewResponse });
 
             return Ok(reviewResponse);
+        }
+
+        // PUT: api/Programs/{program_id}/application/{application_Id} 體驗者取消申請體驗
+        [HttpPut]
+        [Route("{program_id}/applications/{application_id}/cancel")]
+        [JwtAuthFilter]
+        [ResponseType(typeof(ProgramSubmit))]
+        public async Task<IHttpActionResult> CancelProgramSubmit(int program_id, int application_id)
+        {
+            try
+            {
+                // 1. 驗證登入
+                if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
+                {
+                    return Unauthorized();
+                }
+                int userId = (int)userIdObj;
+
+                // 2. 取得要取消的 ProgramSubmit
+                var submit = db.ProgramSubmits.FirstOrDefault(s => s.Id == application_id && s.Participant.UserId == userId);
+                if (submit == null)
+                {
+                    return NotFound();
+                }
+
+                // 2.1 防止重複取消
+                if (submit.StatusId == (int)ReviewStatus.Cancelled)
+                {
+                    return BadRequest("此申請已取消");
+                }
+
+                // 3. 從 Request body 讀取消原因
+                string body = await Request.Content.ReadAsStringAsync();
+                if (string.IsNullOrWhiteSpace(body))
+                {
+                    return BadRequest("取消原因為必填");
+                }
+
+                string cancelReason;
+
+                try
+                {
+                    // 嘗試解析 JSON，如果前端傳的是 {"cancel_reason": "家裡有事"} 格式
+                    dynamic obj = JsonConvert.DeserializeObject<dynamic>(body);
+                    cancelReason = obj.cancel_reason != null ? (string)obj.cancel_reason : body;
+                }
+                catch
+                {
+                    // 如果不是 JSON 格式，直接當成文字
+                    cancelReason = body;
+                }
+
+                // 4. 更新狀態與取消原因
+                submit.StatusId = (int)ReviewStatus.Cancelled;
+                submit.CancelReason = cancelReason.Trim(); // 去掉多餘空白
+                submit.CancelAt = DateTime.Now;
+
+                db.SaveChanges();
+
+                // 更新 ProgramPlan 的熱門分數
+                // ------------------------
+                var program = db.ProgramPlan.FirstOrDefault(p => p.Id == program_id);
+                if (program != null)
+                {
+                    // 更新申請通過數
+                    program.AppliedCount = db.ProgramSubmits
+                        .Where(a => a.ProgramPlanId == program_id && a.StatusId == (int)ReviewStatus.Approved)
+                        .Sum(a => (int?)a.ParticipantsCount) ?? 0;
+
+                    // 計算熱門分數
+                    program.Score = program.ViewsCount * 1
+                                  + program.FavoritesCount * 3
+                                  + program.AppliedCount * 5;
+
+                    db.SaveChanges();
+                }
+                    // 5. 回傳乾淨 JSON
+                    return Ok(new
+                {
+                    success = true,
+                    message = "申請已取消",
+                    cancel_reason = cancelReason,
+                    cancel_at = submit.CancelAt
+                });
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
         }
 
         // POST: api/PublicProgramPlans  體驗者申請體驗計畫
@@ -1281,8 +1441,8 @@ namespace TryBeta.Controllers
                     });
                 }
 
-                // 解析回傳結果
-                var moderationObj = JsonConvert.DeserializeObject<ModerationResponse>(moderationResultJson);
+                    // 解析回傳結果
+                    var moderationObj = JsonConvert.DeserializeObject<ModerationResponse>(moderationResultJson);
                 if (moderationObj?.Results != null && moderationObj.Results.Count > 0)
                 {
                     var first = moderationObj.Results[0];
@@ -1390,7 +1550,7 @@ namespace TryBeta.Controllers
                 int userId = (int)userIdObj;
 
 
-                var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == dto.UserId);
+                var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == userId);
                 if (participant == null)
                     return NotFound();
 
@@ -1411,6 +1571,7 @@ namespace TryBeta.Controllers
                 if (exists)
                     return BadRequest("已收藏此體驗計畫");
 
+                // 新增 Favorite
                 var favorite = new Favorite
                 {
                     ParticipantId = participant.Id,
@@ -1419,6 +1580,15 @@ namespace TryBeta.Controllers
                 };
 
                 db.Favorites.Add(favorite);
+                db.SaveChanges();
+
+                // 更新 ProgramPlan 的 FavoritesCount
+                program.FavoritesCount = db.Favorites.Count(f => f.ProgramPlanId == dto.ProgramPlanId);
+
+                // 更新熱門分數
+                program.Score = program.ViewsCount * 1
+                                + program.FavoritesCount * 3
+                                + program.AppliedCount * 5;
                 db.SaveChanges();
 
                 return Ok(new { Message = "成功收藏體驗計畫" });
@@ -1431,7 +1601,7 @@ namespace TryBeta.Controllers
 
         //DELETE: api/v1/favorites 體驗者取消收藏體驗計畫
         [HttpDelete]
-        [Route("~/api/v1/favorites/{programPlanId}")]
+        [Route("~/api/v1/favorites/{programPlanId:int}")]
         [JwtAuthFilter]
         public IHttpActionResult RemoveFavorite(int programPlanId)
         {
@@ -1456,6 +1626,29 @@ namespace TryBeta.Controllers
 
                 db.Favorites.Remove(favorite);
                 db.SaveChanges();
+
+                // 更新 ProgramPlan 的 FavoritesCount 與熱門分數
+                var program = db.ProgramPlan.FirstOrDefault(p => p.Id == programPlanId);
+                if (program != null)
+                {
+                    // 更新收藏數
+                    program.FavoritesCount = db.Favorites.Count(f => f.ProgramPlanId == programPlanId);
+
+                    // 更新申請通過數
+                    program.AppliedCount = db.ProgramSubmits
+                        .Where(a => a.ProgramPlanId == programPlanId && a.StatusId == 2)
+                        .Sum(a => (int?)a.ParticipantsCount) ?? 0;
+
+                    // 更新瀏覽次數（可選，如果你想保證最新）
+                    program.ViewsCount = db.ProgramViews.Count(v => v.ProgramPlanId == programPlanId);
+
+                    // 計算熱門分數，權重可調整
+                    program.Score = program.ViewsCount * 1
+                                  + program.FavoritesCount * 3
+                                  + program.AppliedCount * 5;
+
+                    db.SaveChanges();
+                }
 
                 return Ok(new { Message = "已取消收藏" });
             }

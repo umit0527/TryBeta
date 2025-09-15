@@ -419,3 +419,7 @@ FodyWeavers.xsd
 
 webconnect.config
 TryBeta/OpenAISettings.json
+<<<<<<< HEAD
+=======
+TryBeta/NewebPaySettings.config
+>>>>>>> API-NewebPay

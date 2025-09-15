@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
@@ -7,6 +8,7 @@ using System.Data.Entity.Validation;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.UI;
@@ -94,7 +96,7 @@ namespace TryBeta.Controllers
         [HttpGet]
         [Route("programs/{programplanId:int}")]
         [JwtAuthFilter]
-        public IHttpActionResult GetProgramPlan(int companyid, int programId)
+        public IHttpActionResult GetProgramPlan(int companyid, int programplanId)
         {
             try
             {
@@ -111,7 +113,7 @@ namespace TryBeta.Controllers
                 }
 
                 var programPlan = db.ProgramPlan
-                    .Where(p => p.Id == programId && p.CompanyId == companyId)
+                    .Where(p => p.Id == programplanId && p.CompanyId == companyId)
                     .FirstOrDefault();
 
                 if (programPlan == null)
@@ -222,7 +224,8 @@ namespace TryBeta.Controllers
         [Route("programs")]
         [JwtAuthFilter]
         public IHttpActionResult GetCompanyPrograms(
-        string search = null,
+        int companyid,
+            string search = null,
         int? industry_id = null,
         int? job_title_id = null,
         int? status_id = null,
@@ -235,7 +238,14 @@ namespace TryBeta.Controllers
                 // 驗證登入企業ID
                 if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
                     return Unauthorized();
-                int companyId = (int)userIdObj;
+                int loggedInCompanyId = (int)userIdObj; // 從 JWT token 取得登入者 ID
+
+                // 檢查登入者是否有權限查看 URL 中指定的 companyid
+                if (loggedInCompanyId != companyid)
+                {
+                    return Unauthorized(); // 如果不匹配，回傳未授權
+                }
+
 
                 // 基本查詢
                 var query = db.ProgramPlan
@@ -243,8 +253,8 @@ namespace TryBeta.Controllers
                     .Include(p => p.JobTitle)
                     .Include(p => p.Status)
                     .Include(p => p.Steps)
-                    .Include(p => p.ProgramPlanImages)
-                    .Where(p => p.CompanyId == companyId)
+                .Include(p => p.ProgramPlanImages)
+                    .Where(p => p.CompanyId == companyid)
                     .AsQueryable();
 
                 // 關鍵字搜尋
@@ -404,7 +414,7 @@ namespace TryBeta.Controllers
 
         // GET: api/v1/company/{companyid}/programs/{programId}/applications  查看單一體驗的申請者列表
         [HttpGet]
-        [Route("~/api/v1/company/programs/{programId:int}/applications")]
+        [Route("~/api/v1/company/{companyId:int}/programs/{programId:int}/applications")]
         [JwtAuthFilter]
         public IHttpActionResult GetProgramApplications(
             string pending_sort = "submit_desc",
@@ -664,8 +674,8 @@ namespace TryBeta.Controllers
                 query = query.Where(e => e.CreatedAt < endDateInclusive); // 小於隔天 0:00 => 包含整天
             }
 
-                // 排序
-                switch (sort.ToLower())
+            // 排序
+            switch (sort.ToLower())
             {
                 case "date_asc":
                     query = query.OrderBy(e => e.CreatedAt);
@@ -690,7 +700,7 @@ namespace TryBeta.Controllers
                     ParticipantIdentity = e.Participant.Identity,
                     Birthday = e.Participant.Birthday,
                     ProgramName = e.Program.Name,
-                    ProgramPlanId=e.Program.Id,
+                    ProgramPlanId = e.Program.Id,
                     Score = e.Score,
                     Comment = e.Comment,
                     EvaluationDate = e.CreatedAt
@@ -698,7 +708,6 @@ namespace TryBeta.Controllers
                 .ToList();
 
             // 在記憶體中處理計算年齡
-            
             var evaluations = tempList.Select(e => new
             {
                 e.Id,
@@ -929,7 +938,7 @@ namespace TryBeta.Controllers
         [HttpPut]
         [Route("~/api/v1/programs/{programId:int}/applications/{participantId:int}/review")]
         [JwtAuthFilter]
-        public IHttpActionResult ReviewParticipant(int programId, int participantId, [FromBody] ProgramSubmitReviewDto dto)
+        public async Task<IHttpActionResult> ReviewParticipant(int programId, int participantId, [FromBody] ProgramSubmitReviewDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -944,40 +953,123 @@ namespace TryBeta.Controllers
 
             var program = db.ProgramPlan.FirstOrDefault(p => p.Id == programId && p.CompanyId == companyId);
             if (program == null)
+                return Content(System.Net.HttpStatusCode.Forbidden, new { message = "非本公司不得審核該體驗計畫" });
+
+            var application = db.ProgramSubmits
+                .Include(a => a.Participant.User)
+                .FirstOrDefault(a => a.ProgramPlanId == programId && a.ParticipantId == participantId);
+
+            if (application == null)
+                return NotFound();
+
+            if (dto.StatusId == (int)ReviewStatus.Approved)
             {
-                return Content(System.Net.HttpStatusCode.Forbidden, new
-                {
-                    message = "非本公司不得審核該體驗計畫"
-                });
+                if (program.AppliedCount >= program.MaxPeople)
+                    return BadRequest($"此體驗計畫已達人數上限 ({program.MaxPeople}人)，無法再核准新的申請。");
+
+                program.AppliedCount++;
+
+                // 扣掉方案額度
+                var planUsage = db.PlanUsage
+                                .Where(pu => pu.CompanyId == companyId && pu.StatusId == 1 && pu.RemainingPeople > 0)
+                                .OrderBy(pu => pu.CreatedAt)
+                                .FirstOrDefault();
+                if (planUsage == null || planUsage.RemainingPeople <= 0)
+                    return BadRequest("體驗人數剩餘額度不足，無法核准申請");
+
+                planUsage.RemainingPeople--;
+                planUsage.UpdatedAt = DateTime.Now;
+
+                // 更新熱門分數
+                // ------------------------
+                program.Score = program.ViewsCount * 1
+                              + program.FavoritesCount * 3
+                              + program.AppliedCount * 5;
             }
 
-            var application = db.ProgramSubmits.FirstOrDefault(a => a.ProgramPlanId == programId && a.ParticipantId == participantId);
-            if (application == null) return NotFound();
-
-            // 更新申請狀態與審核時間
-            application.StatusId = (int)dto.StatusId;
+            // 更新申請狀態
+            application.StatusId = dto.StatusId;
             application.ReviewedAt = DateTime.Now;
 
-            // 新增審核紀錄到 ProgramSubmitReviews
             var review = new ProgramSubmitReview
             {
                 ProgramSubmitId = application.Id,
                 StatusId = dto.StatusId,
-                Comment = dto.Comment,   // 統一存通過訊息或拒絕理由
+                Comment = dto.Comment,
                 ReviewedAt = DateTime.Now,
                 ReviewerId = companyId
             };
             db.ProgramSubmitReviews.Add(review);
 
-            //當審核狀態為「通過」時，將 ProgramPlan 的 AppliedCount 欄位加一
-            if (dto.StatusId == (int)ReviewStatus.Approved)
-            {
-               program.AppliedCount++;
-            }
+            string evaluationMessage;
 
             try
             {
-                db.SaveChanges();
+                await db.SaveChangesAsync();
+
+                // 建立空的評價或檢查是否已存在
+                var existingEvaluation = await db.ParticipantEvaluations
+                    .FirstOrDefaultAsync(e => e.ParticipantId == application.ParticipantId && e.ProgramPlanId == programId);
+
+                if (existingEvaluation != null)
+                {
+                    evaluationMessage = $"空的評價已存在，不再建立";
+                }
+                else
+                {
+                    var evaluation = new ParticipantEvaluation
+                    {
+                        ParticipantId = application.ParticipantId,
+                        ProgramPlanId = programId,
+                        SerialNum = application.ParticipantSerialNum,
+                        Score = 0,
+                        Comment = null,
+                        StatusId = 17,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+                    db.ParticipantEvaluations.Add(evaluation);
+                    await db.SaveChangesAsync();
+
+                    evaluationMessage = $"空的評價已建立";
+                }
+
+                // 非同步發送 Email，不阻塞前端
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var participantEmail = application.Participant.User?.Email;
+                        if (!string.IsNullOrEmpty(participantEmail))
+                        {
+                            // 審核結果 Email
+                            await EmailService.SendReviewResultAsync(
+                                participantId,
+                                ((ReviewStatus)application.StatusId).ToString(),
+                                review.Comment,
+                                participantEmail,
+                                program.Name);
+
+                            // 可評價 Email 延遲 1 分鐘
+                            if (dto.StatusId == (int)ReviewStatus.Approved)
+                            {
+                                await Task.Delay(60000);
+                                await EmailService.SendEvaluationAvailableEmail(
+                                    db,
+                                    application.Participant.UserId,
+                                    application.ParticipantId,
+                                    application.ProgramPlanId,
+                                    application.ParticipantSerialNum,
+                                    participantEmail,
+                                    program.Name);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Email 發送失敗: {ex.Message}");
+                    }
+                });
             }
             catch (DbEntityValidationException ex)
             {
@@ -987,12 +1079,14 @@ namespace TryBeta.Controllers
                 return BadRequest("資料驗證失敗: " + string.Join("; ", errors));
             }
 
+            // 前端立即回傳訊息
             return Ok(new
             {
                 message = "審核完成",
                 status = application.StatusId,
                 status_title = ((ReviewStatus)application.StatusId).ToString(),
-                comment = review.Comment
+                comment = review.Comment,
+                evaluation_status = evaluationMessage
             });
         }
 

@@ -10,7 +10,7 @@ namespace TryBeta.Models
 {
     public class ParticipantEvaluation
     {
-        [Key]
+        [Key, Column(Order = 0)]
         public int Id { get; set; }
 
         [Required]
@@ -34,7 +34,6 @@ namespace TryBeta.Models
         [JsonProperty("score")]
         public int Score { get; set; }  // 評分，例如 1~5
 
-        [Required]
         [JsonProperty("comment")]
         public string Comment { get; set; }
 
@@ -47,8 +46,11 @@ namespace TryBeta.Models
         public virtual ParticipantInfoes Participant { get; set; }
         public virtual ProgramPlan Program { get; set; }
 
-        ////導覽屬性
-        //[ForeignKey("StatusId")]
-        //public virtual ProgramPlanStatus Status { get; set; }
+        //導覽屬性
+        //[ForeignKey("ProgramSubmitId")]
+        //public virtual ProgramSubmit ProgramSubmit { get; set; }
+
+        [ForeignKey("StatusId")]
+        public virtual ProgramPlanStatus Status { get; set; }
     }
 }

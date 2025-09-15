@@ -55,22 +55,7 @@ namespace TryBeta.Models
         public DbSet<AdminInfoes> AdminInfoes { get; set; } //平台使用者基本資料表 (用來審核時表現名字)
         public DbSet<TopProgramPlan> TopProgramPlans { get; set; } //熱門體驗表 (首頁的熱門體驗用)
         public DbSet<Favorite> Favorites { get; set; } //收藏體驗表 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        public DbSet<TokenBlacklist> TokenBlacklistes { get; set; } //Token黑名單 (登出用)
 
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -93,21 +78,21 @@ namespace TryBeta.Models
 
             //企業購買的方案訂單表
             modelBuilder.Entity<Plan>()
-        .Property(p => p.Price)
-        .HasPrecision(18, 2);
+                .Property(p => p.Price)
+                .HasPrecision(18, 2);
 
             // ProgramSubmit -> Status 禁止 cascade delete
             modelBuilder.Entity<ProgramSubmit>()
-        .HasRequired(s => s.Status)
-        .WithMany()
-        .HasForeignKey(s => s.StatusId)
-        .WillCascadeOnDelete(false);
+                .HasRequired(s => s.Status)
+                .WithMany()
+                .HasForeignKey(s => s.StatusId)
+                .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<ParticipantInfoes>()
-           .HasRequired(p => p.District)
-           .WithMany()
-           .HasForeignKey(p => p.DistrictId)
-           .WillCascadeOnDelete(false);  // 關鍵：禁止 cascade
+                .HasRequired(p => p.District)
+                .WithMany()
+                .HasForeignKey(p => p.DistrictId)
+                .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<ParticipantInfoes>()
                 .HasRequired(p => p.City)
@@ -115,9 +100,33 @@ namespace TryBeta.Models
                 .HasForeignKey(p => p.CityId)
                 .WillCascadeOnDelete(false);
 
+            // 明確指定外鍵：ProgramSubmit 的 StatusId
+            modelBuilder.Entity<ProgramSubmit>()
+                .HasRequired(p => p.Status)
+                .WithMany(s => s.ProgramSubmits)
+                .HasForeignKey(p => p.StatusId)
+                .WillCascadeOnDelete(false);
+
+            // 明確指定外鍵：CompanyPlanOrder 的 OrderNum
+            modelBuilder.Entity<CompanyPlanOrder>()
+                .HasIndex(o => o.OrderNum)
+                .IsUnique();
+
+            // ParticipantEvaluation -> Status 禁止 Cascade
+            modelBuilder.Entity<ParticipantEvaluation>()
+                .HasRequired(p => p.Status)
+                .WithMany()
+                .HasForeignKey(p => p.StatusId)
+                .WillCascadeOnDelete(false);
+
+            // ProgramPlan -> ProgramPlanStatus 禁止 Cascade
+            modelBuilder.Entity<ProgramPlan>()
+                .HasRequired(p => p.Status)
+                .WithMany()
+                .HasForeignKey(p => p.StatusId)
+                .WillCascadeOnDelete(false);
+
             base.OnModelCreating(modelBuilder);
         }
-
-
     }
 }

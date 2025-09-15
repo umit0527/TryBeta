@@ -20,6 +20,9 @@ namespace TryBeta.Models
         [ForeignKey("Company")]
         public int CompanyId { get; set; }
 
+        [JsonProperty("plan_id")]
+        public int? PlanId { get; set; }
+
         [Required]
         [StringLength(50)]
         [JsonProperty("serial_num")]
@@ -122,8 +125,12 @@ namespace TryBeta.Models
         [ForeignKey("StatusId")]
         public virtual ProgramPlanStatus Status { get; set; }
 
-        
+        [ForeignKey("PlanId")]
+        public virtual Plan Plan { get; set; }
+
         public virtual ICollection<ProgramPlanImage> ProgramPlanImages { get; set; } = new List<ProgramPlanImage>();
         public virtual ICollection<ProgramStep> Steps { get; set; } = new List<ProgramStep>();
+        public virtual ICollection<ParticipantEvaluation> ParticipantEvaluations { get; set; } = new List<ParticipantEvaluation>();
+        public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
     }
 }

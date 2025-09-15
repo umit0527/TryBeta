@@ -27,7 +27,7 @@ namespace TryBeta.Controllers
 
         // GET: api/Users/5 取得基本資料
         [HttpGet]
-        [Route("{id:int}")]
+        [Route("{participantid:int}")]
         [JwtAuthFilter]
         [ResponseType(typeof(ParticipantRegisterDto))]
         public IHttpActionResult GetParticipant(int id)

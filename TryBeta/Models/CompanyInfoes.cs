@@ -42,6 +42,12 @@ namespace TryBeta.Models
         [JsonProperty("scale_id")]
         public int ScaleId { get; set; }  //企業規模人數
 
+        [JsonProperty("created_at")]
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        [JsonProperty("updated_at")]
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
         // 外鍵 UserId
         [Required]
         [JsonProperty("user_id")]
@@ -51,16 +57,20 @@ namespace TryBeta.Models
         [ForeignKey("UserId")]
         public virtual Users User { get; set; }
 
-        //// 導覽屬性 (導航到 CompanyContacts)
+        // 導覽屬性 (導航到 CompanyInfoes)
+        public virtual ICollection<ProgramPlan> ProgramPlans { get; set; } = new List<ProgramPlan>();
+
+        // 導覽屬性 (導航到 CompanyContacts)
         public virtual CompanyContacts CompanyContacts { get; set; }
 
         // 導覽屬性 (導航到 CompanyImages)
         public virtual ICollection<CompanyImages> CompanyImages { get; set; }
 
-        [JsonProperty("created_at")]
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        // 導覽屬性 (導航到 CompanyScales)
+        [ForeignKey("ScaleId")]
+        public virtual CompanyScales Scales { get; set; }
 
-        [JsonProperty("updated_at")]
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        // 導覽屬性 (導航到 Industry)
+        public virtual Industry Industry { get; set; }
     }
 }

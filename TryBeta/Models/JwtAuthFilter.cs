@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Web.Configuration;
@@ -45,6 +46,7 @@ namespace TryBeta.Models
             }
             else
             {
+                var token = request.Headers.Authorization.Parameter;
                 try
                 {
                     // 有 JwtToken 且授權格式正確時執行，用 try 包住，因為如果有篡改可能解密失敗
@@ -70,10 +72,26 @@ namespace TryBeta.Models
                         };
                         throw new HttpResponseException(errorMessage); // Debug 模式會停在此行，點繼續執行即可
                     }
+                    // 檢查 token 是否在黑名單
+                    using (var db = new TryBetaDbContext())
+                    {
+                        bool isBlacklisted = db.TokenBlacklistes.Any(b => b.Token == token);
+                        if (isBlacklisted)
+                        {
+                            string messageJson = JsonConvert.SerializeObject(new
+                            { Status = false, Message = "Token 已失效，請重新登入" });
+                            var errorMessage = new HttpResponseMessage()
+                            {
+                                ReasonPhrase = "JwtToken Blacklisted",
+                                Content = new StringContent(messageJson, Encoding.UTF8, "application/json")
+                            };
+                            throw new HttpResponseException(errorMessage);
+                        }
+                    }
                 }
                 catch (Exception)
                 {
-                    // 解密失敗
+                    // 解密失敗或內容有問題
                     string messageJson = JsonConvert.SerializeObject(new { Status = false, Message = "Token不符，請重新登入" }); // JwtToken 不符，需導引重新登入
                     var errorMessage = new HttpResponseMessage()
                     {

@@ -8,8 +8,6 @@ using System.Web;
 
 namespace TryBeta.Models
 {
-    
-
     public class ProgramPlanDto : IValidatableObject
     {
         [JsonProperty("id")]
