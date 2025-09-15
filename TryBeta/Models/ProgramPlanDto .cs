@@ -12,6 +12,9 @@ namespace TryBeta.Models
 
     public class ProgramPlanDto : IValidatableObject
     {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
         [JsonProperty("company_name")]
         public string CompanyName { get; set; }
 
@@ -120,7 +123,7 @@ namespace TryBeta.Models
         public int AppliedCount { get; set; } = 0;
 
         [JsonProperty("score")]
-        public int Score => ViewsCount * 1 + FavoritesCount * 3 + AppliedCount * 5;
+        public int Score { get; set; }
         // ------------------------------------
 
         [JsonProperty("days_left")]

@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
+using System.Web.UI;
 using TryBeta.Models;
 using static TryBeta.Models.ParticipantDetailDto;
 
@@ -91,7 +92,7 @@ namespace TryBeta.Controllers
 
         // GET: api/v1/company/{companyid}/programs/{programId} 取得單一體驗計畫詳情
         [HttpGet]
-        [Route("programs/{programId:int}")]
+        [Route("programs/{programplanId:int}")]
         [JwtAuthFilter]
         public IHttpActionResult GetProgramPlan(int companyid, int programId)
         {
@@ -242,16 +243,14 @@ namespace TryBeta.Controllers
                     .Include(p => p.JobTitle)
                     .Include(p => p.Status)
                     .Include(p => p.Steps)
+                    .Include(p => p.ProgramPlanImages)
                     .Where(p => p.CompanyId == companyId)
                     .AsQueryable();
 
                 // 關鍵字搜尋
                 if (!string.IsNullOrEmpty(search))
                 {
-                    query = query.Where(p => p.Name.Contains(search) ||
-                                        p.Intro.Contains(search) ||
-                                        p.Steps.Any(s => s.Name.Contains(search) ||
-                                        s.Description.Contains(search)));
+                    query = query.Where(p => p.Name.Contains(search));
                 }
 
                 // 產業篩選
@@ -370,6 +369,10 @@ namespace TryBeta.Controllers
                         p.PublishEndDate,
                         p.ProgramStartDate,
                         p.ProgramEndDate,
+                        CoverImage = p.ProgramPlanImages
+                        .OrderBy(img => img.Id)
+                        .Select(img => img.ImgPath)
+                        .FirstOrDefault(),
                         Steps = p.Steps.Select(s => new
                         {
                             s.Id,
@@ -618,6 +621,107 @@ namespace TryBeta.Controllers
             {
                 return InternalServerError(ex);
             }
+        }
+
+        // GET: api/v1/company/{companyId}/evaluations  企業取得評價列表資訊
+        [HttpGet]
+        [Route("~/api/v1/company/{companyId}/evaluations")]
+        public IHttpActionResult GetCompanyEvaluations(
+            int companyId,
+            string search = null,
+            int? score = null,                // 分數 1-5
+            DateTime? start_date = null,       // 評價起始日
+            DateTime? end_date = null,         // 評價結束日
+            string sort = "date_desc",        // 排序方式
+            int page = 1,
+            int limit = 20)
+        {
+            var query = db.ParticipantEvaluations
+                .Where(e => e.Program.CompanyId == companyId)  //該企業的體驗評價
+                .Where(e => e.StatusId == 2 || e.StatusId == 4 || e.StatusId == 15);  //評價是審核通過的
+
+            // 搜尋：體驗者名字 / 評價內容 / 計畫名稱
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(e =>
+                    e.Participant.Name.Contains(search) ||
+                    e.Comment.Contains(search) ||
+                    e.Program.Name.Contains(search));
+            }
+
+            // 篩選分數
+            if (score.HasValue)
+            {
+                query = query.Where(e => e.Score == score.Value);
+            }
+
+            // 篩選日期區間
+            if (start_date.HasValue)
+                query = query.Where(e => e.CreatedAt >= start_date.Value);
+            if (end_date.HasValue)
+            {
+                var endDateInclusive = end_date.Value.Date.AddDays(1); // 把時間拉到隔天 0:00
+                query = query.Where(e => e.CreatedAt < endDateInclusive); // 小於隔天 0:00 => 包含整天
+            }
+
+                // 排序
+                switch (sort.ToLower())
+            {
+                case "date_asc":
+                    query = query.OrderBy(e => e.CreatedAt);
+                    break;
+                case "date_desc":
+                default:
+                    query = query.OrderByDescending(e => e.CreatedAt);
+                    break;
+            }
+
+            // 總筆數
+            var totalCount = query.Count();
+
+            // 先投影需要的欄位 + ToList() 關閉 DataReader
+            var tempList = query
+                .Skip((page - 1) * limit)
+                .Take(limit)
+                .Select(e => new
+                {
+                    Id = e.Id,
+                    ParticipantName = e.Participant.Name,
+                    ParticipantIdentity = e.Participant.Identity,
+                    Birthday = e.Participant.Birthday,
+                    ProgramName = e.Program.Name,
+                    ProgramPlanId=e.Program.Id,
+                    Score = e.Score,
+                    Comment = e.Comment,
+                    EvaluationDate = e.CreatedAt
+                })
+                .ToList();
+
+            // 在記憶體中處理計算年齡
+            
+            var evaluations = tempList.Select(e => new
+            {
+                e.Id,
+                e.ParticipantName,
+                e.ParticipantIdentity,
+                ParticipantAge = DateTime.Today.Year - e.Birthday.Year -
+                                 (DateTime.Today.DayOfYear < e.Birthday.DayOfYear ? 1 : 0),
+                e.ProgramName,
+                e.ProgramPlanId,
+                e.Score,
+                e.Comment,
+                e.EvaluationDate
+            }).ToList();
+
+            var result = new
+            {
+                TotalCount = totalCount,
+                Page = page,
+                Limit = limit,
+                Data = evaluations
+            };
+
+            return Ok(result);
         }
 
         // POST: api/ProgramPlans

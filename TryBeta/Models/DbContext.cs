@@ -53,6 +53,10 @@ namespace TryBeta.Models
         public DbSet<ProgramView> ProgramViews { get; set; } //企業體驗計畫瀏覽數據表
         public DbSet<EvaluationReview> EvaluationReviews { get; set; } //平台的體驗者評價紀錄表
         public DbSet<AdminInfoes> AdminInfoes { get; set; } //平台使用者基本資料表 (用來審核時表現名字)
+        public DbSet<TopProgramPlan> TopProgramPlans { get; set; } //熱門體驗表 (首頁的熱門體驗用)
+        public DbSet<Favorite> Favorites { get; set; } //收藏體驗表 
+
+
 
 
 

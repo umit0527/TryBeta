@@ -18,6 +18,8 @@ using System.Threading.Tasks;
 using System.Text;
 using System.Configuration;
 using System.Web.Http.Results;
+using Jose;
+using System.Collections;
 
 namespace TryBeta.Controllers
 {
@@ -32,7 +34,7 @@ namespace TryBeta.Controllers
         //    return db.ProgramPlan;
         //}
 
-        // GET: api/v1/users/programs 體驗計畫篩選器，包含全部體驗計畫
+        // GET: api/v1/programs 體驗計畫篩選器，包含全部體驗計畫 + 首頁Navbar搜尋欄
         [HttpGet]
         [Route("")]
         public IHttpActionResult GetPublicProgramsFilter(
@@ -40,6 +42,7 @@ namespace TryBeta.Controllers
             int? industry_id = null,
             int? job_title_id = null,
             string city_id = null,
+            string district_id = null,
             string sort = "publish_start_desc",
             int page = 1,
             int limit = 21)
@@ -54,9 +57,11 @@ namespace TryBeta.Controllers
                     .Include(p => p.JobTitle)
                     .Include(p => p.Status)
                     .Include(p => p.Steps)
+                    .Include(p => p.ProgramPlanImages)
+                    .Include(p => p.Company)
                     .AsQueryable();
 
-                // 🔹 過濾掉不符狀態或刊登過期的體驗
+                // 過濾掉不符狀態或刊登過期的體驗
                 query = query.Where(p =>
                     (p.StatusId == 2 || p.StatusId == 4 || p.StatusId == 7 || p.StatusId == 15) &&
                     p.PublishEndDate >= now
@@ -66,10 +71,12 @@ namespace TryBeta.Controllers
                 if (!string.IsNullOrEmpty(search))
                 {
                     query = query.Where(p =>
-                        p.Name.Contains(search) ||
-                        p.Intro.Contains(search) ||
-                        p.Steps.Any(s => s.Name.Contains(search) || s.Description.Contains(search))
-                    );
+                     p.Name.Contains(search) ||
+                     p.Industry.Title.Contains(search) ||
+                     p.JobTitle.Title.Contains(search) ||
+                     p.Address.Contains(search)||
+                     p.Company.Name.Contains(search)
+                     );
                 }
 
                 // 產業篩選
@@ -95,6 +102,19 @@ namespace TryBeta.Controllers
                     if (!string.IsNullOrEmpty(cityName))
                     {
                         query = query.Where(p => p.Address.Contains(cityName));
+
+                        // 如果同時選擇鄉鎮
+                        if (!string.IsNullOrEmpty(district_id))
+                        {
+                            var districtName = db.Districts
+                                                 .Where(d => d.Id.ToString() == district_id)
+                                                 .Select(d => d.Name)
+                                                 .FirstOrDefault();
+                            if (!string.IsNullOrEmpty(districtName))
+                            {
+                                query = query.Where(p => p.Address.Contains(districtName));
+                            }
+                        }
                     }
                 }
 
@@ -177,9 +197,12 @@ namespace TryBeta.Controllers
                             p.PublishEndDate,
                             p.ProgramStartDate,
                             p.ProgramEndDate,
+                            CoverImage = p.ProgramPlanImages
+                            .OrderBy(img => img.Id)
+                            .Select(img => img.ImgPath)
+                            .FirstOrDefault(),
                             Steps = p.Steps.Select(s => new
                             {
-                                s.Id,
                                 s.Name,
                                 s.Description,
                                 s.CreatedAt,
@@ -212,8 +235,7 @@ namespace TryBeta.Controllers
             }
         }
 
-
-        // GET: api/PublicProgramPlans/5 取得單一體驗計畫
+        // GET: api/Programs/5 取得單一體驗計畫詳情
         [HttpGet]
         [Route("{programId:int}")]
         public IHttpActionResult GetPublicPrograms(int programId)
@@ -590,9 +612,9 @@ namespace TryBeta.Controllers
         [HttpGet]
         [Route("~/api/v1/users/{userId}/evaluations")]
         public IHttpActionResult GetParticipantEvaluations(
-            int userId, 
-            string search=null ,
-            int? status_id=null  , 
+            int userId,
+            string search = null,
+            int? status_id = null,
             string sort = "date_desc",
             int page = 1,
             int limit = 20)
@@ -680,7 +702,272 @@ namespace TryBeta.Controllers
             return Ok(evaluations);
         }
 
-        // PUT: api/PublicProgramPlans/5
+        // GET: api/HomePage 取得熱門體驗清單與體驗者評價
+        [Route("~/api/v1/HomePage")]
+        public IHttpActionResult GetPopularProgramPlans()
+        {
+            // 1. 取得熱門體驗
+            var popularPlans = db.ProgramPlan
+                .Where(p => p.PublishEndDate >= DateTime.Today && (p.StatusId == 2 || p.StatusId == 4))
+                .OrderByDescending(p => p.Score)
+                .Take(10)
+                .ToList();
+
+            var popularDtoList = popularPlans.Select(plan =>
+            {
+                var cover = db.ProgramPlanImages
+                    .Where(img => img.ProgramPlanId == plan.Id)
+                    .OrderBy(img => img.Id)
+                    .FirstOrDefault();
+
+                return new HomePageDto
+                {
+                    Id = plan.Id,
+                    Score = plan.Score,
+                    CompanyName = plan.Company.Name,
+                    Name = plan.Name,
+                    Intro = plan.Intro,
+                    Address = plan.Address,
+                    ProgramStartDate = plan.ProgramStartDate,
+                    ProgramEndDate = plan.ProgramEndDate,
+                    DaysLeft = (plan.PublishEndDate - DateTime.Today).Days,
+                    StatusId = plan.StatusId,
+                    StatusTitle = plan.Status.Title,
+                    CoverId = cover?.Id ?? 0,
+                    ImgPath = cover?.ImgPath,
+                };
+            }).ToList();
+
+            // 2. 取得最新高分評價（join ParticipantInfoes + Identity）
+            var latestEvaluations = (from ev in db.ParticipantEvaluations
+                                     join p in db.ParticipantInfoes on ev.ParticipantId equals p.Id
+                                     join i in db.Identity on p.IdentityId equals i.Id
+                                     join prog in db.ProgramPlan on ev.ProgramPlanId equals prog.Id
+                                     where ev.Score >= 4 && (prog.StatusId == 2 || prog.StatusId == 4)
+                                     orderby ev.UpdatedAt descending
+                                     select new
+                                     {
+                                         Participant = p,
+                                         IdentityTitle = i.Title,
+                                         Comment = ev.Comment,
+                                         Score = ev.Score,
+                                         EvaluationDate = ev.UpdatedAt
+                                     })
+                         .Take(10)
+                         .ToList() // ← 先把資料抓到記憶體
+                         .Select(x => new
+                         {
+                             ParticipantName = MaskName(x.Participant.Name),
+                             IdentityTitle = x.IdentityTitle,
+                             Age = DateTime.Today.Year - x.Participant.Birthday.Year -
+                                   (DateTime.Today.DayOfYear < x.Participant.Birthday.DayOfYear ? 1 : 0),
+                             Comment = x.Comment,
+                             Score = x.Score,
+                             EvaluationDate = x.EvaluationDate
+                         })
+                         .ToList();
+
+            // 3. 回傳單一 JSON
+            var result = new
+            {
+                PopularPrograms = popularDtoList,
+                LatestHighScoreEvaluations = latestEvaluations
+            };
+
+            return Ok(result);
+        }
+
+        // GET: api/v1/users/{userId}/favorites 取得收藏體驗列表資訊
+        [HttpGet]
+        [Route("~/api/v1/users/{userId}/favorites")]
+        public IHttpActionResult GetUserFavorites(
+            int userId,
+            string search = null,
+            int? industry_id = null,
+            int? job_title_id = null,
+            string city_id = null,
+            string district_id=null,
+            string sort = "publish_start_desc",
+            int page = 1,
+            int limit = 21)
+        {
+            try
+            {
+                var now = DateTime.Now;
+
+                //轉換: userid 對應到 participantId
+                var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == userId);
+                if (participant == null) return NotFound();
+
+                var participantId = participant.Id;
+
+                // 取出該使用者的收藏紀錄
+                var favoriteQuery = db.Favorites
+                    .Where(f => f.ParticipantId == participantId)
+                    .Select(f => f.ProgramPlan)
+                    .Include(p => p.Industry)
+                    .Include(p => p.JobTitle)
+                    .Include(p => p.Status)
+                    .Include(p => p.Steps)
+                    .Include(p => p.ProgramPlanImages)
+                    .AsQueryable();
+
+                // 過濾掉不符狀態或刊登過期的體驗
+                favoriteQuery = favoriteQuery.Where(p =>
+                    (p.StatusId == 2 || p.StatusId == 4 || p.StatusId == 7 || p.StatusId == 15) &&
+                    p.PublishEndDate >= now
+                );
+
+                // 關鍵字搜尋
+                if (!string.IsNullOrEmpty(search))
+                {
+                    favoriteQuery = favoriteQuery.Where(p =>
+                        p.Name.Contains(search)
+                    );
+                }
+
+                // 產業篩選
+                if (industry_id.HasValue)
+                {
+                    favoriteQuery = favoriteQuery.Where(p => p.IndustryId == industry_id.Value);
+                }
+
+                // 職務篩選
+                if (job_title_id.HasValue)
+                {
+                    favoriteQuery = favoriteQuery.Where(p => p.JobTitleId == job_title_id.Value);
+                }
+
+                if (!string.IsNullOrEmpty(city_id))
+                {
+                    var cityName = db.City
+                                     .Where(c => c.Id.ToString() == city_id)
+                                     .Select(c => c.Name)
+                                     .FirstOrDefault();
+
+                    if (!string.IsNullOrEmpty(cityName))
+                    {
+                        favoriteQuery = favoriteQuery.Where(p => p.Address.Contains(cityName));
+
+                        // 如果同時選擇鄉鎮
+                        if (!string.IsNullOrEmpty(district_id))
+                        {
+                            var districtName = db.Districts
+                                                 .Where(d => d.Id.ToString() == district_id)
+                                                 .Select(d => d.Name)
+                                                 .FirstOrDefault();
+                            if (!string.IsNullOrEmpty(districtName))
+                            {
+                                favoriteQuery = favoriteQuery.Where(p => p.Address.Contains(districtName));
+                            }
+                        }
+                    }
+                }
+
+                // 排序 
+                switch (sort)
+                {
+                    case "publish_start_asc": //刊登開始日期舊到新
+                        favoriteQuery = favoriteQuery.OrderBy(p => p.PublishStartDate);
+                        break;
+                    case "publish_start_desc": //刊登開始日期新到舊
+                        favoriteQuery = favoriteQuery.OrderByDescending(p => p.PublishStartDate);
+                        break;
+                    case "publish_end_asc": //刊登結束日期舊到新
+                        favoriteQuery = favoriteQuery.OrderBy(p => p.PublishEndDate);
+                        break;
+                    case "publish_end_desc": //刊登結束日期新到舊
+                        favoriteQuery = favoriteQuery.OrderByDescending(p => p.PublishEndDate);
+                        break;
+                    case "program_start_asc": //體驗開始日期舊到新
+                        favoriteQuery = favoriteQuery.OrderBy(p => p.ProgramStartDate);
+                        break;
+                    case "program_start_desc": //體驗開始日期新到舊
+                        favoriteQuery = favoriteQuery.OrderByDescending(p => p.ProgramStartDate);
+                        break;
+                    case "hot":
+                        favoriteQuery = favoriteQuery.OrderByDescending(p =>
+                            p.ViewsCount * 1 +
+                            p.FavoritesCount * 3 +
+                            db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id) * 5
+                        );
+                        break;
+                    default:
+                        favoriteQuery = favoriteQuery.OrderByDescending(p => p.PublishStartDate);
+                        break;
+                }
+
+                // 分頁
+                var total = favoriteQuery.Count();
+                var items = favoriteQuery
+                    .Skip((page - 1) * limit)
+                    .Take(limit)
+                    .ToList()
+                    .Select(p =>
+                    {
+                        var appliedCount = db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id);
+
+                        int? daysLeft = null;
+                        bool? isOngoing = null;
+
+                        if (now < p.ProgramStartDate)
+                        {
+                            daysLeft = (p.PublishEndDate - now).Days;
+                        }
+                        else if (now >= p.ProgramStartDate && now <= p.ProgramEndDate)
+                        {
+                            isOngoing = true;
+                        }
+                        else
+                        {
+                            isOngoing = false;
+                        }
+
+                        var viewsCount = p.ViewsCount;
+                        var favoritesCount = db.Favorites.Count(f => f.ProgramPlanId == p.Id);
+                        var score = viewsCount * 1 + favoritesCount * 3 + appliedCount * 5;
+
+                        return new
+                        {
+                            p.Id,
+                            p.Name,
+                            p.Intro,
+                            p.Address,
+                            Industry = new { p.Industry.Id, p.Industry.Title },
+                            JobTitle = new { p.JobTitle.Id, p.JobTitle.Title },
+                            p.PublishStartDate,
+                            p.PublishEndDate,
+                            p.ProgramStartDate,
+                            p.ProgramEndDate,
+                            AppliedCount = appliedCount,
+                            DaysLeft = daysLeft,
+                            CoverImage = p.ProgramPlanImages
+                                .OrderBy(img => img.Id)
+                                .Select(img => img.ImgPath)
+                                .FirstOrDefault(),
+                            IsOngoing = isOngoing,
+                        };
+                    })
+                    .ToList();
+
+                string message = total == 0 ? "尚未收藏任何體驗計畫" : null;
+
+                return Ok(new
+                {
+                    total,
+                    page,
+                    limit,
+                    items,
+                    message
+                });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        // PUT: api/PublicProgramPlans/5 
         [ResponseType(typeof(void))]
         public IHttpActionResult PutProgramPlan(int id, ProgramPlan programPlan)
         {
@@ -713,6 +1000,127 @@ namespace TryBeta.Controllers
             }
 
             return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        // PUT: api/v1/users/{userId}/programs/{programId}/evaluations  體驗者修改評價
+        [HttpPut]
+        [Route("~/api/v1/users/{userId}/programs/{programId}/evaluations")]
+        [JwtAuthFilter]
+        public async Task<IHttpActionResult> UpdateReview(int userId, int programId, [FromBody] ParticipantEvaluationDto dto)
+        {
+            // 驗證 ModelState
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // 讀取 OpenAI API Key
+            var jsonText = File.ReadAllText(HttpContext.Current.Server.MapPath("~/OpenAISettings.json"));
+            dynamic jsonObj = JsonConvert.DeserializeObject(jsonText);
+            string apiKey = jsonObj.OpenAI.ApiKey;
+
+            if (string.IsNullOrEmpty(apiKey))
+                return InternalServerError(new Exception("OpenAI API Key 未設定"));
+
+            // Moderation API 審核
+            bool flagged = false;
+            var flaggedCategories = new List<string>();
+            string moderationResultJson = string.Empty;
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                var payload = new
+                {
+                    model = "omni-moderation-latest",
+                    input = dto.Comment
+                };
+
+                var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+                var moderationResponse = await client.PostAsync("https://api.openai.com/v1/moderations", content);
+                moderationResultJson = await moderationResponse.Content.ReadAsStringAsync();
+
+                if (!moderationResponse.IsSuccessStatusCode)
+                {
+                    return Content(HttpStatusCode.ServiceUnavailable, new
+                    {
+                        message = "Moderation API 呼叫失敗，請稍後再試。",
+                        error = moderationResultJson
+                    });
+                }
+
+                // 解析回傳結果
+                var moderationObj = JsonConvert.DeserializeObject<ModerationResponse>(moderationResultJson);
+                if (moderationObj?.Results != null && moderationObj.Results.Count > 0)
+                {
+                    var first = moderationObj.Results[0];
+                    if (first.Categories != null)
+                    {
+                        foreach (var kv in first.Categories)
+                        {
+                            if (kv.Value)
+                                flaggedCategories.Add(kv.Key);
+                        }
+                    }
+                    flagged = flaggedCategories.Count > 0;
+                }
+            }
+
+            // 找 ParticipantInfo
+            var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == userId);
+            if (participant == null) return BadRequest("找不到對應的體驗者");
+
+            // 找 ProgramSubmit
+            var application = db.ProgramSubmits
+                .FirstOrDefault(s => s.ParticipantId == participant.Id && s.ProgramPlanId == programId);
+            if (application == null) return BadRequest("找不到對應的體驗申請");
+            if (application.StatusId != 2) return BadRequest("尚未通過企業審核");
+
+            // 找 ProgramPlan
+            var program = db.ProgramPlan.FirstOrDefault(p => p.Id == programId);
+            if (program == null) return BadRequest("找不到該體驗計畫");
+            if (DateTime.Now <= program.ProgramEndDate) return BadRequest("體驗尚未結束");
+
+            // 找已有評價
+            var existingReview = db.ParticipantEvaluations
+                .FirstOrDefault(r => r.ProgramPlanId == programId && r.ParticipantId == participant.Id);
+            if (existingReview == null) return BadRequest("尚未提交過評價，請使用 POST 新增");
+
+            // 更新評價
+            existingReview.Score = dto.Score;
+            existingReview.Comment = dto.Comment;
+            existingReview.StatusId = flagged ? 3 : 2; // AI審核結果
+            db.SaveChanges(); // 更新 ParticipantEvaluation
+
+            // 建立新的 AI 系統審核結果
+            var aiReview = new EvaluationReview
+            {
+                EvaluationId = existingReview.Id,
+                ReviewedAt = DateTime.Now,
+                ReviewerId = 11,
+                ReviewTypeId = ReviewTypeEnum.System,
+                StatusId = flagged ? 3 : 2,
+                Comment = flagged ? string.Join(",", flaggedCategories) : "系統自動審核通過"
+            };
+            db.EvaluationReviews.Add(aiReview);
+            db.SaveChanges();
+
+            // 組裝回傳
+            var reviewResponse = new
+            {
+                ProgramName = program.Name,
+                ProgramStartDate = program.ProgramStartDate,
+                ProgramEndDate = program.ProgramEndDate,
+                CompanyName = program.Company.Name,
+                Score = existingReview.Score,
+                Comment = existingReview.Comment,
+                SerialNum = existingReview.SerialNum,
+                AiStatus = aiReview.StatusId
+            };
+
+            if (flagged)
+                return Content(HttpStatusCode.BadRequest, new { message = "評價內容被判定為不當，請修改後再提交。", review = reviewResponse });
+
+            return Ok(reviewResponse);
         }
 
         // POST: api/PublicProgramPlans  體驗者申請體驗計畫
@@ -857,7 +1265,7 @@ namespace TryBeta.Controllers
                 var payload = new
                 {
                     model = "omni-moderation-latest",
-                    input = dto.Comment  
+                    input = dto.Comment
                 };
 
                 var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
@@ -935,7 +1343,7 @@ namespace TryBeta.Controllers
                 ReviewedAt = DateTime.Now,
                 ReviewerId = 11,
                 ReviewTypeId = ReviewTypeEnum.System,
-                StatusId = flagged ? 3 : 2, 
+                StatusId = flagged ? 3 : 2,
                 Comment = flagged ? string.Join(",", flaggedCategories) : "通過"
             };
             db.EvaluationReviews.Add(aiReview);
@@ -960,6 +1368,101 @@ namespace TryBeta.Controllers
                 return Content(HttpStatusCode.BadRequest, new { message = "評價內容被判定為不當，請修改後再提交。", review = reviewResponse });
 
             return Ok(reviewResponse);
+        }
+
+        //POST: /api/v1/favorites 體驗者收藏體驗計畫
+        [HttpPost]
+        [Route("~/api/v1/favorites")]
+        [JwtAuthFilter]
+        public IHttpActionResult AddFavorite([FromBody] FavoriteDto dto)
+        {
+            try
+            {
+                // 驗證 ModelState
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                //  驗證登入
+                if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
+                {
+                    return Unauthorized();
+                }
+                int userId = (int)userIdObj;
+
+
+                var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == dto.UserId);
+                if (participant == null)
+                    return NotFound();
+
+                // 驗證 ProgramPlan 是否存在且已通過
+                var program = db.ProgramPlan.FirstOrDefault(p =>
+                    p.Id == dto.ProgramPlanId &&
+                    (p.StatusId == 2 || p.StatusId == 4 || p.StatusId == 15));
+
+                if (program == null)
+                    return BadRequest("該體驗計畫尚未通過發布或不存在");
+
+                // 驗證刊登是否已結束
+                if (program.PublishEndDate < DateTime.Today)
+                    return BadRequest("該體驗計畫刊登已結束");
+
+                // 檢查是否已經收藏
+                var exists = db.Favorites.Any(f => f.ParticipantId == participant.Id && f.ProgramPlanId == dto.ProgramPlanId);
+                if (exists)
+                    return BadRequest("已收藏此體驗計畫");
+
+                var favorite = new Favorite
+                {
+                    ParticipantId = participant.Id,
+                    ProgramPlanId = dto.ProgramPlanId,
+                    CreatedAt = DateTime.Now
+                };
+
+                db.Favorites.Add(favorite);
+                db.SaveChanges();
+
+                return Ok(new { Message = "成功收藏體驗計畫" });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        //DELETE: api/v1/favorites 體驗者取消收藏體驗計畫
+        [HttpDelete]
+        [Route("~/api/v1/favorites/{programPlanId}")]
+        [JwtAuthFilter]
+        public IHttpActionResult RemoveFavorite(int programPlanId)
+        {
+            try
+            {
+                // 驗證登入
+                if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
+                {
+                    return Unauthorized();
+                }
+                int userId = (int)userIdObj;
+
+                // 找到 participant
+                var participant = db.ParticipantInfoes.FirstOrDefault(p => p.UserId == userId);
+                if (participant == null)
+                    return NotFound();
+
+                // 找到收藏紀錄
+                var favorite = db.Favorites.FirstOrDefault(f => f.ParticipantId == participant.Id && f.ProgramPlanId == programPlanId);
+                if (favorite == null)
+                    return BadRequest("尚未收藏此體驗計畫");
+
+                db.Favorites.Remove(favorite);
+                db.SaveChanges();
+
+                return Ok(new { Message = "已取消收藏" });
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // DELETE: api/PublicProgramPlans/5
@@ -990,6 +1493,22 @@ namespace TryBeta.Controllers
         private bool ProgramPlanExists(int id)
         {
             return db.ProgramPlan.Count(e => e.Id == id) > 0;
+        }
+
+        // 工具方法：隱藏名字中間字，HomePage撈體驗者名字用
+        private string MaskName(string fullName)
+        {
+            if (string.IsNullOrEmpty(fullName)) return fullName;
+
+            if (fullName.Length <= 2)
+            {
+                // 如果名字只有兩個字 → 保留第一字，第二字遮住
+                return fullName[0] + "O";
+            }
+
+            // 三個字以上 → 保留第一個與最後一個，中間全部換成 O
+            var middleMasked = new string('O', fullName.Length - 2);
+            return $"{fullName[0]}{middleMasked}{fullName[fullName.Length - 1]}";
         }
     }
 }

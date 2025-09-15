@@ -521,6 +521,18 @@
     <Compile Include="Migrations\202508221406294_required motivationcontent field.Designer.cs">
       <DependentUpon>202508221406294_required motivationcontent field.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508221503287_add TopProgramPlan.cs" />
+    <Compile Include="Migrations\202508221503287_add TopProgramPlan.Designer.cs">
+      <DependentUpon>202508221503287_add TopProgramPlan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508221507370_add Feild Score in ProramPlan Table.cs" />
+    <Compile Include="Migrations\202508221507370_add Feild Score in ProramPlan Table.Designer.cs">
+      <DependentUpon>202508221507370_add Feild Score in ProramPlan Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508230815046_add Favorite Table.cs" />
+    <Compile Include="Migrations\202508230815046_add Favorite Table.Designer.cs">
+      <DependentUpon>202508230815046_add Favorite Table.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AdminInfoes.cs" />
     <Compile Include="Models\AdminLoginDto.cs" />
@@ -536,6 +548,8 @@
     <Compile Include="Models\District.cs" />
     <Compile Include="Models\EvaluationReview.cs" />
     <Compile Include="Models\ExistingResume.cs" />
+    <Compile Include="Models\Favorite.cs" />
+    <Compile Include="Models\FavoriteDto.cs" />
     <Compile Include="Models\Identity.cs" />
     <Compile Include="Models\Industry.cs" />
     <Compile Include="Models\JwtAuthFilter.cs" />
@@ -572,6 +586,7 @@
     <Compile Include="Models\SimpleResume.cs" />
     <Compile Include="Models\ParticipantInfoes.cs" />
     <Compile Include="Models\TopProgramPlan.cs" />
+    <Compile Include="Models\HomePageDto.cs" />
     <Compile Include="Models\UpdateEvaluationDto.cs" />
     <Compile Include="Models\Users.cs" />
     <Compile Include="Models\ParticipantRegisterDto.cs" />
@@ -931,6 +946,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508221406294_required motivationcontent field.resx">
       <DependentUpon>202508221406294_required motivationcontent field.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508221503287_add TopProgramPlan.resx">
+      <DependentUpon>202508221503287_add TopProgramPlan.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508221507370_add Feild Score in ProramPlan Table.resx">
+      <DependentUpon>202508221507370_add Feild Score in ProramPlan Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508230815046_add Favorite Table.resx">
+      <DependentUpon>202508230815046_add Favorite Table.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
