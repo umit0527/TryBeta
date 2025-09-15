@@ -81,6 +81,14 @@ namespace TryBeta.Models
         .Property(p => p.Price)
         .HasPrecision(18, 2);
 
+            // ProgramSubmit -> Status 禁止 cascade delete
+            modelBuilder.Entity<ProgramSubmit>()
+        .HasRequired(s => s.Status)
+        .WithMany()
+        .HasForeignKey(s => s.StatusId)
+        .WillCascadeOnDelete(false);
+
+            base.OnModelCreating(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
         }

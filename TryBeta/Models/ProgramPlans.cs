@@ -93,6 +93,17 @@ namespace TryBeta.Models
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
+        // ------------ 熱門分數相關 ------------
+        [JsonProperty("views_count")]
+        public int ViewsCount { get; set; } = 0;
+
+        [JsonProperty("favorites_count")]
+        public int FavoritesCount { get; set; } = 0;
+
+        [JsonProperty("applied_count")]
+        public int AppliedCount { get; set; } = 0;
+        // ------------------------------------
+
         // 導航屬性
         public virtual CompanyInfoes Company { get; set; }
         public virtual Industry Industry { get; set; }

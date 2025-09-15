@@ -70,7 +70,7 @@ namespace TryBeta.Controllers
                     query = query.Where(p => p.JobTitleId == job_title_id.Value);
                 }
 
-                // 地區篩選：根據 city_id 查 City 表名稱，再比對 Address
+                // 地區篩選
                 if (!string.IsNullOrEmpty(city_id))
                 {
                     var cityName = db.City
@@ -87,25 +87,33 @@ namespace TryBeta.Controllers
                 // 排序
                 switch (sort)
                 {
-                    case "publish_start_asc":        // 刊登開始日期舊到新
+                    case "publish_start_asc":
                         query = query.OrderBy(p => p.PublishStartDate);
                         break;
-                    case "publish_start_desc":       // 刊登開始日期新到舊
+                    case "publish_start_desc":
                         query = query.OrderByDescending(p => p.PublishStartDate);
                         break;
-                    case "publish_end_asc":          // 刊登截止日期舊到新
+                    case "publish_end_asc":
                         query = query.OrderBy(p => p.PublishEndDate);
                         break;
-                    case "publish_end_desc":         // 刊登截止日期新到舊
+                    case "publish_end_desc":
                         query = query.OrderByDescending(p => p.PublishEndDate);
                         break;
-                    case "program_start_asc":        // 體驗開始日期舊到新
+                    case "program_start_asc":
                         query = query.OrderBy(p => p.ProgramStartDate);
                         break;
-                    case "program_start_desc":       // 體驗開始日期新到舊
+                    case "program_start_desc":
                         query = query.OrderByDescending(p => p.ProgramStartDate);
                         break;
-                    default:                         // 預設刊登日期新到舊
+                    case "hot": // 熱門排序
+                        query = query
+                            .OrderByDescending(p =>
+                                p.ViewsCount * 1 +
+                                p.FavoritesCount * 3 +
+                                db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id) * 5
+                            );
+                        break;
+                    default:
                         query = query.OrderByDescending(p => p.PublishStartDate);
                         break;
                 }
@@ -121,7 +129,7 @@ namespace TryBeta.Controllers
                         // 已申請人數
                         var appliedCount = db.ProgramSubmits.Count(a => a.ProgramPlanId == p.Id);
 
-                        // 判斷顯示 DaysLeft 或 IsOngoing
+                        // 判斷 DaysLeft 或 IsOngoing
                         int? daysLeft = null;
                         bool? isOngoing = null;
 
@@ -138,9 +146,13 @@ namespace TryBeta.Controllers
                             isOngoing = false;
                         }
 
+                        // 三個熱門指標
+                        var viewsCount = p.ViewsCount;       
+                        var favoritesCount = p.FavoritesCount; 
+                        var score = viewsCount * 1 + favoritesCount * 3 + appliedCount * 5;
+
                         return new
                         {
-                            // 計畫基本資料
                             p.Id,
                             p.Name,
                             p.Intro,
@@ -161,7 +173,10 @@ namespace TryBeta.Controllers
                             }),
                             AppliedCount = appliedCount,
                             DaysLeft = daysLeft,
-                            IsOngoing = isOngoing
+                            IsOngoing = isOngoing,
+                            ViewsCount = viewsCount,
+                            FavoritesCount = favoritesCount,
+                            Score = score
                         };
                     })
                     .ToList();
@@ -323,6 +338,144 @@ namespace TryBeta.Controllers
             }
         }
 
+        //GET: api/v1/users/programs 申請的體驗計畫追蹤頁
+        [HttpGet]
+        [Route("~/api/v1/users/programs")]
+        [JwtAuthFilter]
+        public IHttpActionResult GetMyApplications(
+            int page = 1, 
+            int limit = 20, 
+            string status = null, 
+            string sort = "submit_desc")
+        {
+            if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
+                return Unauthorized();
+
+            int userId = (int)userIdObj;
+
+            int statusValue = 0;
+            switch (status)
+            {
+                case "審核中":
+                    statusValue = 1;
+                    break;
+                case "已通過":
+                    statusValue = 2;
+                    break;
+                case "未通過":
+                    statusValue = 3;
+                    break;
+                case "已取消":
+                    statusValue = 4;
+                    break;
+                default:
+                    statusValue = 0;
+                    break;
+            }
+
+            // 查詢使用者的所有申請
+            var query = db.ProgramSubmits
+              .Include(s => s.ProgramPlan)
+              .Include(s => s.ProgramPlan.Company)
+              .Include(s => s.Status)
+              .Where(s => s.Participant.UserId == userId);
+
+            // 狀態篩選
+            if (statusValue != 0)
+                query = query.Where(s => s.StatusId == statusValue);
+
+            // 排序
+            switch (sort?.ToLower())
+            {
+                case "submit_asc":  //申請日期舊到新
+                    query = query.OrderBy(s => s.SubmitAt);
+                    break;
+                case "submit_desc": //申請日期新到舊
+                    query = query.OrderByDescending(s => s.SubmitAt);
+                    break;
+                case "program_start_asc":  // 體驗開始日期舊到新
+                    query = query.OrderBy(s => s.ProgramPlan.ProgramStartDate);
+                    break;
+                case "program_start_desc":  // 體驗開始日期新到舊
+                    query = query.OrderByDescending(s => s.ProgramPlan.ProgramStartDate);
+                    break;
+                case "program_end_asc":  // 體驗結束日期舊到新
+                    query = query.OrderBy(s => s.ProgramPlan.ProgramEndDate);
+                    break;
+                case "program_end_desc":  // 體驗結束日期新到舊
+                    query = query.OrderByDescending(s => s.ProgramPlan.ProgramEndDate);
+                    break;
+                case "publish_start_asc":  // 刊登開始日期舊到新
+                    query = query.OrderBy(s => s.ProgramPlan.PublishStartDate);
+                    break;
+                case "publish_start_desc":  // 刊登開始日期新到舊
+                    query = query.OrderByDescending(s => s.ProgramPlan.PublishStartDate);
+                    break;
+                case "publish_end_asc":  // 刊登結束日期舊到新
+                    query = query.OrderBy(s => s.ProgramPlan.PublishEndDate);
+                    break;
+                case "publish_end_desc":  // 刊登結束日期新到舊
+                    query = query.OrderByDescending(s => s.ProgramPlan.PublishEndDate);
+                    break;
+                default:   //預設申請日期新到舊
+                    query = query.OrderByDescending(s => s.SubmitAt);
+                    break;
+            }
+
+            var total = query.Count();
+
+            var items = query
+                .Skip((page - 1) * limit)
+                .Take(limit)
+                .ToList()  // 先 ToList() 避免 EF 不支援 switch expression
+                .Select(s =>
+                {
+                    string statusText;
+                    switch (s.StatusId)
+                    {
+                        case 1:
+                            statusText = "審核中";
+                            break;
+                        case 2:
+                            statusText = "已通過";
+                            break;
+                        case 3:
+                            statusText = "未通過";
+                            break;
+                        case 4:
+                            statusText = "已取消";
+                            break;
+                        default:
+                            statusText = "未知";
+                            break;
+                    }
+
+                    return new
+                    {
+                        ApplicationId = s.Id,
+                        SubmitAt = s.SubmitAt,
+                        ProgramName = s.ProgramPlan.Name,
+                        Address = s.ProgramPlan.Address,
+                        ProgramStartDate = s.ProgramPlan.ProgramStartDate,
+                        ProgramEndDate = s.ProgramPlan.ProgramEndDate,
+                        MinParticipants = s.ProgramPlan.MinPeople,
+                        MaxParticipants = s.ProgramPlan.MaxPeople,
+                        Intro = s.ProgramPlan.Intro,
+                        CompanyName = s.ProgramPlan.Company.Name,
+                        Status = statusText
+                    };
+                })
+                .ToList();
+
+            return Ok(new
+            {
+                total,
+                page,
+                limit,
+                items
+            });
+        }
+
         // PUT: api/PublicProgramPlans/5
         [ResponseType(typeof(void))]
         public IHttpActionResult PutProgramPlan(int id, ProgramPlan programPlan)
@@ -358,7 +511,7 @@ namespace TryBeta.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/PublicProgramPlans
+        // POST: api/PublicProgramPlans  體驗者申請體驗計畫
         [HttpPost]
         [Route("{programId}/applications")]
         [JwtAuthFilter]
@@ -394,15 +547,22 @@ namespace TryBeta.Controllers
                     return BadRequest("找不到對應的體驗者資料，請先建立個人資料");
                 }
 
-                // 5. 驗證 Resume
-                // 驗證 Resume
-                if (dto.ResumeType.ToLower() == "simple resume")
+
+                // 5. 防止重複申請同一個計畫
+                var existingSubmit = db.ProgramSubmits
+                    .FirstOrDefault(s => s.ProgramPlanId == programId && s.ParticipantId == participant.Id);
+                if (existingSubmit != null)
+                    return BadRequest("已申請該體驗計畫");
+
+                // 6. 驗證 Resume
+                var resumeType = dto.ResumeType?.Trim().ToLower();
+                if (resumeType == "simple resume")
                 {
                     var simpleResume = db.SimpleResume.FirstOrDefault(r => r.Id == dto.ResumeId && r.UserId == userId);
                     if (simpleResume == null)
                         return BadRequest("找不到該簡單履歷");
                 }
-                else if (dto.ResumeType.ToLower() == "existing resume")
+                else if (resumeType == "existing resume")
                 {
                     var existingResume = db.ExistingResume.FirstOrDefault(r => r.Id == dto.ResumeId && r.UserId == userId);
                     if (existingResume == null)
@@ -413,11 +573,11 @@ namespace TryBeta.Controllers
                     return BadRequest("履歷類型錯誤");
                 }
 
-                // 6. 建立 ProgramSubmit
+                // 7. 建立 ProgramSubmit
                 var submit = new ProgramSubmit
                 {
                     ProgramPlanId = programId,
-                    ParticipantId = participant.Id,  
+                    ParticipantId = participant.Id,
                     ParticipantsCount = dto.ParticipantsCount,
                     Note = dto.Note,
                     MotivationContent = dto.MotivationContent,
@@ -427,9 +587,9 @@ namespace TryBeta.Controllers
                     AgreeTerms = dto.AgreeTerms
                 };
 
-                if (dto.ResumeType == "simple")
+                if (resumeType == "simple resume")
                     submit.SimpleResumeId = dto.ResumeId;
-                else if (dto.ResumeType == "existing")
+                else if (resumeType == "existing resume")
                     submit.ExistingResumeId = dto.ResumeId;
 
                 db.ProgramSubmits.Add(submit);

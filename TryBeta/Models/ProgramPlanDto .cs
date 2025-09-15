@@ -13,16 +13,17 @@ namespace TryBeta.Models
         public string Name { get; set; }
         public string Description { get; set; }
     }
+
     public class ProgramPlanDto : IValidatableObject
     {
         [JsonProperty("company_name")]
-        public string CompanyName { get; set; }  // 給體驗者端用
+        public string CompanyName { get; set; }
 
         [JsonProperty("company_logo")]
-        public string CompanyLogo { get; set; }  // 給體驗者端用
+        public string CompanyLogo { get; set; }
 
         [JsonProperty("company_cover")]
-        public string CompanyCover { get; set; }  // 給體驗者端用
+        public string CompanyCover { get; set; }
 
         [Required(ErrorMessage = "請輸入名稱")]
         [MaxLength(200, ErrorMessage = "名稱最多200字")]
@@ -79,61 +80,63 @@ namespace TryBeta.Models
 
         [Required(ErrorMessage = "刊登開始日期為必填")]
         [JsonProperty("publish_start_date")]
-        public DateTime PublishStartDate { get; set; }  //體驗刊登開始日期
+        public DateTime PublishStartDate { get; set; }
 
         [Required(ErrorMessage = "刊登持續天數為必填")]
         [Range(1, 365, ErrorMessage = "刊登持續天數必須介於1到365")]
         [JsonProperty("publish_duration_days")]
-        public int PublishDurationDays { get; set; }  //體驗刊登期間
+        public int PublishDurationDays { get; set; }
 
         [JsonProperty("publish_end_date")]
-        public DateTime PublishEndDate { get; set; }  //體驗刊登結束日期
+        public DateTime PublishEndDate { get; set; }
 
         [Required(ErrorMessage = "請選擇體驗開始日期")]
         [JsonProperty("program_start_date")]
-        public DateTime ProgramStartDate { get; set; }  //體驗執行開始日期
+        public DateTime ProgramStartDate { get; set; }
 
         [Required(ErrorMessage = "請選擇體驗結束日期")]
         [JsonProperty("program_end_date")]
-        public DateTime ProgramEndDate { get; set; }  //體驗執行結束日期
+        public DateTime ProgramEndDate { get; set; }
 
         [JsonProperty("program_duration_days")]
-        public int ProgramDurationDays { get; set; }  //體驗執行期間
+        public int ProgramDurationDays { get; set; }
 
         [JsonProperty("status_id")]
         [ForeignKey("StatusId")]
-        public int StatusId { get; set; }  //體驗計畫狀態
+        public int StatusId { get; set; }
 
         [JsonProperty("status_title")]
-        public string StatusTitle { get; set; } // 用來回傳 ProgramPlanStatus.Title
+        public string StatusTitle { get; set; }
+
+        // ------------ 熱門分數相關 ------------
+        [JsonProperty("views_count")]
+        public int ViewsCount { get; set; } = 0;
+
+        [JsonProperty("favorites_count")]
+        public int FavoritesCount { get; set; } = 0;
 
         [JsonProperty("applied_count")]
-        public int AppliedCount { get; set; }   // 已申請人數 給體驗者端呈現用
+        public int AppliedCount { get; set; } = 0;
+
+        [JsonProperty("score")]
+        public int Score => ViewsCount * 1 + FavoritesCount * 3 + AppliedCount * 5;
+        // ------------------------------------
 
         [JsonProperty("days_left")]
-        public int? DaysLeft { get; set; }      // 申請截止日期還有幾天 (體驗還沒r進行時用，給體驗者端呈現用)
+        public int? DaysLeft { get; set; }
 
         [JsonProperty("is_ongoing")]
-        public bool? IsOngoing { get; set; }    // 體驗是否進行中 (體驗進行後用，給體驗者端呈現用)
+        public bool? IsOngoing { get; set; }
 
         public SimpleEntityDto Industry { get; set; }
         public SimpleEntityDto JobTitle { get; set; }
         public SimpleEntityDto Status { get; set; }
 
-
-        // 圖片清單
-        public List<string> Images { get; set; } = new List<string>();  //企業端上傳圖片用
-
+        public List<string> Images { get; set; } = new List<string>();
         public List<ProgramStepDto> Steps { get; set; } = new List<ProgramStepDto>();
 
-
-
-        /// <summary>
-        /// 自動驗證日期邏輯
-        /// </summary>
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            // 計算結束日期
             var publishEndDate = PublishStartDate.AddDays(PublishDurationDays);
             var programEndDate = ProgramStartDate.AddDays(ProgramDurationDays);
 
@@ -165,11 +168,13 @@ namespace TryBeta.Models
                 new[] { nameof(MaxPeople), nameof(MinPeople) });
             }
         }
+
         public class SimpleEntityDto
         {
             public int Id { get; set; }
             public string Title { get; set; }
         }
+
         public class StepDto
         {
             public int Id { get; set; }

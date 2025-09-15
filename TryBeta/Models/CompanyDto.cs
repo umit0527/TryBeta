@@ -20,6 +20,7 @@ namespace TryBeta.Models
             public int IndustryId { get; set; }
 
             [JsonProperty("tax_id_num")]
+            [StringLength(8, MinimumLength = 0, ErrorMessage = "統一編號必須是 8 碼的數字")]
             [RegularExpression(@"^\d{8}$", ErrorMessage = "統一編號必須是 8 碼的數字")]
             public string TaxIdNum { get; set; }
 

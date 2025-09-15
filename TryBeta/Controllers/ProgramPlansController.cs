@@ -275,13 +275,10 @@ namespace TryBeta.Controllers
                     case "publish_start_asc":        // 刊登開始日期舊到新
                         query = query.OrderBy(p => p.PublishStartDate);
                         break;
-                    case "publish_start_desc":       // 刊登開始日期新到舊
-                        query = query.OrderByDescending(p => p.PublishStartDate);
-                        break;
-                    case "publish_end_asc":          // 刊登截止日期舊到新
+                    case "publish_end_asc":          // 刊登結束日期舊到新
                         query = query.OrderBy(p => p.PublishEndDate);
                         break;
-                    case "publish_end_desc":         // 刊登截止日期新到舊
+                    case "publish_end_desc":         // 刊登結束日期新到舊
                         query = query.OrderByDescending(p => p.PublishEndDate);
                         break;
                     case "program_start_asc":        // 體驗開始日期舊到新
@@ -290,7 +287,13 @@ namespace TryBeta.Controllers
                     case "program_start_desc":       // 體驗開始日期新到舊
                         query = query.OrderByDescending(p => p.ProgramStartDate);
                         break;
-                    default:                         // 預設刊登日期新到舊
+                    case "program_end_asc":       // 體驗結束日期舊到新
+                        query = query.OrderByDescending(p => p.ProgramStartDate);
+                        break;
+                    case "program_end_desc":       // 體驗結束日期新到舊
+                        query = query.OrderByDescending(p => p.ProgramStartDate);
+                        break;
+                    default:                         // 預設刊登開始日期新到舊
                         query = query.OrderByDescending(p => p.PublishStartDate);
                         break;
                 }

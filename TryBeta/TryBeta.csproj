@@ -352,6 +352,18 @@
     <Compile Include="Migrations\202508171408376_adjust exisiting &amp; simpleresume isactive feild type.Designer.cs">
       <DependentUpon>202508171408376_adjust exisiting &amp; simpleresume isactive feild type.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508180643027_addScoreFeild&amp;PopularParams.cs" />
+    <Compile Include="Migrations\202508180643027_addScoreFeild&amp;PopularParams.Designer.cs">
+      <DependentUpon>202508180643027_addScoreFeild&amp;PopularParams.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508180717430_add API GET Users Program.cs" />
+    <Compile Include="Migrations\202508180717430_add API GET Users Program.Designer.cs">
+      <DependentUpon>202508180717430_add API GET Users Program.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508180721412_FixProgramSubmitStatus.cs" />
+    <Compile Include="Migrations\202508180721412_FixProgramSubmitStatus.Designer.cs">
+      <DependentUpon>202508180721412_FixProgramSubmitStatus.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
@@ -645,6 +657,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508171408376_adjust exisiting &amp; simpleresume isactive feild type.resx">
       <DependentUpon>202508171408376_adjust exisiting &amp; simpleresume isactive feild type.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508180643027_addScoreFeild&amp;PopularParams.resx">
+      <DependentUpon>202508180643027_addScoreFeild&amp;PopularParams.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508180717430_add API GET Users Program.resx">
+      <DependentUpon>202508180717430_add API GET Users Program.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508180721412_FixProgramSubmitStatus.resx">
+      <DependentUpon>202508180721412_FixProgramSubmitStatus.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

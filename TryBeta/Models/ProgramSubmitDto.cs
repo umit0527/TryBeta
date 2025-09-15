@@ -51,6 +51,7 @@ namespace TryBeta.Models
         public int ResumeId { get; set; }     // 根據類型填 SimpleResumeId or ExistingResumeId
         
         [JsonProperty("motivation_content")]
+        [StringLength(500, ErrorMessage = "最多 500 字")]
         public string MotivationContent { get; set; }
     }
 }
