@@ -91,7 +91,7 @@ namespace TryBeta.Models
             [JsonProperty("type")]
             public string Type { get; set; }
 
-            [JsonProperty("img_path")]
+             [JsonProperty("img_path")]
             public string ImgPath { get; set; }
         }
         public class CompanyPlanOrderDto  //企業方案訂單

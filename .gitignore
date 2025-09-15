@@ -418,9 +418,13 @@ FodyWeavers.xsd
 *.msp
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 TryBeta/Web.config
 =======
 >>>>>>> FinalDemoVersion
 webconnect.config
 TryBeta/OpenAISettings.json
 TryBeta/NewebPaySettings.config
+=======
+webconnect.config
+>>>>>>> API-Admin

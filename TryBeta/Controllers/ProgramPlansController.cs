@@ -154,7 +154,6 @@ namespace TryBeta.Controllers
                     .Where(i => i.Id == programPlan.IndustryId)
                     .Select(i => new { i.Id, i.Title })
                     .FirstOrDefault();
-
                 var jobTitle = db.Positions
                     .Where(j => j.Id == programPlan.JobTitleId)
                     .Select(j => new { j.Id, j.Title })
