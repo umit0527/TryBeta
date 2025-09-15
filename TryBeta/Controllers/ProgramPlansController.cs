@@ -10,7 +10,10 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using TryBeta.Models;
+<<<<<<< HEAD
 
+=======
+>>>>>>> API-OpenAIModeration
 using static TryBeta.Models.ParticipantDetailDto;
 
 namespace TryBeta.Controllers
@@ -61,6 +64,8 @@ namespace TryBeta.Controllers
         //                p.StatusId,
         //                p.Name,
         //                p.Intro,
+
+
         //                p.PublishStartDate,
         //                p.PublishDurationDays,
         //                p.ProgramStartDate,
@@ -90,7 +95,7 @@ namespace TryBeta.Controllers
 
         // GET: api/v1/company/{companyid}/programs/{programId} 取得單一體驗計畫詳情
         [HttpGet]
-        [Route("programs/{programId:int}")]  
+        [Route("programs/{programId:int}")]
         [JwtAuthFilter]
         public IHttpActionResult GetProgramPlan(int companyid, int programId)
         {
@@ -147,12 +152,35 @@ namespace TryBeta.Controllers
 
                 // 取得圖片資料
                 var images = db.ProgramPlanImages
-                    .Where(s => s.Id == programPlan.Id)
-                    .Select(s => new { s.Id, s.ImgPath })
-                    .FirstOrDefault();
+                    .Where(img => img.ProgramPlanId == programPlan.Id)
+                    .Select(img => new { img.Id, img.ImgPath })
+                    .ToList();
+
+                //  取得申請統計資訊 
+                var totalApplicants = db.ProgramSubmits.Count(s => s.ProgramPlanId == programPlan.Id);
+                var reviewedCount = db.ProgramSubmits
+                    .Count(s => s.ProgramPlanId == programPlan.Id && db.ProgramSubmitReviews.Any(r => r.ProgramSubmitId == s.Id));
+                var pendingCount = totalApplicants - reviewedCount;
+
+
+                // 瀏覽統計
+                var now = DateTime.Now;
+                var startOfWeek = now.Date.AddDays(-(int)now.DayOfWeek); // 星期日為一週起點
+                var startOfDay = now.Date;
+
+                var totalViews = db.ProgramViews.Count(v => v.ProgramPlanId == programPlan.Id);
+                var weeklyViews = db.ProgramViews.Count(v => v.ProgramPlanId == programPlan.Id && v.ViewedAt >= startOfWeek);
+                var dailyViews = db.ProgramViews.Count(v => v.ProgramPlanId == programPlan.Id && v.ViewedAt >= startOfDay);
 
                 var response = new
                 {
+                    //統計區塊
+                    Statistics = new
+                    {
+                        TotalApplicants = totalApplicants,
+                        ReviewedCount = reviewedCount,
+                        PendingCount = pendingCount
+                    },
                     programPlan.Id,
                     programPlan.Name,
                     programPlan.Intro,
@@ -171,7 +199,14 @@ namespace TryBeta.Controllers
                     programPlan.ProgramEndDate,
                     programPlan.ProgramDurationDays,
                     Steps = steps,
-                    Images = images
+                    Images = images,
+                    //瀏覽數據
+                    Views = new
+                    {
+                        TotalViews = totalViews,
+                        WeeklyViews = weeklyViews,
+                        DailyViews = dailyViews
+                    }
                 };
 
                 return Ok(response);
@@ -193,8 +228,7 @@ namespace TryBeta.Controllers
         string search = null,
         int? industry_id = null,
         int? job_title_id = null,
-
-        int? status_id = null,// 1=全部 2=已通過 3=已發布 4=待發布 5=已拒絕 6=審核中
+        int? status_id = null,
         string sort = "publish_start_desc",
         int page = 1,
         int limit = 21)
@@ -369,56 +403,6 @@ namespace TryBeta.Controllers
             }
         }
 
-
-        // PUT: api/ProgramPlans/5
-        [ResponseType(typeof(void))]
-        public IHttpActionResult PutProgramPlans(int id, ProgramPlan programPlans)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != programPlans.Id)
-            {
-                return BadRequest();
-            }
-
-            db.Entry(programPlans).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProgramPlansExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
-        }
-
-        // POST: api/ProgramPlans
-        public IHttpActionResult PostProgramPlans(ProgramPlan programPlans)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            db.ProgramPlan.Add(programPlans);
-            db.SaveChanges();
-
-            return CreatedAtRoute("DefaultApi", new { id = programPlans.Id }, programPlans);
-        }
-
         // GET: api/v1/company/{companyid}/programs/{programId}/applications  查看單一體驗的申請者列表
         [HttpGet]
         [Route("~/api/v1/company/programs/{programId:int}/applications")]
@@ -563,7 +547,7 @@ namespace TryBeta.Controllers
                     ReviewStatusId = application.StatusId,
                     ReviewStatusName = application.Status?.Title ?? "",
 
-                    //第一個區塊
+                    // 第一個區塊
                     ParticipantSerialNum = application.ParticipantSerialNum ?? application.Id.ToString(),
                     Name = participant.Name,
                     Phone = participant.Phone,
@@ -605,32 +589,31 @@ namespace TryBeta.Controllers
                                         PortfolioPath = f.PortfolioPath,
                                         FileSize = f.FileSize
                                     })
-                                    .ToList() ?? new List<ParticipantDetailDto.PortfolioFileDto>()
+                                    .ToList() ?? new List<ParticipantDetailDto.PortfolioFileDto>(),
                 };
 
                 // 第五個區塊：過去參加的體驗計畫
                 var pastPrograms = db.ProgramSubmits
-    .Include(s => s.ProgramPlan)
-    .Include(s => s.Status)
-    .Where(s => s.ParticipantId == participantId)
-    .Where(s => s.StatusId == 2 || s.StatusId == 4) // 已參加或自行取消
-    .Where(s => s.StatusId == 2 ? s.ProgramPlan.ProgramEndDate < DateTime.Now : true)
-    .Select(s => new ParticipantDetailDto.PastProgramDto
-    {
-        ProgramName = s.ProgramPlan.Name,
-        ProgramStartDate = s.ProgramPlan.ProgramStartDate,
-        ProgramEndDate = s.ProgramPlan.ProgramEndDate,
-        ParticipationStatus = s.StatusId == 2 ? "Attended" : "Cancelled",
-        CancelReason = s.StatusId == 4 ? s.CancelReason : null,
-        ReviewScore = s.StatusId == 2 ? db.ParticipantEvaluations
-                                         .Where(r => r.ParticipantId == participantId && r.ProgramPlanId == s.ProgramPlanId)
-                                         .Select(r => (double?)r.Score)
-                                         .FirstOrDefault()
-                                     : null
-    })
-    .ToList();
+                    .Include(s => s.ProgramPlan)
+                    .Include(s => s.Status)
+                    .Where(s => s.ParticipantId == participantId)
+                    .Where(s => s.StatusId == 2 || s.StatusId == 4) // 已參加或自行取消
+                    .Where(s => s.StatusId == 2 ? s.ProgramPlan.ProgramEndDate < DateTime.Now : true)
+                    .Select(s => new ParticipantDetailDto.PastProgramDto
+                    {
+                        ProgramName = s.ProgramPlan.Name,
+                        ProgramStartDate = s.ProgramPlan.ProgramStartDate,
+                        ProgramEndDate = s.ProgramPlan.ProgramEndDate,
+                        ParticipationStatus = s.StatusId == 2 ? "Attended" : "Cancelled",
+                        CancelReason = s.StatusId == 4 ? s.CancelReason : null,
+                        ReviewScore = s.StatusId == 2 ? db.ParticipantEvaluations
+                                                         .Where(r => r.ParticipantId == participantId && r.ProgramPlanId == s.ProgramPlanId)
+                                                         .Select(r => (double?)r.Score)
+                                                         .FirstOrDefault()
+                                                     : null
+                    })
+                    .ToList();
 
-                // 組到 DTO
                 dto.PastPrograms = pastPrograms;
 
                 return Ok(dto);
@@ -727,7 +710,7 @@ namespace TryBeta.Controllers
                     ProgramStartDate = dto.ProgramStartDate,
                     ProgramEndDate = dto.ProgramEndDate,
                     ProgramDurationDays = (dto.ProgramEndDate - dto.ProgramStartDate).Days + 1,
-                    StatusId = 1,// 暫扣人數
+                    StatusId = 1,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
@@ -822,7 +805,7 @@ namespace TryBeta.Controllers
                     Steps = dto.Steps,
                     Images = dto.Images,
                     DaysLeft = daysLeft,
-                    IsOngoing = isOngoing
+                    //IsOngoing = isOngoing
                 };
 
                 return Ok(responseDto);
@@ -842,16 +825,16 @@ namespace TryBeta.Controllers
             }
         }
 
-        // PUT: api/ProgramPlans/5
+        // PUT: api/ProgramPlans/5 審核體驗者通過或拒絕
         [HttpPut]
         [Route("~/api/v1/programs/{programId:int}/applications/{participantId:int}/review")]
         [JwtAuthFilter]
-        public IHttpActionResult ReviewParticipant(int programId, int participantId, [FromBody] ParticipantEvaluationDto dto)
+        public IHttpActionResult ReviewParticipant(int programId, int participantId, [FromBody] ProgramSubmitReviewDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (dto.StatusId != ReviewStatus.Approved && dto.StatusId != ReviewStatus.Rejected)
+            if (dto.StatusId != (int)ReviewStatus.Approved && dto.StatusId != (int)ReviewStatus.Rejected)
                 return BadRequest("只能設定為核准申請或婉拒申請");
 
             if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
@@ -871,8 +854,26 @@ namespace TryBeta.Controllers
             var application = db.ProgramSubmits.FirstOrDefault(a => a.ProgramPlanId == programId && a.ParticipantId == participantId);
             if (application == null) return NotFound();
 
+            // 更新申請狀態與審核時間
             application.StatusId = (int)dto.StatusId;
             application.ReviewedAt = DateTime.Now;
+
+            // 新增審核紀錄到 ProgramSubmitReviews
+            var review = new ProgramSubmitReview
+            {
+                ProgramSubmitId = application.Id,
+                StatusId = dto.StatusId,
+                Comment = dto.Comment,   // 統一存通過訊息或拒絕理由
+                ReviewedAt = DateTime.Now,
+                ReviewerId = companyId
+            };
+            db.ProgramSubmitReviews.Add(review);
+
+            //當審核狀態為「通過」時，將 ProgramPlan 的 AppliedCount 欄位加一
+            if (dto.StatusId == (int)ReviewStatus.Approved)
+            {
+               program.AppliedCount++;
+            }
 
             try
             {
@@ -880,11 +881,9 @@ namespace TryBeta.Controllers
             }
             catch (DbEntityValidationException ex)
             {
-                // 把錯誤細節抓出來
                 var errors = ex.EntityValidationErrors
                     .SelectMany(e => e.ValidationErrors)
                     .Select(e => $"{e.PropertyName}: {e.ErrorMessage}");
-
                 return BadRequest("資料驗證失敗: " + string.Join("; ", errors));
             }
 
@@ -892,7 +891,8 @@ namespace TryBeta.Controllers
             {
                 message = "審核完成",
                 status = application.StatusId,
-                status_title = ((ReviewStatus)application.StatusId).ToString()
+                status_title = ((ReviewStatus)application.StatusId).ToString(),
+                comment = review.Comment
             });
         }
 

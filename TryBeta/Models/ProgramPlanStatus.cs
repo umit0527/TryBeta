@@ -19,12 +19,14 @@ namespace TryBeta.Models
     }
     //public enum ProgramPlanStatusEnum
     //{
-    //    UnderReview = 1,     // 審核中
-    //    SystemPass = 2,      // 系統通過
-    //    SystemRejected = 3,  // 系統拒絕
-    //    ManualPass = 4,      // 人工通過
-    //    ManualRejected = 5,  // 人工拒絕
-    //    Pending = 6,         // 待發布
-    //    Published = 7        // 已發布
+        //Under Review = 1,     // 審核中
+        //System Pass = 2,      // 系統通過
+        //System Rejected = 3,  // 系統拒絕
+        //Manual Pass = 4,      // 人工通過
+        //Manual Rejected = 5,  // 人工拒絕
+        //Pending = 6,         // 待發布
+        //Published = 7        // 已發布
+        //All Pass = 15
+        //All Rejected = 16
     //}
 }

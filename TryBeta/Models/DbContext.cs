@@ -49,6 +49,15 @@ namespace TryBeta.Models
         public DbSet<ProgramSubmit> ProgramSubmits { get; set; } //體驗計畫申請表 (體驗者)
         public DbSet<ProgramSubmitStatus> ProgramSubmitStatuses { get; set; } //體驗計畫申請狀態表 (體驗者)
         public DbSet<ParticipantEvaluation> ParticipantEvaluations { get; set; } //體驗者(過去)評價表 (體驗者)
+        public DbSet<ProgramSubmitReview> ProgramSubmitReviews { get; set; } //企業審核體驗者表
+        public DbSet<ProgramView> ProgramViews { get; set; } //企業體驗計畫瀏覽數據表
+        public DbSet<EvaluationReview> EvaluationReviews { get; set; } //平台的體驗者評價紀錄表
+        public DbSet<AdminInfoes> AdminInfoes { get; set; } //平台使用者基本資料表 (用來審核時表現名字)
+
+
+
+
+
 
 
 

@@ -49,7 +49,8 @@ namespace TryBeta.Models
 
         [JsonProperty("resume_id")]
         public int ResumeId { get; set; }     // 根據類型填 SimpleResumeId or ExistingResumeId
-        
+
+        [Required(ErrorMessage = "申請動機為必填")]
         [JsonProperty("motivation_content")]
         [StringLength(500, ErrorMessage = "最多 500 字")]
         public string MotivationContent { get; set; }

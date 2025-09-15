@@ -665,7 +665,8 @@ new ProgramPlanStatus { Title = "Manual Rejected" },
 new ProgramPlanStatus { Title = "Pending" },
 new ProgramPlanStatus { Title = "Published" },
 new ProgramPlanStatus { Title = "All Pass" },
-new ProgramPlanStatus { Title = "All Rejected" }
+new ProgramPlanStatus { Title = "All Rejected" },
+new ProgramPlanStatus { Title = "Not Reviewed" }
 );
 
             //帳號密碼狀態表

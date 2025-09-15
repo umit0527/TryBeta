@@ -28,6 +28,10 @@ namespace TryBeta.Models
         [JsonProperty("comment")]
         public string Comment { get; set; }
 
+        [JsonProperty("serial_num")]
+        [MaxLength(50)]
+        public string SerialNum { get; set; }
+
         [JsonProperty("program_name")]
         public string ProgramName { get; set; }
 
@@ -39,6 +43,12 @@ namespace TryBeta.Models
 
         [JsonProperty("company_name")]
         public string CompanyName { get; set; }
+
+        [JsonProperty("company_logo")]
+        public string CompanyLogo { get; set; }  // 企業 Logo (體驗者端的所有評價列表用)
+
+        [JsonProperty("evaluation_date")]
+        public DateTime EvaluationDate { get; set; }  // 評價日期 (體驗者端的所有評價列表用)
 
         //[Required]
         //[JsonProperty("reviewed_at")]

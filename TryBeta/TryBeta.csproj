@@ -64,35 +64,104 @@
     <Reference Include="Konscious.Security.Cryptography.Blake2, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Konscious.Security.Cryptography.Blake2.1.1.1\lib\net46\Konscious.Security.Cryptography.Blake2.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.2, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.8.0.2\lib\net462\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=8.0.0.3, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.8.0.3\lib\net462\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json.Bson, Version=1.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.Bson.1.0.2\lib\net45\Newtonsoft.Json.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenAI, Version=2.3.0.0, Culture=neutral, PublicKeyToken=b4187f3e65366280, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenAI.2.3.0\lib\netstandard2.0\OpenAI.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
+    <Reference Include="System.ClientModel, Version=1.5.1.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ClientModel.1.5.1\lib\netstandard2.0\System.ClientModel.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=8.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.8.0.1\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO" />
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory.Data, Version=8.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.Data.8.0.1\lib\net462\System.Memory.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.9\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Encoding" />
     <Reference Include="System.Security.Cryptography.Primitives" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Text.Encodings.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Encodings.Web.8.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json, Version=8.0.0.5, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Json.8.0.5\lib\net462\System.Text.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Cors, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Cors.5.3.0\lib\net45\System.Web.Cors.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.9\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.Cors, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Cors.5.2.9\lib\net45\System.Web.Http.Cors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.9\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.9\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.9\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
@@ -109,43 +178,10 @@
     </Reference>
     <Reference Include="System.Net.Http">
     </Reference>
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.9\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net.Http.WebRequest">
-    </Reference>
-    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.Helpers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.9\lib\net45\System.Web.Http.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Http.WebHost, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.9\lib\net45\System.Web.Http.WebHost.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.9\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Optimization">
       <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.9\lib\net45\System.Web.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.9\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="WebGrease">
       <Private>True</Private>
@@ -194,6 +230,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\CompanyController.cs" />
     <Compile Include="Controllers\CompanyCurrentPlanController.cs" />
@@ -424,7 +461,69 @@
     <Compile Include="Migrations\202508191002475_adjust ParticipantEvaluationDto.Designer.cs">
       <DependentUpon>202508191002475_adjust ParticipantEvaluationDto.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202508191424108_add StatusId in ParticipantEvaluation Table.cs" />
+    <Compile Include="Migrations\202508191424108_add StatusId in ParticipantEvaluation Table.Designer.cs">
+      <DependentUpon>202508191424108_add StatusId in ParticipantEvaluation Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508191428096_fix Admin Get Evaluation StatusId.cs" />
+    <Compile Include="Migrations\202508191428096_fix Admin Get Evaluation StatusId.Designer.cs">
+      <DependentUpon>202508191428096_fix Admin Get Evaluation StatusId.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508191433106_fix ParticipantEvaluation StatusId2.cs" />
+    <Compile Include="Migrations\202508191433106_fix ParticipantEvaluation StatusId2.Designer.cs">
+      <DependentUpon>202508191433106_fix ParticipantEvaluation StatusId2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508200639049_add ProgramSubmitReview.cs" />
+    <Compile Include="Migrations\202508200639049_add ProgramSubmitReview.Designer.cs">
+      <DependentUpon>202508200639049_add ProgramSubmitReview.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508200643166_adjustProgramSubmitReview Feild.cs" />
+    <Compile Include="Migrations\202508200643166_adjustProgramSubmitReview Feild.Designer.cs">
+      <DependentUpon>202508200643166_adjustProgramSubmitReview Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508200824430_add PrgramView Table.cs" />
+    <Compile Include="Migrations\202508200824430_add PrgramView Table.Designer.cs">
+      <DependentUpon>202508200824430_add PrgramView Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508200920272_add ProgramView.cs" />
+    <Compile Include="Migrations\202508200920272_add ProgramView.Designer.cs">
+      <DependentUpon>202508200920272_add ProgramView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201354397_add EvaluationReview Table.cs" />
+    <Compile Include="Migrations\202508201354397_add EvaluationReview Table.Designer.cs">
+      <DependentUpon>202508201354397_add EvaluationReview Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201406176_adjust EvaluationReview Feild.cs" />
+    <Compile Include="Migrations\202508201406176_adjust EvaluationReview Feild.Designer.cs">
+      <DependentUpon>202508201406176_adjust EvaluationReview Feild.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201451037_add AdminInfoes Table.cs" />
+    <Compile Include="Migrations\202508201451037_add AdminInfoes Table.Designer.cs">
+      <DependentUpon>202508201451037_add AdminInfoes Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508201454254_add Feild in AdminInfoes Table.cs" />
+    <Compile Include="Migrations\202508201454254_add Feild in AdminInfoes Table.Designer.cs">
+      <DependentUpon>202508201454254_add Feild in AdminInfoes Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508210345363_add Feild SerialNum in ParticipantEvaluvtion.cs" />
+    <Compile Include="Migrations\202508210345363_add Feild SerialNum in ParticipantEvaluvtion.Designer.cs">
+      <DependentUpon>202508210345363_add Feild SerialNum in ParticipantEvaluvtion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508210625123_add OpenAIModeration Table.cs" />
+    <Compile Include="Migrations\202508210625123_add OpenAIModeration Table.Designer.cs">
+      <DependentUpon>202508210625123_add OpenAIModeration Table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508210825553_add PrograPlanStatus Value.cs" />
+    <Compile Include="Migrations\202508210825553_add PrograPlanStatus Value.Designer.cs">
+      <DependentUpon>202508210825553_add PrograPlanStatus Value.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202508221406294_required motivationcontent field.cs" />
+    <Compile Include="Migrations\202508221406294_required motivationcontent field.Designer.cs">
+      <DependentUpon>202508221406294_required motivationcontent field.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\AdminInfoes.cs" />
+    <Compile Include="Models\AdminLoginDto.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\CompanyContacts.cs" />
     <Compile Include="Models\CompanyDto.cs" />
@@ -435,11 +534,14 @@
     <Compile Include="Models\CompanyScales.cs" />
     <Compile Include="Models\DbContext.cs" />
     <Compile Include="Models\District.cs" />
+    <Compile Include="Models\EvaluationReview.cs" />
     <Compile Include="Models\ExistingResume.cs" />
     <Compile Include="Models\Identity.cs" />
     <Compile Include="Models\Industry.cs" />
     <Compile Include="Models\JwtAuthFilter.cs" />
     <Compile Include="Models\JwtAuthUtil.cs" />
+    <Compile Include="Models\OpenAIModeration.cs" />
+    <Compile Include="Models\OpenAISettings.cs" />
     <Compile Include="Models\ParticipantDetailDto.cs" />
     <Compile Include="Models\ParticipantDto.cs" />
     <Compile Include="Models\ParticipantEducation.cs" />
@@ -460,12 +562,17 @@
     <Compile Include="Models\ProgramSubmit.cs" />
     <Compile Include="Models\ProgramSubmitDto.cs" />
     <Compile Include="Models\ProgramSubmitStatus.cs" />
+    <Compile Include="Models\ProgramView.cs" />
     <Compile Include="Models\ResumeEducation.cs" />
     <Compile Include="Models\ResumeExperience.cs" />
     <Compile Include="Models\PortfolioFiles.cs" />
     <Compile Include="Models\ResumeSkill.cs" />
+    <Compile Include="Models\ProgramSubmitReview.cs" />
+    <Compile Include="Models\ProgramSubmitReviewDto.cs" />
     <Compile Include="Models\SimpleResume.cs" />
     <Compile Include="Models\ParticipantInfoes.cs" />
+    <Compile Include="Models\TopProgramPlan.cs" />
+    <Compile Include="Models\UpdateEvaluationDto.cs" />
     <Compile Include="Models\Users.cs" />
     <Compile Include="Models\ParticipantRegisterDto.cs" />
     <Compile Include="Models\ParticipantLoginDto.cs" />
@@ -498,6 +605,10 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="OpenAISettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\HelpPage\Views\_ViewStart.cshtml" />
     <Content Include="Areas\HelpPage\Views\Web.config" />
     <Content Include="Areas\HelpPage\Views\Shared\_Layout.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\ResourceModel.cshtml" />
@@ -530,7 +641,6 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-    <Content Include="Areas\HelpPage\Views\_ViewStart.cshtml" />
     <Content Include="Content\Site.css" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
@@ -776,6 +886,51 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508191002475_adjust ParticipantEvaluationDto.resx">
       <DependentUpon>202508191002475_adjust ParticipantEvaluationDto.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508191424108_add StatusId in ParticipantEvaluation Table.resx">
+      <DependentUpon>202508191424108_add StatusId in ParticipantEvaluation Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508191428096_fix Admin Get Evaluation StatusId.resx">
+      <DependentUpon>202508191428096_fix Admin Get Evaluation StatusId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508191433106_fix ParticipantEvaluation StatusId2.resx">
+      <DependentUpon>202508191433106_fix ParticipantEvaluation StatusId2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508200639049_add ProgramSubmitReview.resx">
+      <DependentUpon>202508200639049_add ProgramSubmitReview.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508200643166_adjustProgramSubmitReview Feild.resx">
+      <DependentUpon>202508200643166_adjustProgramSubmitReview Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508200824430_add PrgramView Table.resx">
+      <DependentUpon>202508200824430_add PrgramView Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508200920272_add ProgramView.resx">
+      <DependentUpon>202508200920272_add ProgramView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201354397_add EvaluationReview Table.resx">
+      <DependentUpon>202508201354397_add EvaluationReview Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201406176_adjust EvaluationReview Feild.resx">
+      <DependentUpon>202508201406176_adjust EvaluationReview Feild.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201451037_add AdminInfoes Table.resx">
+      <DependentUpon>202508201451037_add AdminInfoes Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508201454254_add Feild in AdminInfoes Table.resx">
+      <DependentUpon>202508201454254_add Feild in AdminInfoes Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508210345363_add Feild SerialNum in ParticipantEvaluvtion.resx">
+      <DependentUpon>202508210345363_add Feild SerialNum in ParticipantEvaluvtion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508210625123_add OpenAIModeration Table.resx">
+      <DependentUpon>202508210625123_add OpenAIModeration Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508210825553_add PrograPlanStatus Value.resx">
+      <DependentUpon>202508210825553_add PrograPlanStatus Value.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202508221406294_required motivationcontent field.resx">
+      <DependentUpon>202508221406294_required motivationcontent field.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -21,6 +22,15 @@ namespace TryBeta.Models
         public int ProgramPlanId { get; set; }
 
         [Required]
+        [JsonProperty("status_id")]
+        public int StatusId { get; set; }
+
+        [Required]
+        [JsonProperty("serial_num")]
+        [MaxLength(50)]
+        public string SerialNum { get; set; }
+
+        [Required]
         [JsonProperty("score")]
         public int Score { get; set; }  // 評分，例如 1~5
 
@@ -36,5 +46,9 @@ namespace TryBeta.Models
 
         public virtual ParticipantInfoes Participant { get; set; }
         public virtual ProgramPlan Program { get; set; }
+
+        ////導覽屬性
+        //[ForeignKey("StatusId")]
+        //public virtual ProgramPlanStatus Status { get; set; }
     }
 }

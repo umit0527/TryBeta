@@ -10,6 +10,7 @@ namespace TryBeta.Models
 {
     public class Users
     {
+        [Key]
         [JsonProperty("id")]
         public int Id { get; set; }
 
@@ -48,5 +49,8 @@ namespace TryBeta.Models
         // EF 導航屬性
         [ForeignKey("StatusId")]
         public virtual UserStatus UserStatus { get; set; }
+
+        //導覽屬性
+        public virtual AdminInfoes AdminInfo { get; set; }
     }
 }

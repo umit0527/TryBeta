@@ -8,11 +8,7 @@ using System.Web;
 
 namespace TryBeta.Models
 {
-    public class ProgramStepDto
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
-    }
+    
 
     public class ProgramPlanDto : IValidatableObject
     {
@@ -130,8 +126,22 @@ namespace TryBeta.Models
         [JsonProperty("days_left")]
         public int? DaysLeft { get; set; }
 
-        [JsonProperty("is_ongoing")]
-        public bool? IsOngoing { get; set; }
+        //原本設計"即使刊登結束但體驗尚未進行結束的也顯示出來"，但是這樣進去單一頁面就要不能讓體驗者申請體驗計畫
+        //單一體驗申請的post就要跟著改，覺得麻煩
+        //[JsonProperty("is_ongoing")]
+        //public bool? IsOngoing { get; set; }  //體驗計畫狀態：ture=進行中 false=已結束 null=未開始
+
+
+        //瀏覽數據統計：依照ProgramViews對應ProgramPlanId的ViewAt統計而來
+
+        [JsonProperty("total_views")]
+        public int TotalViews { get; set; }
+
+        [JsonProperty("weekly_views")]
+        public int WeeklyViews { get; set; }
+
+        [JsonProperty("daily_views")]
+        public int DailyViews { get; set; }
 
         public SimpleEntityDto Industry { get; set; }
         public SimpleEntityDto JobTitle { get; set; }
@@ -173,24 +183,16 @@ namespace TryBeta.Models
                 new[] { nameof(MaxPeople), nameof(MinPeople) });
             }
         }
-
         public class SimpleEntityDto
         {
             public int Id { get; set; }
             public string Title { get; set; }
         }
 
-        public class StepDto
+        public class ProgramStepDto
         {
-            public int Id { get; set; }
             public string Name { get; set; }
             public string Description { get; set; }
-        }
-
-        //public class ImageDto
-        //{
-        //    public int Id { get; set; }
-        //    public string Url { get; set; }
-        //}
+        }      
     }
 }

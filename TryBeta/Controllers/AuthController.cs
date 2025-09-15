@@ -125,17 +125,7 @@ namespace TryBeta.Controllers
                     user.Email,
                     user.Role,
                 }
-                //company = new
-                //{
-                //    company?.Id,
-                //    company?.Name,
-                //    company?.TaxIdNum,
-                //    company?.IndustryId,
-                //    company?.Address,
-                //    company?.Website,
-                //    company?.Intro,
-                //    company?.ScaleId
-                //}
+                
             });
         }
 
@@ -192,6 +182,72 @@ namespace TryBeta.Controllers
                     user.Account,
                     user.Email,
                     user.Role,
+                }
+            });
+        }
+
+        // POST: api/v1/admin/login 管理員登入
+        [HttpPost]
+        [Route("admin/login")]
+        [ResponseType(typeof(Users))]
+        public IHttpActionResult PostAdminLogin(AdminLoginDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("登入資料有誤");
+            }
+
+            // 找出對應的帳號/email，限定身分是管理員
+            var user = db.Users.FirstOrDefault(u =>
+                (u.Account == dto.Identifier || u.Email == dto.Identifier) && u.Role == "Admin");
+
+            if (user == null)
+            {
+                return Content(HttpStatusCode.Unauthorized, new
+                {
+                    status = 401,
+                    message = "帳號或密碼錯誤"
+                });
+            }
+
+            // 驗證密碼
+            bool isPasswordValid = false;
+
+            if (user.Role == "Admin")
+            {
+                // 管理員帳號允許用明碼 (僅限測試用)
+                isPasswordValid = (user.PasswordHash == dto.Password);
+            }
+            else
+            {
+                // 其他角色仍使用 Hash 驗證
+                isPasswordValid = PasswordHasher.VerifyPassword(user.PasswordHash, dto.Password);
+            }
+
+            if (!isPasswordValid)
+            {
+                return Content(HttpStatusCode.Unauthorized, new
+                {
+                    status = 401,
+                    message = "帳號或密碼錯誤"
+                });
+            }
+
+            // 產生 JWT Token (這邊不需要公司或體驗者名稱)
+            var jwtUtil = new JwtAuthUtil();
+            string token = jwtUtil.GenerateToken(user.Id, user.Account, "Admin");
+
+            return Ok(new
+            {
+                status = 200,
+                message = "登入成功",
+                token = token,
+                user = new
+                {
+                    user.Id,
+                    user.Account,
+                    user.Email,
+                    user.Role
                 }
             });
         }

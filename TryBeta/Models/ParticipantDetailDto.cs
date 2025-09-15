@@ -173,6 +173,6 @@ namespace TryBeta.Models
 
             [JsonProperty("review_score")]
             public double? ReviewScore { get; set; }
-        }       
+        }        
     }
 }

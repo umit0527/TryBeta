@@ -79,6 +79,7 @@ namespace TryBeta.Models
         public virtual SimpleResume SimpleResume { get; set; }
 
         // 申請動機
+        [Required]
         [JsonProperty("motivation_content")]
         public string MotivationContent { get; set; }
 

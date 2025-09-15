@@ -20,13 +20,13 @@ namespace TryBeta.Controllers
     {
         private TryBetaDbContext db = new TryBetaDbContext();
 
-        // GET: api/Company 
-        [HttpGet]
-        [Route("")]
-        public IQueryable<CompanyInfoes> GetCompanyinfos()
-        {
-            return db.Companyinfoes;
-        }
+        //// GET: api/Company 
+        //[HttpGet]
+        //[Route("")]
+        //public IQueryable<CompanyInfoes> GetCompanyinfos()
+        //{
+        //    return db.Companyinfoes;
+        //}
 
         // GET: api/Company/ 取得登入企業的基本資料
         [HttpGet]
