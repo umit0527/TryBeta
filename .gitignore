@@ -419,6 +419,7 @@ FodyWeavers.xsd
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 TryBeta/Web.config
 =======
 >>>>>>> FinalDemoVersion
@@ -428,3 +429,6 @@ TryBeta/NewebPaySettings.config
 =======
 webconnect.config
 >>>>>>> API-Admin
+=======
+webconnect.config
+>>>>>>> API-SingleParticipantSubmit
