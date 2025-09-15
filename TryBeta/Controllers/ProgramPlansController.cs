@@ -10,10 +10,6 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using TryBeta.Models;
-<<<<<<< HEAD
-
-=======
->>>>>>> API-OpenAIModeration
 using static TryBeta.Models.ParticipantDetailDto;
 
 namespace TryBeta.Controllers
