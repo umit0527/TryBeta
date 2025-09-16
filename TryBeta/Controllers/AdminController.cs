@@ -187,6 +187,7 @@ namespace TryBeta.Controllers
 
             return Ok(new
             {
+
                 currentStatus = currentReviewStatus?.status,
                 id = evaluation.Id,
                 evaluationSerialNum = evaluation.SerialNum,

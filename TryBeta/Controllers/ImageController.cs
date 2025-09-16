@@ -16,10 +16,10 @@ namespace TryBeta.Controllers
     {
         private TryBetaDbContext db = new TryBetaDbContext();
 
-        //GET: 讀取圖片
+        //GET: 讀取體驗計畫圖片
         [HttpGet]
         [Route("api/v1/programs/image/{*filePath}")]
-        public HttpResponseMessage GetImage(string filePath)
+        public HttpResponseMessage GetProgramImage(string filePath)
         {
 
             // 先做 URL Decode
@@ -49,7 +49,40 @@ namespace TryBeta.Controllers
             return result;
         }
 
-        // POST: api/v1/uploads 上傳照片
+        //GET: 讀取體驗計畫圖片
+        [HttpGet]
+        [Route("api/v1/company/image/{*filePath}")]
+        public HttpResponseMessage GetCompanyImage(string filePath)
+        {
+
+            // 先做 URL Decode
+            filePath = Uri.UnescapeDataString(filePath ?? "");
+
+            // MapPath
+            string fullPath = HttpContext.Current.Server.MapPath("~/" + filePath);
+
+            if (!System.IO.File.Exists(fullPath))
+            {
+                return new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent("找不到檔案，實際路徑：" + fullPath)
+                };
+            }
+
+            var contentType = MimeMapping.GetMimeMapping(fullPath);
+            var bytes = System.IO.File.ReadAllBytes(fullPath);
+
+            var result = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(bytes)
+            };
+            result.Content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+
+            return result;
+        }
+
+        // POST: api/v1/uploads 體驗計畫的上傳照片
         [HttpPost]
         [Route("~/api/v1/programs/{programId}/images")]
         [JwtAuthFilter]

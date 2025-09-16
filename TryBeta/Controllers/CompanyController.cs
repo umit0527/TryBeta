@@ -1,13 +1,17 @@
 ﻿using Jose;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.UI.WebControls;
@@ -21,28 +25,20 @@ namespace TryBeta.Controllers
     {
         private TryBetaDbContext db = new TryBetaDbContext();
 
-        //// GET: api/Company 
-        //[HttpGet]
-        //[Route("")]
-        //public IQueryable<CompanyInfoes> GetCompanyinfos()
-        //{
-        //    return db.Companyinfoes;
-        //}
-
         // GET: api/Company/ 取得登入企業的基本資料
         [HttpGet]
         [Route("")]
         [JwtAuthFilter]
-        [ResponseType(typeof(CompanyRegisterDto))]
+        [ResponseType(typeof(CompanyInfoResponseDto))]
         public IHttpActionResult GetMyCompanyInfo()
         {
-            // 1. 從 JwtAuthFilter 取得 UserId
+            // 1.從 JwtAuthFilter 取得 UserId
             if (!Request.Properties.TryGetValue("UserId", out var userIdObj))
                 return Unauthorized();
 
             int userId = (int)userIdObj;
 
-            // 2. 從資料庫抓登入企業資料，Include 關聯表
+            // 2.從資料庫抓登入企業資料，Include 關聯表
             var companyEntity = db.Companyinfoes
                                   .Include(c => c.CompanyContacts)
                                   .Include(c => c.CompanyImages)
@@ -53,45 +49,39 @@ namespace TryBeta.Controllers
                 return NotFound();
 
             // 取得網站基底 URL 指向 GetImage API
-            string baseUrl = $"{Request.RequestUri.Scheme}://{Request.RequestUri.Host}:{Request.RequestUri.Port}/api/v1/programs/image/";
+            string baseUrl = $"{Request.RequestUri.Scheme}://{Request.RequestUri.Host}:{Request.RequestUri.Port}/api/v1/company/image/";
 
-            // 3. 組 DTO
-            var dto = new CompanyRegisterDto
-            {
-                Name = companyEntity.Name,
-                IndustryId = companyEntity.IndustryId,
-                TaxIdNum = companyEntity.TaxIdNum,
-                Address = companyEntity.Address,
-                Website = companyEntity.Website,
-                Intro = companyEntity.Intro,
-                ScaleId = companyEntity.ScaleId,
-                Account = companyEntity.User.Account,
-                Email = companyEntity.User.Email,
+           // 3.組 DTO
+           var dto = new CompanyInfoResponseDto
+           {
+               Name = companyEntity.Name,
+               IndustryId = companyEntity.IndustryId,
+               TaxIdNum = companyEntity.TaxIdNum,
+               Address = companyEntity.Address,
+               Website = companyEntity.Website,
+               Intro = companyEntity.Intro,
+               ScaleId = companyEntity.ScaleId,
+               Account = companyEntity.User.Account,
+               Email = companyEntity.User.Email,
 
-                // 聯絡人
-                CompanyContact = companyEntity.CompanyContacts == null ? null : new CompanyContactDto
-                {
-                    Name = companyEntity.CompanyContacts.Name,
-                    JobTitle = companyEntity.CompanyContacts.JobTitle,
-                    Email = companyEntity.CompanyContacts.Email,
-                    Phone = companyEntity.CompanyContacts.Phone
-                },
+               // 聯絡人
+               CompanyContact = companyEntity.CompanyContacts == null ? null : new CompanyContactDto
+               {
+                   Name = companyEntity.CompanyContacts.Name,
+                   JobTitle = companyEntity.CompanyContacts.JobTitle,
+                   Email = companyEntity.CompanyContacts.Email,
+                   Phone = companyEntity.CompanyContacts.Phone
+               },
 
-                // 所有圖片，透過 GetImage API 生成可用路徑
-                CompanyImg = companyEntity.CompanyImages.Select(img => new CompanyImgDto
-                {
-                    Type = img.Type,
-                    ImgPath = baseUrl + img.ImgPath.TrimStart('~', '/')
-                }).ToList(),
+               // 所有圖片，透過 GetImage API 生成可用路徑
+               CompanyImg = companyEntity.CompanyImages.Select(img => new CompanyImgDto
+               {
+                   Type = img.Type,
+                   ImgPath = baseUrl + img.ImgPath.TrimStart('~', '/')
+               }).ToList(),
+           };
 
-                // 企業 Logo
-                CompanyLogo = companyEntity.CompanyImages
-                                   .Where(img => img.Type == "Logo")
-                                   .Select(img => baseUrl + img.ImgPath.TrimStart('~', '/'))
-                                   .FirstOrDefault()
-        };
-
-            // 4. 回傳 DTO
+            // 4.回傳 DTO
             return Ok(dto);
         }
 
@@ -136,25 +126,42 @@ namespace TryBeta.Controllers
         [HttpPost]
         [Route("")]
         [ResponseType(typeof(CompanyInfoes))]
-        public IHttpActionResult PostCompanyInfo(CompanyRegisterDto dto)
+        public async Task<IHttpActionResult> PostCompanyInfo()
         {
+            // 讀取 JSON 資料 (dto)
+            var provider = new MultipartMemoryStreamProvider();
+            await Request.Content.ReadAsMultipartAsync(provider);
+
+            var dtoContent = provider.Contents
+                .FirstOrDefault(c => c.Headers.ContentDisposition.Name.Trim('"') == "dto");
+            if (dtoContent == null)
+                return BadRequest("缺少公司資料");
+
+            var jsonString = await dtoContent.ReadAsStringAsync();
+            var dto = JsonConvert.DeserializeObject<CompanyRegisterDto>(jsonString);
+            
             var allErrors = new List<string>();
 
-            // 先跑 ModelState 驗證
+            // ModelState 驗證
             if (!ModelState.IsValid)
             {
                 var modelErrors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage)
-                                 ? e.Exception?.Message
-                                 : e.ErrorMessage)
-                    .Where(m => !string.IsNullOrWhiteSpace(m))
-                    .ToList();
+                    .SelectMany(v => v.Errors)  //把所有驗證錯誤抓出來
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage)  //取出錯誤訊息
+                                 ? e.Exception?.Message  //如果沒有才用 Exception.Message
+                                 : e.ErrorMessage)  //先用 ErrorMessage
+                    .Where(m => !string.IsNullOrWhiteSpace(m))  //過濾掉空字串
+                    .ToList();  //轉成清單
 
-                allErrors.AddRange(modelErrors);
+                allErrors.AddRange(modelErrors);  //把錯誤存到自訂的 allErrors 集合裡，用來回傳給前端
             }
 
-            // 檢查帳號、Email 在 Users 表中是否已存在，409
+            //if (dto.CompanyContact == null)
+            //{
+            //    return BadRequest("聯絡人資料沒有送到後端");
+            //}
+
+            // 唯一性檢查 (帳號、Email、公司名稱、統編)
             bool accountExists = db.Users.Any(u => u.Account == dto.Account);
             if (accountExists)
             {
@@ -177,15 +184,8 @@ namespace TryBeta.Controllers
             //  統編檢查
             if (!string.IsNullOrWhiteSpace(dto.TaxIdNum))
             {
-                if (!System.Text.RegularExpressions.Regex.IsMatch(dto.TaxIdNum, @"^\d{8}$"))
-                {
-                    allErrors.Add("統一編號必須是 8 碼的數字");
-                }
-                else
-                {
-                    if (db.Companyinfoes.Any(c => c.TaxIdNum == dto.TaxIdNum))
-                        allErrors.Add("該統編已被使用");
-                }
+                if (db.Companyinfoes.Any(c => c.TaxIdNum == dto.TaxIdNum))
+                    allErrors.Add("該統編已被使用");
             }
 
             // 如果有任何錯誤就統一回傳
@@ -200,10 +200,9 @@ namespace TryBeta.Controllers
                 return Content(HttpStatusCode.BadRequest, content);
             }
 
-
             var hashedPassword = PasswordHasher.HashPassword(dto.Password); // 將密碼(明碼)加鹽雜湊
 
-            // 若帳號和email是獨立 User 表的資料，需要先建立 User
+            // 若帳號和email都沒有重複的值→可以建立帳號，需要先建立 User
             using (var transaction = db.Database.BeginTransaction())
             {
                 try
@@ -222,7 +221,7 @@ namespace TryBeta.Controllers
                     db.Users.Add(user);
                     db.SaveChanges();
 
-                    // 建立公司基本資料
+                    // 建立公司基本資料 + 聯絡人 (同時建立)
                     var company = new CompanyInfoes
                     {
                         Name = dto.Name,
@@ -234,51 +233,55 @@ namespace TryBeta.Controllers
                         ScaleId = dto.ScaleId,
                         UserId = user.Id,
                         CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now
-                    };
-                    db.Companyinfoes.Add(company);
-                    db.SaveChanges();
-
-                    // 建立聯絡人
-                    if (dto.CompanyContact != null)
-                    {
-                        var contact = new CompanyContacts
+                        UpdatedAt = DateTime.Now,
+                        CompanyContacts = dto.CompanyContact == null ? null : new CompanyContacts
                         {
-                            CompanyId = company.Id,
                             Name = dto.CompanyContact.Name,
                             JobTitle = dto.CompanyContact.JobTitle,
                             Email = dto.CompanyContact.Email,
                             Phone = dto.CompanyContact.Phone,
                             CreatedAt = DateTime.Now,
                             UpdatedAt = DateTime.Now
-                        };
-                        db.CompanyContact.Add(contact);
-                        db.SaveChanges();
-                    }
+                        }
+                    };
 
-                    // 建立圖片
-                    if (dto.CompanyImg != null && dto.CompanyImg.Any())
+                    db.Companyinfoes.Add(company);
+                    db.SaveChanges();
+
+                    // 上傳圖片
+                    string uploadRoot = HttpContext.Current.Server.MapPath("~/Images");
+                    if (!Directory.Exists(uploadRoot))
+                        Directory.CreateDirectory(uploadRoot);
+
+                    foreach (var file in provider.Contents.Where(c => c.Headers.ContentDisposition.FileName != null))
                     {
-                        var environmentCount = dto.CompanyImg.Count(i => i.Type == "environment");
-                        if (environmentCount > 6)
-                        {
-                            return BadRequest("環境照片最多只能上傳 6 張");
-                        }
+                        var originalFileName = file.Headers.ContentDisposition.FileName.Trim('"');
+                        var ext = Path.GetExtension(originalFileName).ToLower();
+                        var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                        if (!allowedExt.Contains(ext)) continue;
 
-                        foreach (var imgDto in dto.CompanyImg)
+                        var bytes = await file.ReadAsByteArrayAsync();
+                        if (bytes.Length > 5 * 1024 * 1024) continue;
+
+                        var newFileName = Path.GetFileNameWithoutExtension(originalFileName)
+                                          + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ext;
+                        var newFilePath = Path.Combine(uploadRoot, newFileName);
+                        File.WriteAllBytes(newFilePath, bytes);
+
+                        string relativePath = "~/Images/" + newFileName;
+
+                        // 存到 CompanyImages
+                        string type = file.Headers.ContentDisposition.Name.Trim('"'); // logo / cover / environmentImgs[]
+                        db.CompanyImages.Add(new CompanyImages
                         {
-                            var image = new CompanyImages
-                            {
-                                CompanyId = company.Id,
-                                Type = imgDto.Type,
-                                ImgPath = imgDto.ImgPath,
-                                CreatedAt = DateTime.Now,
-                                UpdatedAt = DateTime.Now
-                            };
-                            db.CompanyImages.Add(image);
-                        }
-                        db.SaveChanges();
+                            CompanyId = company.Id,
+                            Type = type,
+                            ImgPath = relativePath,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now
+                        });
                     }
+                    db.SaveChanges();
 
                     transaction.Commit();
 
@@ -287,20 +290,7 @@ namespace TryBeta.Controllers
                     {
                         status = 201,
                         message = "註冊成功",
-                        company = new
-                        {
-                            company.Id,
-                            company.Name,
-                            company.IndustryId,
-                            company.TaxIdNum,
-                            company.Address,
-                            company.Website,
-                            company.Intro,
-                            company.ScaleId,
-                            company.UserId,
-                            company.CreatedAt,
-                            company.UpdatedAt
-                        }
+                        company_id = company.Id
                     });
                 }
                 catch (Exception ex)

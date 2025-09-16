@@ -9,6 +9,7 @@ namespace TryBeta.Models
 {
     public class ParticipantDto
     {
+
         [JsonProperty("name")]
         public string Name { get; set; }
 

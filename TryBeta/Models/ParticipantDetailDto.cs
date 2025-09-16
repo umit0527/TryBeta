@@ -7,6 +7,7 @@ using System.Web;
 
 namespace TryBeta.Models
 {
+
     public class ParticipantDetailDto  //企業審核單一體驗者用
     {
         [JsonProperty("review_status_id")]

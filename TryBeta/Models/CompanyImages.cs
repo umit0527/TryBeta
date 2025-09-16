@@ -15,10 +15,12 @@ namespace TryBeta.Models
         [JsonProperty("id")]
         public int Id { get; set; }
 
-        // 外鍵，連結到公司資料
-        [ForeignKey("CompanyInfo")]
+        // 外鍵，連結到 CompanyInfoes
+        [ForeignKey("CompanyInfo")]  //標在外鍵欄位上 → 參數填「導覽屬性名稱」
         [JsonProperty("company_id")]
         public int CompanyId { get; set; }
+        // 導覽屬性，方便 Entity Framework 進行關聯
+        public virtual CompanyInfoes CompanyInfo { get; set; }
 
         /// <summary>
         /// 圖片類型：logo / cover / environment
@@ -26,7 +28,7 @@ namespace TryBeta.Models
         [Required]
         [StringLength(100)]
         [JsonProperty("type")]
-        public string Type { get; set; }//照片類型：logo/cover/環境
+        public string Type { get; set; }
 
         /// <summary>
         /// 圖片儲存路徑或網址
@@ -40,8 +42,5 @@ namespace TryBeta.Models
 
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
-        // 導覽屬性，方便 Entity Framework 進行關聯
-        public virtual CompanyInfoes CompanyInfo { get; set; }
     }
 }

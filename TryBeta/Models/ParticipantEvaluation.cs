@@ -25,6 +25,7 @@ namespace TryBeta.Models
         [JsonProperty("status_id")]
         public int StatusId { get; set; }
 
+
         [Required]
         [JsonProperty("serial_num")]
         [MaxLength(50)]

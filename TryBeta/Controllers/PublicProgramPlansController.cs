@@ -762,6 +762,7 @@ namespace TryBeta.Controllers
                     .Where(img => img.ProgramPlanId == plan.Id)
                     .OrderBy(img => img.Id)
                     .FirstOrDefault();
+
                 return new HomePageDto
                 {
                     Id = plan.Id,
