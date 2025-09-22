@@ -50,7 +50,6 @@ namespace TryBeta.Controllers
         {
             try
             {
-
                 var now = DateTime.Now;
                 var request = HttpContext.Current.Request;
                 var baseUrl = request.Url.GetLeftPart(UriPartial.Authority);

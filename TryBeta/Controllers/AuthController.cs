@@ -241,83 +241,83 @@ namespace TryBeta.Controllers
             });
         }
 
-        //// POST: api/Auth/users/login/google
-        //[HttpPost]
-        //[Route("users/login/google")]
-        //[ResponseType(typeof(Users))]
-        //public async Task<IHttpActionResult> PostParticipantLoginWithGoogle(GoogleDto dto)
-        //{
-        //    if (!ModelState.IsValid || string.IsNullOrEmpty(dto.id_token))
-        //    {
-        //        return BadRequest("缺少 Google 登入 Token");
-        //    }
+        // POST: api/Auth/users/login/google
+        [HttpPost]
+        [Route("users/login/google")]
+        [ResponseType(typeof(Users))]
+        public async Task<IHttpActionResult> PostParticipantLoginWithGoogle(GoogleDto dto)
+        {
+            if (!ModelState.IsValid || string.IsNullOrEmpty(dto.Token))
+            {
+                return BadRequest("缺少 Google 登入 Token");
+            }
 
-        //    Google.Apis.Auth.GoogleJsonWebSignature.Payload payload;
-        //    try
-        //    {
-        //        // 驗證 Google ID Token
-        //        payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(dto.id_token);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return Content(HttpStatusCode.Unauthorized, new
-        //        {
-        //            status = 401,
-        //            message = "無效的 Google Token"
-        //        });
-        //    }
+            Google.Apis.Auth.GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                // 驗證 Google ID Token
+                payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(dto.Token);
+            }
+            catch (Exception)
+            {
+                return Content(HttpStatusCode.Unauthorized, new
+                {
+                    status = 401,
+                    message = "無效的 Google Token"
+                });
+            }
 
-        //    // 使用 email 或 Google 子 ID 來查詢是否已存在帳號
-        //    var user = db.Users.FirstOrDefault(u => u.Email == payload.Email && u.Role == "Participant");
+            // 使用 email 或 Google 子 ID 來查詢是否已存在帳號
+            var user = db.Users.FirstOrDefault(u => u.Email == payload.Email && u.Role == "Participant");
 
-        //    if (user == null)
-        //    {
-        //        // 自動註冊新帳號
-        //        user = new Users
-        //        {
-        //            Account = payload.Email.Length > 50 ? payload.Email.Substring(0, 50) : payload.Email,
-        //            Email = payload.Email,
-        //            Role = "Participant",
-        //            GoogleId = payload.Subject.Length > 100 ? payload.Subject.Substring(0, 100) : payload.Subject, // 已更新長度
-        //            PasswordHash = "GOOGLE",
-        //            StatusId = 1, // 啟用
-        //            CreatedAt = DateTime.UtcNow,
-        //            UpdatedAt = DateTime.UtcNow
-        //            // 可額外存 Name / Picture 等基本資料
-        //        };
+            if (user == null)
+            {
+                // 自動註冊新帳號
+                user = new Users
+                {
+                    Account = payload.Email.Length > 50 ? payload.Email.Substring(0, 50) : payload.Email,
+                    Email = payload.Email,
+                    Role = "Participant",
+                    GoogleId = payload.Subject.Length > 100 ? payload.Subject.Substring(0, 100) : payload.Subject, // 已更新長度
+                    PasswordHash = "GOOGLE",
+                    StatusId = 1, // 啟用
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                    // 可額外存 Name / Picture 等基本資料
+                };
 
-        //        db.Users.Add(user);
-        //        db.SaveChanges();
-        //    }
-        //    else
-        //    {
-        //        // 已存在帳號，但 GoogleId 尚未綁定
-        //        if (string.IsNullOrEmpty(user.GoogleId))
-        //        {
-        //            user.GoogleId = payload.Subject;
-        //            user.UpdatedAt = DateTime.UtcNow;
-        //            db.SaveChanges();
-        //        }
-        //    }
+                db.Users.Add(user);
+                db.SaveChanges();
+            }
+            else
+            {
+                // 已存在帳號，但 GoogleId 尚未綁定
+                if (string.IsNullOrEmpty(user.GoogleId))
+                {
+                    user.GoogleId = payload.Subject;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    db.SaveChanges();
+                }
+            }
 
-        //    // 產生 JWT Token
-        //    var jwtUtil = new JwtAuthUtil();
-        //    string token = jwtUtil.GenerateToken(user.Id, user.Account, "");
+            // 產生 JWT Token
+            var jwtUtil = new JwtAuthUtil();
+            string token = jwtUtil.GenerateToken(user.Id, user.Account, "");
 
-        //    return Ok(new
-        //    {
-        //        status = 200,
-        //        message = "登入成功",
-        //        token = token,
-        //        user = new
-        //        {
-        //            user.Id,
-        //            user.Account,
-        //            user.Email,
-        //            user.Role,
-        //        }
-        //    });
-        //}
+            return Ok(new
+            {
+                status = 200,
+                message = "登入成功",
+                token = token,
+                user = new
+                {
+                    user.Id,
+                    user.Account,
+                    user.Email,
+                    user.Role,
+                }
+            });
+        }
 
         // POST: api/v1/users/logout 體驗者登出
         [HttpPost]

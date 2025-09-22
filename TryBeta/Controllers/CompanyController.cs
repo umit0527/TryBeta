@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -128,16 +129,24 @@ namespace TryBeta.Controllers
         [ResponseType(typeof(CompanyInfoes))]
         public async Task<IHttpActionResult> PostCompanyInfo()
         {
-            // 讀取 JSON 資料 (dto)
+            // 讀取 JSON 資料 (dto)：從 HTTP content 取出文字。
+            // 一樣是 I/ O 操作（stream → string 轉換），可能需要等待。
             var provider = new MultipartMemoryStreamProvider();
+            // 讀取上傳檔案：把檔案讀成 byte[]。
+            // 這是 磁碟/ 記憶體 I / O，大檔案時會很耗時。
+            // 如果不用 await，整個 Thread 就會卡住等檔案讀完。
             await Request.Content.ReadAsMultipartAsync(provider);
 
+            // provider.Contents：用來處理「multipart/form-data」的 HTTP POST 請求（表單 + 檔案一起送的格式）。
+            // 找出一個特定叫 "dto" 的欄位。
             var dtoContent = provider.Contents
                 .FirstOrDefault(c => c.Headers.ContentDisposition.Name.Trim('"') == "dto");
             if (dtoContent == null)
                 return BadRequest("缺少公司資料");
 
+            // 讀取欄位dto的 Json 資料：讀取後轉為string
             var jsonString = await dtoContent.ReadAsStringAsync();
+            // 序列化
             var dto = JsonConvert.DeserializeObject<CompanyRegisterDto>(jsonString);
             
             var allErrors = new List<string>();
@@ -156,16 +165,12 @@ namespace TryBeta.Controllers
                 allErrors.AddRange(modelErrors);  //把錯誤存到自訂的 allErrors 集合裡，用來回傳給前端
             }
 
-            //if (dto.CompanyContact == null)
-            //{
-            //    return BadRequest("聯絡人資料沒有送到後端");
-            //}
-
             // 唯一性檢查 (帳號、Email、公司名稱、統編)
+            // 查詢 Users 表，是否有任何一筆資料的 Account 欄位 等於使用者填的帳號 (dto.Account)
             bool accountExists = db.Users.Any(u => u.Account == dto.Account);
-            if (accountExists)
+            if (accountExists) //有的話是 true
             {
-                allErrors.Add("該帳號已被使用");
+                allErrors.Add("該帳號已被使用");  // 把錯誤存到自訂的 allErrors 集合裡，用來回傳給前端
             }
 
             bool emailExists = db.Users.Any(u => u.Email == dto.Email);
@@ -174,14 +179,14 @@ namespace TryBeta.Controllers
                 allErrors.Add("該 Email 已被使用");
             }
 
-            // 企業名稱和統編在 CompanyInfo 表中檢查
+            // 在 CompanyInfo 表中檢查，企業名稱
             bool nameExists = db.Companyinfoes.Any(c => c.Name == dto.Name);
             if (nameExists)
             {
                 allErrors.Add("該企業名稱已被使用");
             }
 
-            //  統編檢查
+            //  統編
             if (!string.IsNullOrWhiteSpace(dto.TaxIdNum))
             {
                 if (db.Companyinfoes.Any(c => c.TaxIdNum == dto.TaxIdNum))
@@ -202,7 +207,8 @@ namespace TryBeta.Controllers
 
             var hashedPassword = PasswordHasher.HashPassword(dto.Password); // 將密碼(明碼)加鹽雜湊
 
-            // 若帳號和email都沒有重複的值→可以建立帳號，需要先建立 User
+            // 若帳號和email都沒有重複的值
+            // 建立帳號，使用Transaction，當user、圖片與基本資料都建立成功，則建立帳號成功
             using (var transaction = db.Database.BeginTransaction())
             {
                 try
@@ -214,7 +220,7 @@ namespace TryBeta.Controllers
                         Email = dto.Email,
                         PasswordHash = hashedPassword,
                         Role = "Company",
-                        StatusId = 1,
+                        StatusId = 1,  //啟用
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now
                     };
@@ -249,9 +255,7 @@ namespace TryBeta.Controllers
                     db.SaveChanges();
 
                     // 上傳圖片
-                    string uploadRoot = HttpContext.Current.Server.MapPath("~/Images");
-                    if (!Directory.Exists(uploadRoot))
-                        Directory.CreateDirectory(uploadRoot);
+                    string baseRoot = HttpContext.Current.Server.MapPath("~/Images/Company");
 
                     foreach (var file in provider.Contents.Where(c => c.Headers.ContentDisposition.FileName != null))
                     {
@@ -263,15 +267,39 @@ namespace TryBeta.Controllers
                         var bytes = await file.ReadAsByteArrayAsync();
                         if (bytes.Length > 5 * 1024 * 1024) continue;
 
+                        // 依 type 分資料夾
+                        string type = file.Headers.ContentDisposition.Name.Trim('"'); // logo / cover / environmentImgs[]
+
+                        string subFolder;
+                        switch (type.ToLower())
+                        {
+                            case "logo":
+                                subFolder = "Logo";
+                                break;
+                            case "cover":
+                                subFolder = "Cover";
+                                break;
+                            default:
+                                // 不管是 environmentImgs 或 environmentImgs[]
+                                if (type.ToLower().StartsWith("environmentimgs"))
+                                    subFolder = "Environment";
+                                else
+                                    subFolder = "Other";
+                                break;
+                        }
+
+                        string uploadRoot = Path.Combine(baseRoot, subFolder);
+                        if (!Directory.Exists(uploadRoot))
+                            Directory.CreateDirectory(uploadRoot);
+
                         var newFileName = Path.GetFileNameWithoutExtension(originalFileName)
                                           + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ext;
                         var newFilePath = Path.Combine(uploadRoot, newFileName);
                         File.WriteAllBytes(newFilePath, bytes);
 
-                        string relativePath = "~/Images/" + newFileName;
+                        string relativePath = $"~/Images/Company/{subFolder}/{newFileName}";
 
                         // 存到 CompanyImages
-                        string type = file.Headers.ContentDisposition.Name.Trim('"'); // logo / cover / environmentImgs[]
                         db.CompanyImages.Add(new CompanyImages
                         {
                             CompanyId = company.Id,

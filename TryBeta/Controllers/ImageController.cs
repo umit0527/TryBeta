@@ -49,7 +49,7 @@ namespace TryBeta.Controllers
             return result;
         }
 
-        //GET: 讀取體驗計畫圖片
+        //GET: 讀取企業基本資料的圖片
         [HttpGet]
         [Route("api/v1/company/image/{*filePath}")]
         public HttpResponseMessage GetCompanyImage(string filePath)
@@ -156,7 +156,6 @@ namespace TryBeta.Controllers
 
                     results.Add(new
                     {
-                        id = programImage.Id,
                         programplan_id = programId,
                         img_path = relativePath, // <- 相對路徑
                         created_at = programImage.CreatedAt
@@ -167,11 +166,11 @@ namespace TryBeta.Controllers
                     return BadRequest("沒有符合格式或大小的檔案可以上傳");
 
                 // 取得最新一筆 ProgramPlan 的 Id
-                var latestProgramId = db.ProgramPlan.OrderByDescending(p => p.Id).Select(p => p.Id).FirstOrDefault();
+                //var latestProgramId = db.ProgramPlan.OrderByDescending(p => p.Id).Select(p => p.Id).FirstOrDefault();
 
                 return Ok(new
                 {
-                    latest_programplan_id = latestProgramId,
+                    //latest_programplan_id = latestProgramId,
                     uploaded_files = results
                 });
             }
