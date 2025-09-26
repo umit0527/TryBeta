@@ -30,6 +30,7 @@ namespace TryBeta.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;    // 建立時間
     }
 
+
     public class PaymentCallbackDto
     {
         // 藍新回傳的交易資料，加密過 (AES)
