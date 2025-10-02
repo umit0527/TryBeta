@@ -404,8 +404,8 @@ namespace TryBeta.Controllers
             { "Amt", order.Price.ToString() },
             { "ItemDesc", plan.Name },
             { "TradeLimit", "600" },
-            { "NotifyURL", chargeData.NotifyUrl },  // 後端 ResultURL
-            { "ReturnURL", chargeData.ReturnUrl },  // 前端跳轉
+            { "ReturnURL", "https://try-b.vercel.app/api/v1/company/payments/return" },    // 前端顯示用
+            { "NotifyURL", "https://trybeta.rocket-coding.com/api/v1/payments/callback" }, // 後端驗證用
             { "Email", chargeData.Email },
             { "LoginType", "0" },
             { "CREDIT", credit },
@@ -537,6 +537,8 @@ namespace TryBeta.Controllers
                             order.PaymentMethod = paymentType ?? order.PaymentMethod;
                             order.Card4No = card4No;
                             order.PaidAt = DateTime.Now;
+
+                            db.SaveChanges(); // 先更新訂單狀態，不改 StartDate / EndDate
                         }
                         else
                         {
@@ -560,8 +562,6 @@ namespace TryBeta.Controllers
 
                         var usage = AddOrUpdatePlanUsage(order.CompanyId, order.PlanId, plan.MaxParticipants, plan.DurationDays);
 
-                        order.StartDate = usage.StartDate;
-                        order.EndDate = usage.EndDate;
                         order.OrderStatus = "Active";
                         order.UpdatedAt = DateTime.Now;
 
@@ -626,19 +626,19 @@ namespace TryBeta.Controllers
                 string tradeSha = form["TradeSha"];
 
                 if (string.IsNullOrEmpty(tradeInfo) || string.IsNullOrEmpty(tradeSha))
-                    return Redirect("https://try-b.vercel.app/company/purchase");
+                    return Ok(new { status = "Invalid", message = "TradeInfo or TradeSha missing" });
 
                 // 驗證 SHA
                 string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}").ToUpper();
                 if (!string.Equals(calcSha, tradeSha, StringComparison.OrdinalIgnoreCase))
-                    return Redirect("https://try-b.vercel.app/company/purchase");
+                    return Ok(new { status = "Invalid", message = "SHA verification failed" });
 
                 // 解密 TradeInfo
                 var decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
                 var result = JsonConvert.DeserializeObject<PaymentTradeInfoDto>(decrypted);
 
                 if (result == null || string.IsNullOrEmpty(result.RespondCode) || string.IsNullOrEmpty(result.MerchantOrderNo))
-                    return Redirect("https://try-b.vercel.app/company/purchase");
+                    return Ok(new { status = "Invalid", message = "TradeInfo invalid" });
 
                 // 找訂單
                 var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == result.MerchantOrderNo);
@@ -649,25 +649,26 @@ namespace TryBeta.Controllers
                         order.PaymentStatus = "Paid";
                         db.SaveChanges();
 
+                        // 更新方案使用
                         var plan = db.Plan.Find(order.PlanId);
                         if (plan != null)
                             AddOrUpdatePlanUsage(order.CompanyId, order.PlanId, plan.MaxParticipants, plan.DurationDays);
 
-                        return Redirect("https://try-b.vercel.app/company/purchase-success");
+                        return Ok(new { status = "Paid", orderId = order.OrderNum });
                     }
                     else
                     {
                         order.PaymentStatus = "Failed";
                         db.SaveChanges();
-                        return Redirect("https://try-b.vercel.app/company/purchase-fail");
+                        return Ok(new { status = "Failed", orderId = order.OrderNum });
                     }
                 }
 
-                return Redirect("https://try-b.vercel.app/company/purchase");
+                return Ok(new { status = "NotFound" });
             }
             catch
             {
-                return Redirect("https://try-b.vercel.app/company/purchase");
+                return Ok(new { status = "Error" });
             }
         }
 
