@@ -45,8 +45,13 @@ namespace TryBeta.Models
         [JsonProperty("Status")]
         public string Status { get; set; }
 
-        [JsonProperty("plan_id")]
-        public int PlanId { get; set; }       // 方案 ID
+        //[JsonProperty("plan_id")]
+        //public int PlanId { get; set; }       // 方案 ID
+
+        public string MerchantOrderNo { get; set; }
+
+        public string Card4No { get; set; }
+
     }
 
     public class PaymentTradeInfoDto

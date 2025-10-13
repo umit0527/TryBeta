@@ -115,101 +115,6 @@ namespace TryBeta.Controllers
             }
         }
 
-        //// GET: api/v1/payments/callback 藍新金流：回傳結果給前端 測試
-        //[HttpGet]
-        //[Route("callback/test")]
-        //public IHttpActionResult PaymentCallbackGetTest()
-        //{
-        //    try
-        //    {
-        //        // ====== 測試用資料 ======
-        //        bool isTest = string.IsNullOrEmpty(HttpContext.Current.Request.QueryString["TradeInfo"]);
-        //        string tradeInfo, tradeSha, status;
-
-        //        string hashKey = ConfigurationManager.AppSettings["HashKey"];
-        //        string hashIV = ConfigurationManager.AppSettings["HashIV"];
-
-        //        if (isTest)
-        //        {
-        //            // 模擬藍新回傳資料
-        //            var tradeInfoObj1 = new PaymentTradeInfoDto
-        //            {
-        //                MerchantOrderNo = "ORD-20250826-002",
-        //                PaymentType = "CREDIT",
-        //                Card4No = "1234"
-        //            };
-        //            string json = JsonConvert.SerializeObject(tradeInfoObj1 ?? new PaymentTradeInfoDto());
-        //            if (string.IsNullOrEmpty(json))
-        //                throw new Exception("TradeInfo JSON 為空");
-
-        //            tradeInfo = CryptoUtil.EncryptAESHex(json, hashKey, hashIV);
-        //            tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&TradeInfo={tradeInfo}&HashIV={hashIV}").ToUpperInvariant();
-        //            status = "SUCCESS";
-        //        }
-        //        else
-        //        {
-        //            // 真正藍新回傳
-        //            var query = HttpContext.Current.Request.QueryString;
-        //            tradeInfo = query["TradeInfo"];
-        //            tradeSha = query["TradeSha"];
-        //            status = query["Status"];
-        //        }
-
-        //        if (string.IsNullOrEmpty(tradeInfo) || string.IsNullOrEmpty(tradeSha))
-        //            return BadRequest("缺少必要的回傳參數");
-
-        //        if (string.IsNullOrEmpty(status) || !status.Equals("SUCCESS", StringComparison.OrdinalIgnoreCase))
-        //            return Ok("1|OK"); // 付款失敗也回傳 1|OK，藍新不重送
-
-        //        //// 2️ 設定 HashKey / HashIV
-        //        //string hashKey = ConfigurationManager.AppSettings["HashKey"];
-        //        //string hashIV = ConfigurationManager.AppSettings["HashIV"];
-
-        //        // 3️ 驗證 TradeSha
-        //        string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&TradeInfo={tradeInfo}&HashIV={hashIV}");
-        //        if (!string.Equals(calcSha, tradeSha, StringComparison.OrdinalIgnoreCase))
-        //            return BadRequest("TradeSha 驗證失敗");
-
-        //        // 4️ 解密 TradeInfo
-        //        string decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
-        //        var tradeInfoObj = JsonConvert.DeserializeObject<PaymentTradeInfoDto>(decrypted);
-
-        //        if (tradeInfoObj == null || string.IsNullOrEmpty(tradeInfoObj.MerchantOrderNo))
-        //            return BadRequest("TradeInfo 資料異常");
-
-        //        // 5️ 查訂單
-        //        var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == tradeInfoObj.MerchantOrderNo);
-        //        if (order == null)
-        //            return BadRequest("訂單不存在");
-
-        //        // 6️ 查方案
-        //        var plan = db.Plan.Find(order.PlanId);
-        //        if (plan == null)
-        //            return BadRequest($"方案不存在 (planId={order.PlanId})");
-
-        //        // 7 判斷付款結果
-        //        bool isPaid = status.Equals("SUCCESS", StringComparison.OrdinalIgnoreCase);
-
-        //        // 8 回傳訂單狀態給前端
-        //        var result = new
-        //        {
-        //            OrderNum = order.OrderNum,
-        //            CompanyId = order.CompanyId,
-        //            PlanId = order.PlanId,
-        //            PaymentStatus = "Paid",
-        //            OrderStatus = "Active",
-        //            PaymentMethod = tradeInfoObj.PaymentType ?? order.PaymentMethod,
-        //            Card4No = tradeInfoObj.Card4No
-        //        };
-
-        //        return Ok(result);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return InternalServerError(ex);
-        //    }
-        //}
-
         // PUT: api/Payment/5
         [ResponseType(typeof(void))]
         public IHttpActionResult PutCompanyPlanOrder(int id, CompanyPlanOrder companyPlanOrder)
@@ -370,7 +275,7 @@ namespace TryBeta.Controllers
                     PlanId = chargeData.PlanId,
                     Price = amt,
                     StartDate = DateTime.Now,
-                    EndDate = null,
+                    EndDate = DateTime.Now.AddDays(plan.DurationDays),
                     PaymentStatus = "Pending",
                     OrderStatus = "Created",
                     PaymentMethod = string.IsNullOrEmpty(chargeData.PaymentMethod) ? "CreditCard" : chargeData.PaymentMethod,
@@ -611,66 +516,69 @@ namespace TryBeta.Controllers
             }
         }
 
-        // POST: api/v1/payments/result 藍新金流：根據結果導引前端頁面
-        [HttpPost]
-        [Route("success")]
-        public IHttpActionResult Result()
-        {
-            try
-            {
-                string hashKey = ConfigurationManager.AppSettings["HashKey"];
-                string hashIV = ConfigurationManager.AppSettings["HashIV"];
+        //// POST: api/v1/payments/result 藍新金流：根據結果導引前端頁面  Form-Data
+        //[HttpPost]
+        //[Route("result")]
+        //public IHttpActionResult Result()
+        //{
+        //    try
+        //    {
+        //        var form = HttpContext.Current.Request.Form;
+        //        string tradeInfo = form["TradeInfo"];
+        //        string tradeSha = form["TradeSha"];
 
-                var form = HttpContext.Current.Request.Form;
-                string tradeInfo = form["TradeInfo"];
-                string tradeSha = form["TradeSha"];
+        //        if (string.IsNullOrEmpty(tradeInfo) || string.IsNullOrEmpty(tradeSha))
+        //        {
+        //            return BadRequest("TradeInfo or TradeSha missing");
+        //        }
 
-                if (string.IsNullOrEmpty(tradeInfo) || string.IsNullOrEmpty(tradeSha))
-                    return Ok(new { status = "Invalid", message = "TradeInfo or TradeSha missing" });
+        //        string hashKey = ConfigurationManager.AppSettings["HashKey"];
+        //        string hashIV = ConfigurationManager.AppSettings["HashIV"];
 
-                // 驗證 SHA
-                string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}").ToUpper();
-                if (!string.Equals(calcSha, tradeSha, StringComparison.OrdinalIgnoreCase))
-                    return Ok(new { status = "Invalid", message = "SHA verification failed" });
+        //        // 驗證 SHA
+        //        string checkSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}").ToUpper();
+        //        if (checkSha != tradeSha.ToUpper())
+        //            return BadRequest("SHA verification failed");
 
-                // 解密 TradeInfo
-                var decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
-                var result = JsonConvert.DeserializeObject<PaymentTradeInfoDto>(decrypted);
+        //        // 解密 TradeInfo
+        //        string decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
 
-                if (result == null || string.IsNullOrEmpty(result.RespondCode) || string.IsNullOrEmpty(result.MerchantOrderNo))
-                    return Ok(new { status = "Invalid", message = "TradeInfo invalid" });
+        //        var dict = decrypted.Split('&')
+        //            .Select(p => p.Split('='))
+        //            .ToDictionary(k => k[0], v => v.Length > 1 ? v[1] : "");
 
-                // 找訂單
-                var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == result.MerchantOrderNo);
-                if (order != null)
-                {
-                    if (result.RespondCode == "00")
-                    {
-                        order.PaymentStatus = "Paid";
-                        db.SaveChanges();
+        //        string orderNo = dict["MerchantOrderNo"];
+        //        string amt = dict["Amt"];
+        //        string paymentMethod = dict.ContainsKey("PaymentMethod") ? dict["PaymentMethod"] : "";
+        //        string card4No = dict.ContainsKey("Card4No") ? dict["Card4No"] : "";
+        //        string respondCode = dict.ContainsKey("RespondCode") ? dict["RespondCode"] : "";
 
-                        // 更新方案使用
-                        var plan = db.Plan.Find(order.PlanId);
-                        if (plan != null)
-                            AddOrUpdatePlanUsage(order.CompanyId, order.PlanId, plan.MaxParticipants, plan.DurationDays);
+        //        // 更新資料庫
+        //        var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == orderNo);
+        //        if (order != null)
+        //        {
+        //            order.PaymentStatus = respondCode == "00" ? "Paid" : "Failed";
+        //            order.OrderStatus = order.PaymentStatus == "Paid" ? "Active" : "Failed";
+        //            order.Card4No = card4No;
+        //            order.UpdatedAt = DateTime.Now;
+        //            db.SaveChanges();
+        //        }
 
-                        return Ok(new { status = "Paid", orderId = order.OrderNum });
-                    }
-                    else
-                    {
-                        order.PaymentStatus = "Failed";
-                        db.SaveChanges();
-                        return Ok(new { status = "Failed", orderId = order.OrderNum });
-                    }
-                }
-
-                return Ok(new { status = "NotFound" });
-            }
-            catch
-            {
-                return Ok(new { status = "Error" });
-            }
-        }
+        //        // 回傳前端 JSON
+        //        return Ok(new
+        //        {
+        //            status = respondCode == "00" ? "Success" : "Failed",
+        //            orderNo,
+        //            amount = amt,
+        //            paymentMethod,
+        //            card4No
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Ok(new { status = "Error", message = ex.Message });
+        //    }
+        //}
 
         //// POST: api/v1/payments/result/test 藍新金流：根據結果導引前端頁面 測試
         //[HttpPost]
@@ -732,20 +640,59 @@ namespace TryBeta.Controllers
         //}
 
         // DELETE: api/Payment/5
-        [ResponseType(typeof(CompanyPlanOrder))]
-        public IHttpActionResult DeleteCompanyPlanOrder(int id)
+
+        // POST: api/v1/payments/result 藍新金流：根據結果導引前端頁面  Json
+        [HttpPost]
+        [Route("result")]
+        public IHttpActionResult Result([FromBody] PaymentCallbackDto req)
         {
-            CompanyPlanOrder companyPlanOrder = db.CompanyPlanOrders.Find(id);
-            if (companyPlanOrder == null)
+            try
             {
-                return NotFound();
+                if (req == null || string.IsNullOrEmpty(req.TradeInfo))
+                    return BadRequest("TradeInfo missing");
+
+                // 取得 AES 金鑰
+                string hashKey = ConfigurationManager.AppSettings["HashKey"];
+                string hashIV = ConfigurationManager.AppSettings["HashIV"];
+
+                // 解密 TradeInfo
+                string decrypted = CryptoUtil.DecryptAESHex(req.TradeInfo, hashKey, hashIV);
+
+                // 將解密後的 JSON 解析
+                var jsonObj = JObject.Parse(decrypted);
+                var resultObj = jsonObj["Result"];
+                if (resultObj == null || resultObj["MerchantOrderNo"] == null)
+                    return BadRequest("MerchantOrderNo missing in TradeInfo");
+
+                // 取得訂單資料
+                string orderNo = resultObj["MerchantOrderNo"].ToString();
+                string tradeNo = resultObj["TradeNo"]?.ToString();
+                string amt = resultObj["Amt"]?.ToString();
+                string paymentType = resultObj["PaymentType"]?.ToString();
+
+                // 查資料庫訂單
+                var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == orderNo);
+                if (order == null)
+                    return Ok(new { status = "Error", message = "Order not found" });
+
+                // 取得付款狀態
+                string status = order.PaymentStatus == "Paid" ? "Success" : "Failed";
+
+                return Ok(new
+                {
+                    status,
+                    orderNo,
+                    tradeNo,
+                    amount = amt,
+                    paymentMethod = paymentType ?? ""
+                });
             }
-
-            db.CompanyPlanOrders.Remove(companyPlanOrder);
-            db.SaveChanges();
-
-            return Ok(companyPlanOrder);
+            catch (Exception ex)
+            {
+                return Ok(new { status = "Error", message = ex.Message });
+            }
         }
+
 
         // 累加方案使用額度或新增一筆新的使用紀錄
         private PlanUsage AddOrUpdatePlanUsage(int companyId, int planId, int purchasedPeople, int durationDays)
