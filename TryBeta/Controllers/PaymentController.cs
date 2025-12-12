@@ -703,7 +703,11 @@ namespace TryBeta.Controllers
                 .OrderByDescending(p => p.EndDate)
                 .FirstOrDefault();
 
-            if (currentUsage != null)
+            bool canAccumulate = currentUsage != null &&
+                                 currentUsage.EndDate >= DateTime.Now &&
+                                 currentUsage.RemainingPeople > 0;
+
+            if (canAccumulate)
             {
                 // 累加剩餘體驗人數
                 currentUsage.RemainingPeople += purchasedPeople;
@@ -717,7 +721,7 @@ namespace TryBeta.Controllers
             }
             else
             {
-                // 沒有未過期方案 → 新增
+                // 方案皆為無效 → 新增
                 var newUsage = new PlanUsage
                 {
                     CompanyId = companyId,

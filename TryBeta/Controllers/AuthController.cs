@@ -83,9 +83,9 @@ namespace TryBeta.Controllers
             {
                 return BadRequest("登入資料有誤");
             }
-                
+
             // 找出對應的帳號/email，限定身分是企業
-            var user = db.Users.FirstOrDefault(u =>(u.Account == dto.Identifier || u.Email == dto.Identifier) && u.Role == "Company");
+            var user = db.Users.FirstOrDefault(u => (u.Account == dto.Identifier || u.Email == dto.Identifier) && u.Role == "Company");
 
             if (user == null)
             {
@@ -128,7 +128,7 @@ namespace TryBeta.Controllers
                     user.Role,
                     companyId = company?.Id
                 }
-                
+
             });
         }
 
@@ -186,7 +186,7 @@ namespace TryBeta.Controllers
 
         // POST: api/Auth 體驗者登入
         [HttpPost]
-        [Route("users/login")] 
+        [Route("users/login")]
         [ResponseType(typeof(Users))]
         public IHttpActionResult PostParticipantLogin(ParticipantLoginDto dto)
         {
@@ -241,9 +241,9 @@ namespace TryBeta.Controllers
             });
         }
 
-        // POST: api/Auth/users/login/google
+        // POST: api/users/google Google登入
         [HttpPost]
-        [Route("users/login/google")]
+        [Route("users/google")]
         [ResponseType(typeof(Users))]
         public async Task<IHttpActionResult> PostParticipantLoginWithGoogle(GoogleDto dto)
         {
@@ -252,6 +252,7 @@ namespace TryBeta.Controllers
                 return BadRequest("缺少 Google 登入 Token");
             }
 
+            // 驗證 Google 給的 Token ，並解析 Token 裡的使用者資訊
             Google.Apis.Auth.GoogleJsonWebSignature.Payload payload;
             try
             {
@@ -267,8 +268,10 @@ namespace TryBeta.Controllers
                 });
             }
 
-            // 使用 email 或 Google 子 ID 來查詢是否已存在帳號
-            var user = db.Users.FirstOrDefault(u => u.Email == payload.Email && u.Role == "Participant");
+            // GoogleID 查詢是否已存在帳號
+            var googleId = payload.Subject.Length > 100 ? payload.Subject.Substring(0, 100) : payload.Subject;
+
+            var user = db.Users.FirstOrDefault(u => u.GoogleId == googleId && u.Role == "Participant");
 
             if (user == null)
             {
@@ -283,23 +286,12 @@ namespace TryBeta.Controllers
                     StatusId = 1, // 啟用
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
-                    // 可額外存 Name / Picture 等基本資料
                 };
 
                 db.Users.Add(user);
                 db.SaveChanges();
             }
-            else
-            {
-                // 已存在帳號，但 GoogleId 尚未綁定
-                if (string.IsNullOrEmpty(user.GoogleId))
-                {
-                    user.GoogleId = payload.Subject;
-                    user.UpdatedAt = DateTime.UtcNow;
-                    db.SaveChanges();
-                }
-            }
-
+            
             // 產生 JWT Token
             var jwtUtil = new JwtAuthUtil();
             string token = jwtUtil.GenerateToken(user.Id, user.Account, "");
@@ -314,6 +306,7 @@ namespace TryBeta.Controllers
                     user.Id,
                     user.Account,
                     user.Email,
+                    Name = payload.Name,
                     user.Role,
                 }
             });
