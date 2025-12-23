@@ -1152,7 +1152,7 @@ namespace TryBeta.Controllers
 
             // Moderation API 審核
             bool flagged = false;
-            var flaggedCategories = new List<string>();
+            var flaggedCategories = new List<string>(); //用來存違規的標籤
             string moderationResultJson = string.Empty;
 
             using (var client = new HttpClient())
@@ -1191,6 +1191,7 @@ namespace TryBeta.Controllers
                                 flaggedCategories.Add(kv.Key);
                         }
                     }
+                    // 布林判斷式：如果 List 裡 有東西 → true、如果 List 是 空的 → false
                     flagged = flaggedCategories.Count > 0;
                 }
             }

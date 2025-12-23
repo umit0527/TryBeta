@@ -150,85 +150,85 @@ namespace TryBeta.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/v1/orders 建立方案訂單
-        [HttpPost]
-        [Route("~/api/v1/orders")]
-        [JwtAuthFilter]
-        public IHttpActionResult CreateCompanyPlanOrder([FromBody] CompanyPlanOrder dto)
-        {
-            try
-            {
-                if (dto == null)
-                    return BadRequest("缺少必要資料");
+        //// POST: api/v1/orders 建立方案訂單
+        //[HttpPost]
+        //[Route("~/api/v1/orders")]
+        //[JwtAuthFilter]
+        //public IHttpActionResult CreateCompanyPlanOrder([FromBody] CompanyPlanOrder dto)
+        //{
+        //    try
+        //    {
+        //        if (dto == null)
+        //            return BadRequest("缺少必要資料");
 
-                // 1. 驗證 Company 是否存在
-                var company = db.Companyinfoes.FirstOrDefault(c => c.Id == dto.CompanyId);
-                if (company == null)
-                    return NotFound();
+        //        // 1. 驗證 Company 是否存在
+        //        var company = db.Companyinfoes.FirstOrDefault(c => c.Id == dto.CompanyId);
+        //        if (company == null)
+        //            return NotFound();
 
-                // 2. 驗證 Plan 是否存在
-                var plan = db.Plan.FirstOrDefault(p => p.Id == dto.PlanId);
-                if (plan == null)
-                    return NotFound();
+        //        // 2. 驗證 Plan 是否存在
+        //        var plan = db.Plan.FirstOrDefault(p => p.Id == dto.PlanId);
+        //        if (plan == null)
+        //            return NotFound();
 
-                // 3. 日期驗證
-                if (dto.EndDate.HasValue && dto.EndDate <= dto.StartDate)
-                    return BadRequest("結束日期必須大於開始日期");
+        //        // 3. 日期驗證
+        //        if (dto.EndDate.HasValue && dto.EndDate <= dto.StartDate)
+        //            return BadRequest("結束日期必須大於開始日期");
 
-                // 4. 自動產生訂單編號（ORD-YYYYMMDD-流水號）
-                var today = DateTime.Now.ToString("yyyyMMdd");
-                var prefix = "ORD-" + today;
+        //        // 4. 自動產生訂單編號（ORD-YYYYMMDD-流水號）
+        //        var today = DateTime.Now.ToString("yyyyMMdd");
+        //        var prefix = "ORD-" + today;
 
-                // 計算今天已存在訂單數量
-                var countToday = db.CompanyPlanOrders.Count(o => o.OrderNum.StartsWith(prefix)) + 1;
+        //        // 計算今天已存在訂單數量
+        //        var countToday = db.CompanyPlanOrders.Count(o => o.OrderNum.StartsWith(prefix)) + 1;
 
-                // 三位數流水號
-                var orderNum = $"{prefix}-{countToday:D3}";
+        //        // 三位數流水號
+        //        var orderNum = $"{prefix}-{countToday:D3}";
 
-                // 5. 建立訂單（避免前端亂傳敏感欄位）
-                var order = new CompanyPlanOrder
-                {
-                    OrderNum = orderNum,
-                    CompanyId = dto.CompanyId,
-                    PlanId = dto.PlanId,
-                    Price = dto.Price,
-                    PurchaseDate = DateTime.Now,
-                    StartDate = dto.StartDate,
-                    EndDate = dto.EndDate,
-                    OrderStatus = "Created",
-                    PaymentStatus = string.IsNullOrEmpty(dto.PaymentStatus) ? "Pending" : dto.PaymentStatus,
-                    PaymentMethod = dto.PaymentMethod,
-                    Card4No = dto.Card4No,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
-                    PaidAt = dto.PaymentStatus == "Paid" ? (DateTime?)DateTime.Now : null
-                };
+        //        // 5. 建立訂單（避免前端亂傳敏感欄位）
+        //        var order = new CompanyPlanOrder
+        //        {
+        //            OrderNum = orderNum,
+        //            CompanyId = dto.CompanyId,
+        //            PlanId = dto.PlanId,
+        //            Price = dto.Price,
+        //            PurchaseDate = DateTime.Now,
+        //            StartDate = dto.StartDate,
+        //            EndDate = dto.EndDate,
+        //            OrderStatus = "Created",
+        //            PaymentStatus = string.IsNullOrEmpty(dto.PaymentStatus) ? "Pending" : dto.PaymentStatus,
+        //            PaymentMethod = dto.PaymentMethod,
+        //            Card4No = dto.Card4No,
+        //            CreatedAt = DateTime.Now,
+        //            UpdatedAt = DateTime.Now,
+        //            PaidAt = dto.PaymentStatus == "Paid" ? (DateTime?)DateTime.Now : null
+        //        };
 
-                db.CompanyPlanOrders.Add(order);
-                db.SaveChanges();
+        //        db.CompanyPlanOrders.Add(order);
+        //        db.SaveChanges();
 
-                // 6. 精簡回傳資料，避免外鍵敏感資訊洩漏
-                return Ok(new
-                {
-                    message = "訂單建立成功",
-                    data = new
-                    {
-                        order.Id,
-                        order.OrderNum,
-                        order.Price,
-                        order.PaymentStatus,
-                        order.PaymentMethod,
-                        order.PurchaseDate,
-                        order.StartDate,
-                        order.EndDate
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return InternalServerError(ex);
-            }
-        }
+        //        // 6. 精簡回傳資料，避免外鍵敏感資訊洩漏
+        //        return Ok(new
+        //        {
+        //            message = "訂單建立成功",
+        //            data = new
+        //            {
+        //                order.Id,
+        //                order.OrderNum,
+        //                order.Price,
+        //                order.PaymentStatus,
+        //                order.PaymentMethod,
+        //                order.PurchaseDate,
+        //                order.StartDate,
+        //                order.EndDate
+        //            }
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return InternalServerError(ex);
+        //    }
+        //}
 
         // POST: api/v1/payments 藍新金流：建立訂單
         [HttpPost]
@@ -291,13 +291,6 @@ namespace TryBeta.Controllers
                 string version = "2.0";
 
                 string credit = order.PaymentMethod == "CreditCard" ? "1" : "0";
-                string webatm = order.PaymentMethod == "WebATM" ? "1" : "0";
-                string cvs = order.PaymentMethod == "CVS" ? "1" : "0";
-                string googlepay = order.PaymentMethod == "GooglePay" ? "1" : "0";
-                string applepay = order.PaymentMethod == "ApplePay" ? "1" : "0";
-                string samsungpay = order.PaymentMethod == "SamsungPay" ? "1" : "0";
-                string twpayatm = order.PaymentMethod == "TWPayATM" ? "1" : "0";
-                string barcode = order.PaymentMethod == "Barcode" ? "1" : "0";
 
                 var tradeParams = new Dictionary<string, string>
         {
@@ -313,17 +306,14 @@ namespace TryBeta.Controllers
             { "NotifyURL", "https://trybeta.rocket-coding.com/api/v1/payments/callback" }, // 後端驗證用
             { "Email", chargeData.Email },
             { "LoginType", "0" },
-            { "CREDIT", credit },
-            { "WEBATM", webatm },
-            { "VACC", cvs },
-            { "GooglePay", googlepay },
-            { "ApplePay", applepay },
-            { "SamsungPay", samsungpay },
-            { "TWPayATM", twpayatm },
-            { "Barcode", barcode }
+            { "CREDIT", "1" }
         };
 
-                string tradeInfoStr = string.Join("&", tradeParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+                string tradeInfoStr = string.Join("&",
+    tradeParams.Select(kvp =>
+        $"{kvp.Key}={HttpUtility.UrlEncode(kvp.Value)}"
+    )
+);
                 string tradeInfo = CryptoUtil.EncryptAESHex(tradeInfoStr, hashKey, hashIV);
                 string tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
 
@@ -428,11 +418,27 @@ namespace TryBeta.Controllers
                             return Ok("1|OK");
                         }
 
+                        var plan = db.Plan.Find(order.PlanId);
                         if (order.PaymentStatus == "Paid")
                         {
                             logInfo += $"INFO: Order {order.OrderNum} already processed\n";
+
+                            AddOrUpdatePlanUsage(
+                                order.CompanyId,
+                                order.PlanId,
+                                plan.MaxParticipants,
+                                plan.DurationDays
+                            );
+
+                            // 保證訂單狀態正確
+                            if (order.OrderStatus != "Active")
+                            {
+                                order.OrderStatus = "Active";
+                                order.UpdatedAt = DateTime.Now;
+                                db.SaveChanges();
+                            }
                             WriteLog(logInfo);
-                            transaction.Rollback();
+                            transaction.Commit();
                             return Ok("1|OK");
                         }
 
@@ -456,14 +462,13 @@ namespace TryBeta.Controllers
                             return Ok("1|OK");
                         }
 
-                        var plan = db.Plan.Find(order.PlanId);
-                        if (plan == null)
-                        {
-                            logInfo += $"ERROR: Plan not found: {order.PlanId}\n";
-                            WriteLog(logInfo);
-                            transaction.Rollback();
-                            return Ok("1|OK");
-                        }
+                        //if (plan == null)
+                        //{
+                        //    logInfo += $"ERROR: Plan not found: {order.PlanId}\n";
+                        //    WriteLog(logInfo);
+                        //    transaction.Rollback();
+                        //    return Ok("1|OK");
+                        //}
 
                         var usage = AddOrUpdatePlanUsage(order.CompanyId, order.PlanId, plan.MaxParticipants, plan.DurationDays);
 
@@ -516,131 +521,6 @@ namespace TryBeta.Controllers
             }
         }
 
-        //// POST: api/v1/payments/result 藍新金流：根據結果導引前端頁面  Form-Data
-        //[HttpPost]
-        //[Route("result")]
-        //public IHttpActionResult Result()
-        //{
-        //    try
-        //    {
-        //        var form = HttpContext.Current.Request.Form;
-        //        string tradeInfo = form["TradeInfo"];
-        //        string tradeSha = form["TradeSha"];
-
-        //        if (string.IsNullOrEmpty(tradeInfo) || string.IsNullOrEmpty(tradeSha))
-        //        {
-        //            return BadRequest("TradeInfo or TradeSha missing");
-        //        }
-
-        //        string hashKey = ConfigurationManager.AppSettings["HashKey"];
-        //        string hashIV = ConfigurationManager.AppSettings["HashIV"];
-
-        //        // 驗證 SHA
-        //        string checkSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}").ToUpper();
-        //        if (checkSha != tradeSha.ToUpper())
-        //            return BadRequest("SHA verification failed");
-
-        //        // 解密 TradeInfo
-        //        string decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
-
-        //        var dict = decrypted.Split('&')
-        //            .Select(p => p.Split('='))
-        //            .ToDictionary(k => k[0], v => v.Length > 1 ? v[1] : "");
-
-        //        string orderNo = dict["MerchantOrderNo"];
-        //        string amt = dict["Amt"];
-        //        string paymentMethod = dict.ContainsKey("PaymentMethod") ? dict["PaymentMethod"] : "";
-        //        string card4No = dict.ContainsKey("Card4No") ? dict["Card4No"] : "";
-        //        string respondCode = dict.ContainsKey("RespondCode") ? dict["RespondCode"] : "";
-
-        //        // 更新資料庫
-        //        var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == orderNo);
-        //        if (order != null)
-        //        {
-        //            order.PaymentStatus = respondCode == "00" ? "Paid" : "Failed";
-        //            order.OrderStatus = order.PaymentStatus == "Paid" ? "Active" : "Failed";
-        //            order.Card4No = card4No;
-        //            order.UpdatedAt = DateTime.Now;
-        //            db.SaveChanges();
-        //        }
-
-        //        // 回傳前端 JSON
-        //        return Ok(new
-        //        {
-        //            status = respondCode == "00" ? "Success" : "Failed",
-        //            orderNo,
-        //            amount = amt,
-        //            paymentMethod,
-        //            card4No
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Ok(new { status = "Error", message = ex.Message });
-        //    }
-        //}
-
-        //// POST: api/v1/payments/result/test 藍新金流：根據結果導引前端頁面 測試
-        //[HttpPost]
-        //[Route("result/test")]
-        //public IHttpActionResult ResultTest()
-        //{
-        //    try
-        //    {
-        //        // ====== 測試用資料 ======
-        //        string hashKey = ConfigurationManager.AppSettings["HashKey"];
-        //        string hashIV = ConfigurationManager.AppSettings["HashIV"];
-
-        //        // 模擬藍新回傳資料
-        //        var tradeInfoObj = new PaymentTradeInfoDto
-        //        {
-        //            MerchantOrderNo = "ORD-20250826-002", // 請確認資料庫已有這筆訂單
-        //            RespondCode = "00",                     // 成功
-        //            PaymentType = "CREDIT",
-        //            Card4No = "1234"
-        //        };
-
-        //        string json = JsonConvert.SerializeObject(tradeInfoObj);
-        //        string tradeInfo = CryptoUtil.EncryptAESHex(json, hashKey, hashIV);
-        //        string tradeSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}").ToUpperInvariant();
-
-        //        // ====== 驗證 TradeSha (模擬正確) ======
-        //        string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{tradeInfo}&HashIV={hashIV}");
-        //        if (!string.Equals(calcSha, tradeSha, StringComparison.OrdinalIgnoreCase))
-        //            return BadRequest("TradeSha 驗證失敗");
-
-        //        // ====== 解密 TradeInfo ======
-        //        var decrypted = CryptoUtil.DecryptAESHex(tradeInfo, hashKey, hashIV);
-        //        var result = JsonConvert.DeserializeObject<PaymentTradeInfoDto>(decrypted);
-
-        //        // ====== 檢查訂單 ======
-        //        var order = db.CompanyPlanOrders.FirstOrDefault(o => o.OrderNum == result.MerchantOrderNo);
-        //        if (order != null && result.RespondCode == "00")
-        //        {
-        //            var plan = db.Plan.Find(order.PlanId);
-        //            if (plan != null)
-        //            {
-        //                AddOrUpdatePlanUsage(order.CompanyId, order.PlanId, plan.MaxParticipants, plan.DurationDays);
-        //            }
-        //        }
-
-        //        // ====== 回傳給前端測試 ======
-        //        return Ok(new
-        //        {
-        //            Message = "測試付款成功",
-        //            RedirectUrl = $"https://pages/company/purchase/success?order={result.MerchantOrderNo}",
-        //            TradeInfo = tradeInfo,
-        //            TradeSha = tradeSha
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return InternalServerError(ex);
-        //    }
-        //}
-
-        // DELETE: api/Payment/5
-
         // POST: api/v1/payments/result 藍新金流：根據結果導引前端頁面  Json
         [HttpPost]
         [Route("result")]
@@ -648,12 +528,17 @@ namespace TryBeta.Controllers
         {
             try
             {
-                if (req == null || string.IsNullOrEmpty(req.TradeInfo))
-                    return BadRequest("TradeInfo missing");
+                if (req == null || string.IsNullOrEmpty(req.TradeInfo) || string.IsNullOrEmpty(req.TradeSha))
+                    return BadRequest("TradeInfo 或 TradeSha 缺失");
 
                 // 取得 AES 金鑰
                 string hashKey = ConfigurationManager.AppSettings["HashKey"];
                 string hashIV = ConfigurationManager.AppSettings["HashIV"];
+
+                // 驗證 TradeSha，確保 TradeInfo 沒被篡改
+                string calcSha = CryptoUtil.EncryptSHA256($"HashKey={hashKey}&{req.TradeInfo}&HashIV={hashIV}");
+                if (!string.Equals(calcSha, req.TradeSha, StringComparison.OrdinalIgnoreCase))
+                    return BadRequest("TradeInfo 驗證失敗");
 
                 // 解密 TradeInfo
                 string decrypted = CryptoUtil.DecryptAESHex(req.TradeInfo, hashKey, hashIV);
@@ -699,15 +584,18 @@ namespace TryBeta.Controllers
         {
             // 找出同公司最後一筆未過期的使用紀錄（不分 planId）
             var currentUsage = db.PlanUsage
-                .Where(p => p.CompanyId == companyId && p.EndDate >= DateTime.Now)
+                .Where(p => p.CompanyId == companyId && p.EndDate >= DateTime.Now
+                && p.StatusId == 1)
                 .OrderByDescending(p => p.EndDate)
                 .FirstOrDefault();
 
+            // 檢查是否可以累加
             bool canAccumulate = currentUsage != null &&
                                  currentUsage.EndDate >= DateTime.Now &&
                                  currentUsage.RemainingPeople > 0;
 
-            if (canAccumulate)
+            // 有紀錄且可累加
+            if (currentUsage != null && canAccumulate)
             {
                 // 累加剩餘體驗人數
                 currentUsage.RemainingPeople += purchasedPeople;
@@ -719,12 +607,13 @@ namespace TryBeta.Controllers
                 db.SaveChanges();
                 return currentUsage;
             }
+            // 無/有紀錄但不可累加 → 新增
             else
             {
-                // 方案皆為無效 → 新增
                 var newUsage = new PlanUsage
                 {
                     CompanyId = companyId,
+                    PlanId = planId,
                     RemainingPeople = purchasedPeople,
                     StartDate = DateTime.Now,
                     EndDate = DateTime.Now.AddDays(durationDays),
